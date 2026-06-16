@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="The Atlas Collection — a local launcher for three interactive, fully-offline learning atlases: Blueprint (system & software design), Citadel (cybersecurity), and Cascade (data engineering)." />
+  <meta name="theme-color" content="#0a0d12" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <title>The Atlas Collection</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0d12'/%3E%3Cg fill='none' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 70 L50 30 L76 70' stroke='%23f5a623'/%3E%3Cpath d='M30 78 L70 78' stroke='%2334d399'/%3E%3C/g%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #0a0d12;
+      --ink: #0f141d;
+      --surface: rgba(22, 28, 38, 0.66);
+      --surface-solid: #11161f;
+      --line: rgba(130, 160, 210, 0.14);
+      --line-strong: rgba(130, 160, 210, 0.28);
+      --text: #e8edf6;
+      --text-dim: #9aa7bd;
+      --text-faint: #66738b;
+      --amber: #f5a623;   /* Blueprint */
+      --emerald: #34d399; /* Citadel */
+      --azure: #38bdf8;   /* Cascade */
+      --radius: 18px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    }
+    [data-theme="light"] {
+      --bg: #f4f1ea;
+      --ink: #ffffff;
+      --surface: rgba(255, 255, 255, 0.72);
+      --surface-solid: #ffffff;
+      --line: rgba(40, 50, 70, 0.12);
+      --line-strong: rgba(40, 50, 70, 0.24);
+      --text: #1b2230;
+      --text-dim: #4b5566;
+      --text-faint: #78839a;
+      --amber: #b9700c;
+      --emerald: #0e9f6e;
+      --azure: #0a7ea8;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      min-height: 100vh; line-height: 1.6; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; transition: background 0.3s var(--ease), color 0.3s var(--ease);
+    }
+    .bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .bg-grid {
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 26px 26px;
+      -webkit-mask-image: radial-gradient(circle at 50% 0%, #000 0%, transparent 72%);
+      mask-image: radial-gradient(circle at 50% 0%, #000 0%, transparent 72%);
+      opacity: 0.6;
+    }
+    .bg-glow {
+      background:
+        radial-gradient(40rem 26rem at 10% -6%, color-mix(in srgb, var(--amber) 14%, transparent), transparent 60%),
+        radial-gradient(40rem 26rem at 50% -10%, color-mix(in srgb, var(--emerald) 14%, transparent), transparent 60%),
+        radial-gradient(40rem 26rem at 90% -6%, color-mix(in srgb, var(--azure) 14%, transparent), transparent 60%);
+    }
+    .wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px) 64px; }
+
+    /* top utility bar */
+    .topbar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: clamp(8px, 3vw, 22px); }
+    .ubtn {
+      display: inline-grid; place-items: center; width: 42px; height: 42px; border-radius: 12px;
+      background: var(--surface); border: 1px solid var(--line); color: var(--text-dim);
+      cursor: pointer; backdrop-filter: blur(8px); transition: border-color 0.2s, color 0.2s, transform 0.2s;
+    }
+    .ubtn:hover { border-color: var(--line-strong); color: var(--text); transform: translateY(-1px); }
+    .ubtn:focus-visible { outline: 2px solid var(--emerald); outline-offset: 3px; }
+    .ubtn svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .ico-moon { display: none; } [data-theme="dark"] .ico-moon { display: block; } [data-theme="dark"] .ico-sun { display: none; }
+    #installBtn { display: none; } #installBtn.show { display: inline-grid; }
+
+    header.masthead { text-align: center; margin-bottom: clamp(30px, 6vw, 60px); }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono);
+      font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint);
+      border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; margin-bottom: 22px;
+    }
+    .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 12px var(--emerald); }
+    h1 { font-size: clamp(2.1rem, 6vw, 3.6rem); line-height: 1.05; letter-spacing: -0.03em; font-weight: 800; }
+    h1 .grad { background: linear-gradient(110deg, var(--amber), var(--emerald) 50%, var(--azure)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .lede { color: var(--text-dim); max-width: 60ch; margin: 20px auto 0; font-size: clamp(1rem, 2.2vw, 1.18rem); }
+
+    .totals { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+    .pill { font-family: var(--mono); font-size: 0.8rem; color: var(--text-dim); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 8px 15px; backdrop-filter: blur(8px); }
+    .pill[hidden] { display: none; }
+    .pill b { color: var(--text); }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 22px; }
+    .card {
+      position: relative; display: flex; flex-direction: column; gap: 14px;
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 26px 24px 24px; text-decoration: none; color: inherit; overflow: hidden;
+      backdrop-filter: blur(12px); transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s;
+      --tc: var(--emerald);
+    }
+    .card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--tc); opacity: 0.9; }
+    .card::after { content: ""; position: absolute; inset: -40% -40% auto auto; width: 60%; height: 60%; background: radial-gradient(circle, color-mix(in srgb, var(--tc) 22%, transparent), transparent 70%); opacity: 0; transition: opacity 0.35s; pointer-events: none; }
+    .card:hover { transform: translateY(-6px); border-color: color-mix(in srgb, var(--tc) 55%, transparent); box-shadow: 0 24px 60px -28px color-mix(in srgb, var(--tc) 60%, transparent); }
+    .card:hover::after { opacity: 1; }
+    .card:focus-visible { outline: 2px solid var(--tc); outline-offset: 3px; }
+
+    .card-top { display: flex; align-items: center; gap: 14px; }
+    .glyph { width: 52px; height: 52px; flex: none; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--tc) 14%, transparent); border: 1px solid color-mix(in srgb, var(--tc) 36%, transparent); }
+    .glyph svg { width: 30px; height: 30px; fill: none; stroke: var(--tc); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .card-name { font-size: 1.34rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+    .card-tag { font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--text-faint); margin-top: 4px; }
+    .card-desc { color: var(--text-dim); font-size: 0.95rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 2px; }
+    .chip { font-size: 0.74rem; color: var(--text-dim); border: 1px solid var(--line); border-radius: 7px; padding: 3px 9px; }
+
+    .card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 12px; }
+    .progress { font-family: var(--mono); font-size: 0.76rem; color: var(--text-faint); }
+    .progress b { color: var(--tc); }
+    .open { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; font-size: 0.92rem; color: var(--tc); }
+    .open svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.25s var(--ease); }
+    .card:hover .open svg { transform: translateX(4px); }
+
+    footer { margin-top: 48px; text-align: center; color: var(--text-faint); font-size: 0.85rem; }
+    footer code { font-family: var(--mono); color: var(--text-dim); background: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    .reveal { opacity: 0; transform: translateY(14px); animation: rise 0.6s var(--ease) forwards; }
+    .reveal.d1 { animation-delay: 0.05s; } .reveal.d2 { animation-delay: 0.12s; } .reveal.d3 { animation-delay: 0.19s; } .reveal.d4 { animation-delay: 0.26s; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; } .card, body { transition: none; } }
+  </style>
+</head>
+<body>
+  <div class="bg bg-grid" aria-hidden="true"></div>
+  <div class="bg bg-glow" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <div class="topbar">
+      <button class="ubtn" id="installBtn" type="button" title="Install the Atlas hub as an app" aria-label="Install app">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        <span class="visually-hidden">Install app</span>
+      </button>
+      <button class="ubtn" id="themeToggle" type="button" title="Toggle light / dark theme" aria-label="Toggle theme">
+        <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      </button>
+    </div>
+
+    <header class="masthead">
+      <span class="eyebrow reveal"><span class="dot"></span>Local · offline · no account</span>
+      <h1 class="reveal d1">The <span class="grad">Atlas</span> Collection</h1>
+      <p class="lede reveal d2">Three interactive, fully-offline learning atlases. Read the concept, then <em>poke</em> it — every idea has something you can drive. Your progress lives in your browser; nothing leaves your machine.</p>
+      <div class="totals reveal d3" id="totals">
+        <span class="pill" id="pillTotal" hidden></span>
+        <span class="pill">3 <b>atlases</b></span>
+      </div>
+    </header>
+
+    <section class="cards" id="cards"></section>
+
+    <footer class="reveal d4">
+      <p>Serve this folder once to launch everything offline: <code>cd ~/Documents/atlas &amp;&amp; python3 -m http.server 8800</code></p>
+    </footer>
+  </main>
+
+  <script>
+    "use strict";
+    /* ---------- theme ---------- */
+    var TKEY = "atlas_theme";
+    function setTheme(t) {
+      document.documentElement.setAttribute("data-theme", t);
+      try { localStorage.setItem(TKEY, t); } catch (e) {}
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute("content", t === "light" ? "#f4f1ea" : "#0a0d12");
+    }
+    (function initTheme() {
+      var t = null;
+      try { t = localStorage.getItem(TKEY); } catch (e) {}
+      if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark";
+      setTheme(t);
+    })();
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      var next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      setTheme(next);
+    });
+
+    /* ---------- app cards (trusted, hard-coded data only) ---------- */
+    var APPS = [
+      {
+        name: "Blueprint", tag: "system & software design", color: "var(--amber)",
+        href: "./hld-lld-academy/index.html", key: "bp_progress_v1",
+        desc: "Architect systems that scale and write code that bends — high-level design, low-level design, data structures & algorithms, and the interview patterns that tie them together.",
+        chips: ["HLD", "LLD", "DSA", "Patterns"],
+        glyph: '<path d="M24 74 L50 24 L76 74 M35 74 L50 46 L65 74"/>'
+      },
+      {
+        name: "Citadel", tag: "cybersecurity", color: "var(--emerald)",
+        href: "./cyber-academy/index.html", key: "cy_progress_v1",
+        desc: "Learn to attack so you can truly defend — foundations, cryptography, application security, network defense, offensive security, threats & forensics, infrastructure domains, and reverse engineering.",
+        chips: ["8 tracks", "Crypto", "AppSec", "Defense", "Forensics"],
+        glyph: '<path d="M50 22 L78 33 V53 C78 70 66 80 50 86 C34 80 22 70 22 53 V33 Z"/><circle cx="50" cy="48" r="7"/><path d="M50 55 V66"/>'
+      },
+      {
+        name: "Cascade", tag: "data engineering", color: "var(--azure)",
+        href: "./data-eng-academy/index.html", key: "cs_progress_v1",
+        desc: "Move and model data that holds up in production — pipelines, batch & streaming, SQL and query engines, Spark, dimensional modeling, and the warehouse patterns behind modern analytics.",
+        chips: ["Pipelines", "Spark", "SQL", "Modeling", "Streaming"],
+        glyph: '<path d="M26 30 H74 M26 30 C26 38 74 38 74 30 M26 30 V70 C26 78 74 78 74 70 V30 M26 50 C26 58 74 58 74 50"/>'
+      }
+    ];
+
+    function readCount(key) {
+      try {
+        var raw = localStorage.getItem(key);
+        if (!raw) return null;
+        var v = JSON.parse(raw);
+        if (Array.isArray(v)) return v.length;
+        if (v && typeof v === "object") return Object.keys(v).length;
+        return null;
+      } catch (e) { return null; }
+    }
+
+    var cards = document.getElementById("cards");
+    var grandTotal = 0, anyProgress = false;
+    var ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+    APPS.forEach(function (app, i) {
+      var a = document.createElement("a");
+      a.className = "card reveal d" + Math.min(i + 1, 4);
+      a.href = app.href;
+      a.style.setProperty("--tc", app.color);
+      a.setAttribute("aria-label", "Open " + app.name);
+
+      var count = readCount(app.key);
+      if (count != null) { grandTotal += count; anyProgress = true; }
+      var progressHtml = count != null
+        ? '<span class="progress"><b>' + count + '</b> completed</span>'
+        : '<span class="progress">Start learning</span>';
+      var chips = app.chips.map(function (c) { return '<span class="chip">' + c + "</span>"; }).join("");
+
+      a.innerHTML =
+        '<div class="card-top">' +
+          '<span class="glyph"><svg viewBox="0 0 100 100" aria-hidden="true">' + app.glyph + "</svg></span>" +
+          '<div><div class="card-name">' + app.name + '</div><div class="card-tag">' + app.tag + "</div></div>" +
+        "</div>" +
+        '<p class="card-desc">' + app.desc + "</p>" +
+        '<div class="chips">' + chips + "</div>" +
+        '<div class="card-foot">' + progressHtml + '<span class="open">Open' + ARROW + "</span></div>";
+      cards.appendChild(a);
+    });
+
+    if (anyProgress) {
+      var pillTotal = document.getElementById("pillTotal");
+      pillTotal.innerHTML = "<b>" + grandTotal + "</b> lessons completed";
+      pillTotal.hidden = false;
+    }
+
+    /* ---------- PWA: install button + service worker ---------- */
+    (function () {
+      var deferred = null;
+      var btn = document.getElementById("installBtn");
+      function standalone() {
+        try {
+          if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+          if (window.navigator && window.navigator.standalone === true) return true;
+        } catch (e) {}
+        return false;
+      }
+      if (!standalone()) {
+        window.addEventListener("beforeinstallprompt", function (e) {
+          try { e.preventDefault(); deferred = e; btn.classList.add("show"); } catch (err) {}
+        });
+        btn.addEventListener("click", function () {
+          if (!deferred || typeof deferred.prompt !== "function") { btn.classList.remove("show"); return; }
+          var evt = deferred; deferred = null;
+          try {
+            evt.prompt();
+            if (evt.userChoice && evt.userChoice.then) evt.userChoice.then(function () { btn.classList.remove("show"); }, function () { btn.classList.remove("show"); });
+            else btn.classList.remove("show");
+          } catch (e) { btn.classList.remove("show"); }
+        });
+        window.addEventListener("appinstalled", function () { deferred = null; btn.classList.remove("show"); });
+      }
+      if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("sw.js").catch(function () {});
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

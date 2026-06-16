@@ -1,0 +1,10 @@
+# macOS / editor cruft
+.DS_Store
+**/.DS_Store
+**/._*
+**/*.bak
+
+# Per-app build outputs (the deployable copies live at the repo root,
+# already assembled by assemble.sh — the transient dist/ folders are not tracked)
+**/dist/
+dist/

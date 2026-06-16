@@ -1,0 +1,250 @@
+/* =====================================================================
+   CITADEL · Reverse Engineering track widget styles
+   Scope: memorylayout · endianness · mitigations widgets only.
+   All classes prefixed rv- to avoid collisions. Reuses global tokens
+   (--accent, --text, --line, --ink-900, --rose, --lime, --cyan, ...)
+   so it adapts to both dark and light themes. Fully responsive: grids
+   wrap, no fixed widths that overflow a ~360px screen.
+   ===================================================================== */
+
+/* ---------- 1. Process memory layout ---------- */
+.rv-mem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 14px;
+}
+.rv-addr-cap {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  text-align: center;
+  letter-spacing: 0.04em;
+  padding: 2px 0;
+}
+.rv-region {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--radius-sm, 10px);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.16s var(--ease), background 0.16s var(--ease), transform 0.16s var(--ease);
+}
+.rv-region:hover { border-color: var(--accent); }
+.rv-region.on {
+  border-color: var(--accent);
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.rv-region-name { font-weight: 700; font-size: 0.92rem; }
+.rv-region-grow {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  text-align: right;
+}
+/* the unmapped gap reads as a thin, hatched divider */
+.rv-region.rv-gap {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 6px,
+    color-mix(in srgb, var(--text-faint) 22%, transparent) 6px,
+    color-mix(in srgb, var(--text-faint) 22%, transparent) 7px
+  );
+  border-style: dashed;
+  padding: 8px 14px;
+}
+.rv-region.rv-gap .rv-region-name { color: var(--text-faint); font-weight: 600; font-size: 0.82rem; }
+
+.rv-mem-detail { margin-top: 0; }
+.rv-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.rv-detail-name { font-size: 1.05rem; color: var(--accent); margin: 0; }
+.rv-perm {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.rv-secnote {
+  font-size: 0.86rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.rv-secnote strong { color: var(--text); }
+
+/* ---------- 2. Endianness explorer ---------- */
+.rv-endian { display: flex; flex-direction: column; gap: 14px; }
+.rv-endian-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.rv-endian-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 96px;
+}
+.rv-bytes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rv-byte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--ink-900);
+}
+.rv-byte-addr {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--text-faint);
+}
+.rv-byte-val {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 0.04em;
+}
+.rv-explain {
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin: 0;
+}
+.rv-err {
+  color: var(--rose);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* ---------- 3. Exploit mitigations explorer ---------- */
+.rv-mit-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+.rv-mit-chip {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease), color 0.15s var(--ease);
+}
+.rv-mit-chip:hover { border-color: var(--accent); }
+.rv-mit-chip.on {
+  background: var(--accent);
+  color: var(--ink-900);
+  border-color: var(--accent);
+}
+.rv-mit-detail { margin-top: 0; }
+.rv-mit-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.rv-mit-name { font-size: 1.1rem; color: var(--accent); margin: 0; }
+.rv-mit-full {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-faint);
+}
+.rv-mit-cost {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.rv-mit-cost-k {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-900);
+  background: var(--accent);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.rv-mit-cost-v {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.rv-mit-how {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+  margin: 0 0 12px;
+}
+.rv-mit-build {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.rv-mit-build-k {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-faint);
+}
+.rv-mit-build code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--cyan);
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 4px 9px;
+  word-break: break-word;
+}
+
+/* ---------- responsive niceties ---------- */
+@media (max-width: 420px) {
+  .rv-endian-label { min-width: 100%; }
+  .rv-byte { min-width: 38px; }
+  .rv-region { padding: 10px 11px; }
+}

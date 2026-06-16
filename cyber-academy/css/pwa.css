@@ -1,0 +1,43 @@
+/* Citadel — installable-PWA styles (additive; pairs with js/pwa.js).
+   Theme-agnostic: relies only on existing design tokens (--accent, --text,
+   --line, --surface, --surface-solid) so it matches both the dark and light
+   themes. Tiny by design — the button otherwise reuses .icon-btn. */
+
+/* Hidden until js/pwa.js reveals it (by toggling .show) once the browser
+   offers installation. Using display keeps it out of the layout entirely,
+   so there is no shift while it is hidden. */
+.cy-install-btn { display: none; }
+
+.cy-install-btn.show {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tint the glyph with the theme accent so "install" reads as a primary,
+   friendly action while still matching the sibling .icon-btn controls.
+   --accent flips per theme, so this stays correct in light and dark. */
+.cy-install-btn.show svg,
+.cy-install-btn.show:hover svg { stroke: var(--accent); }
+
+/* Keyboard focus ring in the theme accent, over a solid surface for contrast. */
+.cy-install-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  background: var(--surface-solid);
+}
+
+/* Visually-hidden text label: available to assistive tech, removed from view
+   without affecting layout. Uses --text only via inheritance (no override). */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+}

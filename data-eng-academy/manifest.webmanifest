@@ -1,0 +1,16 @@
+{
+  "name": "Cascade — The Data Engineering Atlas",
+  "short_name": "Cascade",
+  "description": "An interactive, fully-offline atlas for mastering Data Engineering: storage & file formats, data modeling & warehousing, batch processing, streaming, orchestration & DataOps, and SQL & query engines.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
