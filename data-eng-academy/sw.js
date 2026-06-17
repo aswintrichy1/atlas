@@ -4,7 +4,7 @@
    same-origin asset (fonts, etc.) on first fetch. The whole app works
    with no network after the first visit.
    ===================================================================== */
-const CACHE = "cascade-v13";
+const CACHE = "cascade-v14";
 const CORE = [
   "./",
   "./index.html",
