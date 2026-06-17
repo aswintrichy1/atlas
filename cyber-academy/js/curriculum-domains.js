@@ -112,6 +112,46 @@ window.TRACKS.domains = {
             { t: "note", variant: "key", html: "<strong>Use WPA3 where you can, WPA2 at minimum.</strong> WEP and the original WPA are broken \u2014 treat them as plaintext. A long, unique passphrase (or Enterprise auth) is what stands between your traffic and anyone with an antenna." },
             { t: "quiz", id: "domains-infra" }
           ]
+        },
+        {
+          id: "ot-iot-product-security",
+          title: "OT, IoT & product security",
+          summary: "When software controls physical processes, safety and availability outrank the usual IT playbook.",
+          minutes: 8,
+          tags: ["ot", "iot", "product-security"],
+          blocks: [
+            { t: "p", html: "<strong>Operational technology</strong> controls physical processes: factories, utilities, building systems, medical equipment and transport. <strong>IoT</strong> and connected products bring similar constraints into homes and enterprises. The security goal is not only confidentiality; it is safe, reliable operation." },
+            {
+              t: "table",
+              headers: ["Concept", "Why it matters"],
+              rows: [
+                ["PLC", "A controller that reads sensors and drives actuators in a process"],
+                ["SCADA", "Supervisory systems that monitor and command distributed equipment"],
+                ["Zones", "Groups of assets with similar safety, trust and communication needs"],
+                ["Conduits", "Controlled communication paths between zones"]
+              ]
+            },
+            { t: "h", text: "Why patching is different" },
+            {
+              t: "ul", items: [
+                "Downtime may stop production or affect safety, so changes need tested maintenance windows.",
+                "Devices may run for decades and use vendor-certified firmware tied to physical equipment.",
+                "Compensating controls like segmentation, jump hosts, allow-lists and monitoring often carry the risk until a patch window exists.",
+                "Remote access for vendors must be time-bound, logged and approved."
+              ]
+            },
+            { t: "h", text: "Firmware trust and product lifecycle" },
+            {
+              t: "ul", items: [
+                "Secure boot and signed firmware help devices run only trusted code.",
+                "Updates need authenticity checks, rollback planning and a clear owner.",
+                "Default credentials, exposed debug ports and unsupported components become customer risk.",
+                "A product security program covers design, coordinated disclosure, patch delivery and end-of-life communication."
+              ]
+            },
+            { t: "note", variant: "key", html: "<strong>OT security prioritizes safety and availability.</strong> You still need identity, segmentation, logging and patching, but the change process must respect physical consequences and long-lived equipment." },
+            { t: "quiz", id: "domains-ot-product" }
+          ]
         }
       ]
     },
@@ -154,6 +194,48 @@ window.TRACKS.domains = {
           ]
         },
         {
+          id: "cloud-native-security",
+          title: "Cloud-native security: IAM, Kubernetes & serverless",
+          summary: "Cloud-native systems are identity-heavy, short-lived and automated. The control plane is the new production floor.",
+          minutes: 9,
+          tags: ["cloud", "kubernetes", "serverless"],
+          blocks: [
+            { t: "p", html: "<strong>Cloud-native security</strong> starts with identity. Instances, pods, functions and pipelines all need permissions, and those permissions often matter more than the network path. A tiny service with a broad role can become the fastest route to customer data." },
+            { t: "h", text: "IAM: short-lived, scoped and attached to workloads" },
+            {
+              t: "ul", items: [
+                "<strong>Humans</strong> need phishing-resistant MFA, just-in-time access and separate admin accounts.",
+                "<strong>Workloads</strong> should use platform-issued identities instead of pasted keys in files or environment variables.",
+                "<strong>Metadata services</strong> can hand credentials to compute workloads; protect them from SSRF, container escape paths and over-broad roles.",
+                "<strong>Policies</strong> should describe the exact action, resource and condition needed. Wildcard access is an incident waiting for a trigger."
+              ]
+            },
+            { t: "h", text: "Kubernetes: secure the control plane and the pod boundary" },
+            {
+              t: "table",
+              headers: ["Kubernetes control", "What it prevents"],
+              rows: [
+                ["RBAC", "Pods, users and service accounts doing more than their job"],
+                ["Admission policy", "Privileged containers, unsigned images, risky host mounts"],
+                ["Network policy", "Every pod talking to every other pod by default"],
+                ["Secrets management", "Credentials copied into images, logs or broad namespaces"]
+              ]
+            },
+            { t: "h", text: "Serverless: the event is the perimeter" },
+            {
+              t: "ul", items: [
+                "Each function needs its own narrow role; one shared role across many functions defeats least privilege.",
+                "Validate and bound event payloads from queues, webhooks, storage events and scheduled jobs.",
+                "Separate deploy permission from runtime permission; a build pipeline should not silently gain production data access.",
+                "Watch event-source policies: who can invoke the function can decide what code path runs."
+              ]
+            },
+            { t: "note", variant: "key", html: "<strong>Telemetry is a guardrail, not an afterthought.</strong> Cloud audit logs, identity events, configuration-change streams, container runtime alerts and function invocation metrics are how you see abuse in systems that may only live for seconds." },
+            { t: "note", variant: "tip", html: "Use preventive guardrails for what should never happen: block public storage by default, require approved regions, deny privileged pods, require encryption, and alert on role changes. Cloud scale rewards policies that run continuously." },
+            { t: "quiz", id: "domains-cloud-native" }
+          ]
+        },
+        {
           id: "containers-devsecops",
           title: "Containers & DevSecOps",
           summary: "Ship fast without shipping holes: securing images, pipelines, and infrastructure as code by building security in.",
@@ -181,6 +263,78 @@ window.TRACKS.domains = {
               ]
             },
             { t: "note", variant: "trap", html: "The pipeline is a high-value target precisely because it's trusted to deploy. Supply-chain attacks aim at the build system, not the app \u2014 so least privilege, signed artifacts, and integrity checks apply to your tooling too." }
+          ]
+        },
+        {
+          id: "data-security-privacy-dlp",
+          title: "Data security, privacy & DLP",
+          summary: "Protect data by knowing what it is, where it lives, who owns the keys, and when it should disappear.",
+          minutes: 8,
+          tags: ["data", "privacy", "dlp"],
+          blocks: [
+            { t: "p", html: "Data protection starts before encryption. You need to know <strong>what data exists</strong>, how sensitive it is, why you keep it, who can access it, and how long it should remain. Without that inventory, privacy and security controls become guesswork." },
+            {
+              t: "table",
+              headers: ["Control", "Question it answers"],
+              rows: [
+                ["Classification", "Is this public, internal, confidential or restricted?"],
+                ["Retention", "How long do we need it for business, legal or safety reasons?"],
+                ["Disposal", "How do we prove it was deleted or made unrecoverable?"],
+                ["Key ownership", "Who can decrypt it, rotate keys and approve access?"]
+              ]
+            },
+            { t: "h", text: "Encryption and key ownership" },
+            {
+              t: "ul", items: [
+                "Encrypt sensitive data at rest and in transit with managed, modern cryptography.",
+                "Separate key administrators from data administrators where possible; key access is data access.",
+                "Rotate keys through planned processes, not emergency improvisation.",
+                "Treat backups, exports and analytics copies as data stores that need the same classification."
+              ]
+            },
+            { t: "h", text: "Sensitive access logging & DLP" },
+            {
+              t: "ul", items: [
+                "Log reads and exports of sensitive data with user, purpose, system and correlation ID.",
+                "Detect unusual volume, new destinations, odd hours and access outside a user's normal role.",
+                "Use DLP to spot sensitive patterns leaving by email, file sharing, endpoint copy, SaaS export or cloud storage.",
+                "Minimize collection: the safest record is the one you never needed to store."
+              ]
+            },
+            { t: "note", variant: "key", html: "<strong>Privacy is an operating discipline.</strong> Classification, minimization, retention, disposal and access review are what make encryption meaningful. A perfectly encrypted data lake with everyone approved as admin is still a privacy failure." },
+            { t: "quiz", id: "domains-data-privacy" }
+          ]
+        },
+        {
+          id: "mobile-security-basics",
+          title: "Mobile security basics",
+          summary: "A mobile app is a hostile-client problem: protect local data, trust the backend, and revoke access when the device disappears.",
+          minutes: 7,
+          tags: ["mobile", "client", "privacy"],
+          blocks: [
+            { t: "p", html: "Mobile apps run on devices you do not fully control. They can be lost, rooted, jailbroken, backed up, inspected and used on hostile networks. Secure mobile design assumes the client is exposed and keeps real trust decisions on the backend." },
+            {
+              t: "table",
+              headers: ["Area", "Safer pattern"],
+              rows: [
+                ["Local storage", "Use platform secure storage for tokens and keys; avoid plain files"],
+                ["Permissions", "Request only what the feature truly needs, at the moment it needs it"],
+                ["Network", "Require TLS and never disable certificate validation for convenience"],
+                ["Backend trust", "Authorize every request server-side; never trust hidden client flags"]
+              ]
+            },
+            { t: "h", text: "Lost device and session revocation" },
+            {
+              t: "ul", items: [
+                "Use short-lived access tokens and revocable refresh tokens.",
+                "Provide remote logout for a lost or replaced device.",
+                "Rotate sessions after password changes, MFA changes and suspicious device signals.",
+                "Avoid storing session secrets in web storage inside embedded browsers."
+              ]
+            },
+            { t: "note", variant: "trap", html: "Disabling certificate validation to make a test server work teaches the app to trust impostors. Fix the test certificate path instead; never ship code that accepts any certificate." },
+            { t: "note", variant: "key", html: "<strong>The backend is the authority.</strong> The app can improve usability and local protection, but authorization, fraud checks, rate limits and revocation must be enforced server-side." },
+            { t: "quiz", id: "domains-mobile" }
           ]
         },
         {
@@ -248,6 +402,37 @@ window.TRACKS.domains = {
             },
             { t: "note", variant: "key", html: "Notice the categories <em>are</em> this atlas: web, crypto, forensics, reversing, OSINT. A CTF is where the separate tracks you've studied combine into one problem \u2014 which is exactly how real security works." },
             { t: "note", variant: "tip", html: "Don't fear getting stuck \u2014 that's the training. Read write-ups <em>after</em> you've struggled, keep notes of techniques, and revisit. Struggle-then-explanation is the loop that actually builds skill." }
+          ]
+        },
+        {
+          id: "grc-risk-governance",
+          title: "GRC & risk governance",
+          summary: "Governance turns security from scattered good ideas into accountable decisions, controls and exceptions.",
+          minutes: 7,
+          tags: ["grc", "risk", "governance"],
+          blocks: [
+            { t: "p", html: "<strong>Governance, risk and compliance</strong> is how an organization decides what security means, proves controls exist, and makes risk decisions consciously. It is not paperwork for its own sake; it is the operating system for accountability." },
+            {
+              t: "table",
+              headers: ["Artifact", "Purpose"],
+              rows: [
+                ["Risk register", "Tracks risks, owners, ratings, treatment plans and due dates"],
+                ["Control mapping", "Shows which controls satisfy which framework, law or policy requirement"],
+                ["Policy", "States the rule and intent: what must be true"],
+                ["Standard / procedure", "Defines the required baseline and the steps to meet it"]
+              ]
+            },
+            { t: "h", text: "Third-party risk and exceptions" },
+            {
+              t: "ul", items: [
+                "Vendors inherit trust: assess what data they handle, what access they hold and how they prove controls.",
+                "Contracts should cover security obligations, breach notification, audit rights and data return or disposal.",
+                "Exceptions are temporary, owned and reviewed; they are not silent permission to ignore a control.",
+                "Risk acceptance belongs to an accountable business owner who understands the impact, not to the person who finds the workaround easiest."
+              ]
+            },
+            { t: "note", variant: "key", html: "<strong>A good risk register drives action.</strong> Every entry should name the asset, threat, weakness, impact, owner, treatment choice and review date. If nobody owns it, the organization has only documented worry." },
+            { t: "quiz", id: "domains-grc" }
           ]
         },
         {

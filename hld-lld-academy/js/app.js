@@ -29,6 +29,7 @@
   const TRACKS = [window.TRACKS.hld, window.TRACKS.lld, window.TRACKS.dsa, window.TRACKS.patterns].filter(Boolean);
   const QUIZZES = window.QUIZZES || {};
   const Widgets = window.Widgets || {};
+  const Practice = window.BlueprintPractice || {};
 
   // attach a stable id to every quiz question (for weak-spot tracking)
   Object.keys(QUIZZES).forEach((qzid) => {
@@ -50,6 +51,107 @@
   });
   const byKey = Object.fromEntries(FLAT.map((f) => [f.key, f]));
   const TOTAL = FLAT.length;
+  const LEARNING_PATHS = [
+    {
+      id: "hld-basics",
+      title: "HLD Basics",
+      label: "Foundation path",
+      color: "#f5a623",
+      desc: "A straight-line route through scope, estimation, scaling vocabulary, stateless services, load balancing, caching, and first data-store choices.",
+      routes: [
+        "#/hld/foundations/what-is-hld",
+        "#/hld/foundations/estimation",
+        "#/hld/foundations/framework",
+        "#/hld/scaling/vertical-horizontal",
+        "#/hld/scaling/statelessness",
+        "#/hld/scaling/load-balancing",
+        "#/hld/caching/caching-basics",
+        "#/hld/data/sql-vs-nosql"
+      ]
+    },
+    {
+      id: "reliability-sre",
+      title: "Reliability & SRE",
+      label: "Production path",
+      color: "#fb7185",
+      desc: "Move from uptime math to SLOs, multi-region resilience, cell isolation, overload controls, incident readiness, observability, and launch gates.",
+      routes: [
+        "#/hld/reliability/availability",
+        "#/hld/reliability/slo-error-budgets",
+        "#/hld/reliability/multi-region-resilience",
+        "#/hld/reliability/cell-based-architecture",
+        "#/hld/reliability/circuit-breakers-backpressure",
+        "#/hld/reliability/load-shedding-degradation",
+        "#/hld/reliability/incident-response-readiness",
+        "#/hld/reliability/observability",
+        "#/hld/production-readiness/launch-readiness"
+      ]
+    },
+    {
+      id: "case-studies",
+      title: "Case Studies",
+      label: "Applied HLD path",
+      color: "#a78bfa",
+      desc: "Practice assembling the primitives into complete systems: URL shortener, feed, chat, offline sync, real-world tours, and capstone reviews.",
+      routes: [
+        "#/hld/cases/url-shortener",
+        "#/hld/cases/news-feed",
+        "#/hld/cases/chat",
+        "#/hld/cases/mobile-offline-sync",
+        "#/hld/cases/real-world-tour",
+        "#/hld/cases/interview-designs",
+        "#/hld/cases/production-capstone",
+        "#/hld/cases/saas-reliability-review"
+      ]
+    },
+    {
+      id: "lld-mastery",
+      title: "LLD Mastery",
+      label: "Code design path",
+      color: "#5eead4",
+      desc: "Walk from objects and SOLID to patterns, concurrency, and worked designs that turn system boundaries into testable code.",
+      routes: [
+        "#/lld/oop/what-is-lld",
+        "#/lld/oop/four-pillars",
+        "#/lld/oop/composition-inheritance",
+        "#/lld/solid/srp",
+        "#/lld/solid/ocp",
+        "#/lld/solid/lsp",
+        "#/lld/solid/isp",
+        "#/lld/solid/dip",
+        "#/lld/principles/clean-code",
+        "#/lld/principles/concurrency",
+        "#/lld/patterns/patterns-overview",
+        "#/lld/patterns/creational",
+        "#/lld/patterns/structural",
+        "#/lld/patterns/behavioral",
+        "#/lld/practice/lld-process",
+        "#/lld/practice/case-parking-lot",
+        "#/lld/practice/case-lru",
+        "#/lld/practice/case-sync-operation-queue",
+        "#/lld/practice/case-idempotent-workflow",
+        "#/lld/practice/case-vending-machine",
+        "#/lld/practice/case-elevator"
+      ]
+    },
+    {
+      id: "ai-systems",
+      title: "AI Systems",
+      label: "GenAI architecture path",
+      color: "#bef264",
+      desc: "Design agent, RAG, ranking, LLM serving, and GenAI systems with retrieval quality, evaluation, tracing, tenant isolation, and threat modeling in mind.",
+      routes: [
+        "#/hld/ai-ml/ai-agents",
+        "#/hld/ai-ml/rag-vector",
+        "#/hld/ai-ml/production-rag-system",
+        "#/hld/ai-ml/rag-failure-modes-llmops",
+        "#/hld/ai-ml/search-ranking-recommendations",
+        "#/hld/ai-ml/llm-systems",
+        "#/hld/ai-ml/genai-design",
+        "#/hld/protocols-security/security-threat-modeling"
+      ]
+    }
+  ];
 
   /* ---------------- progress (localStorage) ---------------- */
   const PKEY = "bp_progress_v1";
@@ -259,6 +361,26 @@
 
   function trackColorVars(track) { return "--tc:" + track.color + ";--accent:" + track.color + ";"; }
 
+  function practiceNav() {
+    return (Practice.nav || []).filter((item) => item && item.route && item.title);
+  }
+
+  function practiceHomeHtml() {
+    const items = practiceNav();
+    if (!items.length) return "";
+    return '<section class="practice-ref-home reveal in">' +
+      '<div class="prh-head"><h2>Practice library</h2><p>Offline scenario outlines, timed prompts, rubrics, cheat sheets, and glossary cross-links for final interview polish.</p></div>' +
+      '<div class="practice-ref-grid">' + items.map((item) =>
+        '<a class="practice-ref-card" href="' + escapeHtml(item.route) + '" style="--tc:' + escapeHtml(item.color || "var(--accent)") + '">' +
+          '<span class="path-kicker">' + escapeHtml(item.label || "Practice") + "</span>" +
+          "<h3>" + escapeHtml(item.title) + "</h3>" +
+          "<p>" + escapeHtml(item.summary || "") + "</p>" +
+          '<span class="tc-go">Open <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
+        "</a>"
+      ).join("") + "</div>" +
+    "</section>";
+  }
+
   function homeProgressHtml() {
     const weakN = weakQuestions().length;
     if (!done.size && !review.size && !weakN) return "";
@@ -311,6 +433,7 @@
             : '<a class="btn btn-primary" href="#/hld/foundations/what-is-hld">Start with HLD' + ARR + "</a>" +
               '<a class="btn btn-ghost" href="#/dsa/foundations/arrays">DSA from scratch' + ARR + "</a>") +
           '<a class="btn btn-ghost" href="#/patterns/arrays/prefix-sum">16 interview patterns' + ARR + "</a>" +
+          '<a class="btn btn-ghost" href="#/paths">Guided paths' + ARR + "</a>" +
         "</div>" +
         '<div class="hero-stats reveal reveal-5">' +
           '<div class="hero-stat"><div class="num">' + TOTAL + '</div><div class="lbl">lessons</div></div>' +
@@ -320,6 +443,12 @@
         "</div>" +
       "</section>" +
       homeProgressHtml() +
+      '<a class="path-banner" href="#/paths">' +
+        '<div class="pb-ico"><svg viewBox="0 0 24 24"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/></svg></div>' +
+        '<div class="pb-text"><h3>Follow a guided learning path</h3><p>Pick HLD Basics, Reliability & SRE, Case Studies, LLD Mastery, or AI Systems and copy the path as Markdown study notes.</p></div>' +
+        '<span class="pb-go">Open paths <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
+      "</a>" +
+      practiceHomeHtml() +
       '<div class="track-cards">' + TRACKS.map(trackCard).join("") + "</div>" +
       '<a class="practice-banner" href="#/practice">' +
         '<div class="pb-ico"><svg viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.4-1.1 1-1.1 1.7v.5M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></div>' +
@@ -345,6 +474,172 @@
       '<ul class="tc-modlist">' + track.modules.map((m) => "<li>" + escapeHtml(m.name) + "</li>").join("") + "</ul>" +
       '<span class="tc-go">Enter the ' + track.short + " track <svg viewBox=\"0 0 24 24\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></span>" +
       "</a>";
+  }
+
+  /* ---------------- learning paths ---------------- */
+  const pathKey = (route) => String(route).replace(/^#\//, "");
+  const pathLessons = (path) => path.routes.map((r) => byKey[pathKey(r)]).filter(Boolean);
+
+  function renderPaths() {
+    document.title = "Learning paths · Blueprint";
+    const cards = LEARNING_PATHS.map((path) => {
+      const lessons = pathLessons(path);
+      const totalMinutes = lessons.reduce((n, f) => n + (f.lesson.minutes || 5), 0);
+      const first = lessons[0];
+      return '<section class="path-card" style="--tc:' + path.color + '">' +
+        '<div class="path-kicker">' + escapeHtml(path.label) + " · " + lessons.length + " lessons · ~" + totalMinutes + " min</div>" +
+        "<h2>" + escapeHtml(path.title) + "</h2>" +
+        "<p>" + escapeHtml(path.desc) + "</p>" +
+        '<ol class="path-route-list">' + lessons.map((f) =>
+          '<li><a href="' + f.route + '"><span>' + escapeHtml(f.lesson.title) + '</span><em>' + escapeHtml(f.track.short + " · " + f.mod.name) + "</em></a></li>"
+        ).join("") + "</ol>" +
+        '<div class="path-card-actions">' +
+          (first ? '<a class="btn btn-primary" href="' + first.route + '">Start path</a>' : "") +
+          '<button class="btn btn-ghost copy-path" type="button" data-path="' + escapeHtml(path.id) + '">Copy path as Markdown</button>' +
+        "</div>" +
+      "</section>";
+    }).join("");
+
+    main.innerHTML =
+      '<article class="lesson paths-page" style="--accent:var(--cyan)">' +
+        '<nav class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span>Learning paths</span></nav>' +
+        '<header class="lesson-head reveal in">' +
+          "<h1>Guided learning paths</h1>" +
+          '<p class="summary">Opinionated routes through existing Blueprint lessons. Use them when you want a focused study sequence instead of browsing the full atlas.</p>' +
+        "</header>" +
+        '<div class="paths-grid">' + cards + "</div>" +
+      "</article>";
+
+    $$(".copy-path", main).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const path = LEARNING_PATHS.find((p) => p.id === btn.getAttribute("data-path"));
+        if (!path) return;
+        copyText(pathToMd(path), () => {
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => { btn.textContent = old; }, 1400);
+          toast("Path copied as Markdown");
+        });
+      });
+    });
+    main.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------------- practice reference pages ---------------- */
+  function practicePageMeta(kind) {
+    return practiceNav().find((item) => item.id === kind) || { id: kind, title: "Practice", summary: "", color: "var(--accent)" };
+  }
+  function practiceLinks(links) {
+    if (!links || !links.length) return "";
+    return '<div class="practice-links">' + links.map((l) =>
+      '<a class="inline" href="' + escapeHtml(l.route) + '">' + escapeHtml(l.label) + "</a>"
+    ).join("") + "</div>";
+  }
+  function practicePageShell(kind, body, anchor) {
+    const meta = practicePageMeta(kind);
+    document.title = meta.title + " · Blueprint";
+    const nav = practiceNav().map((item) =>
+      '<a class="' + (item.id === kind ? "active" : "") + '" href="' + escapeHtml(item.route) + '" style="--tc:' + escapeHtml(item.color || "var(--accent)") + '">' + escapeHtml(item.title) + "</a>"
+    ).join("");
+    main.innerHTML =
+      '<article class="lesson practice-ref-page" style="--accent:' + escapeHtml(meta.color || "var(--accent)") + '">' +
+        '<nav class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span>Practice library</span><span class="sep">/</span><span>' + escapeHtml(meta.title) + "</span></nav>" +
+        '<header class="lesson-head reveal in">' +
+          '<p class="path-kicker">' + escapeHtml(meta.label || "Practice") + "</p>" +
+          "<h1>" + escapeHtml(meta.title) + "</h1>" +
+          '<p class="summary">' + escapeHtml(meta.summary || "") + "</p>" +
+        "</header>" +
+        '<nav class="practice-ref-tabs" aria-label="Practice reference pages">' + nav + "</nav>" +
+        body +
+      "</article>";
+    main.scrollTop = 0;
+    window.scrollTo(0, 0);
+    if (anchor) requestAnimationFrame(() => {
+      const target = document.getElementById(anchor);
+      if (target) target.scrollIntoView({ block: "start" });
+    });
+  }
+  function renderPracticeReferences(kind, anchor) {
+    if (kind === "scenarios") return renderScenarioPacks(anchor);
+    if (kind === "interview") return renderInterviewPrompts(anchor);
+    if (kind === "rubrics") return renderRubrics(anchor);
+    if (kind === "cheatsheets") return renderCheatsheets(anchor);
+    if (kind === "glossary") return renderGlossary(anchor);
+    renderHome();
+  }
+  function renderScenarioPacks(anchor) {
+    const cards = (Practice.scenarios || []).map((s) =>
+      '<section class="path-card practice-ref-detail" id="' + escapeHtml(s.id) + '" style="--tc:var(--accent)">' +
+        '<div class="path-kicker">' + escapeHtml((s.subtitle || "Scenario") + " · " + (s.timebox || "Practice")) + "</div>" +
+        "<h2>" + escapeHtml(s.title) + "</h2>" +
+        '<p class="practice-prompt">' + escapeHtml(s.prompt) + "</p>" +
+        practiceLinks(s.related) +
+        '<div class="practice-outline">' + (s.outline || []).map((sec) =>
+          '<div class="practice-outline-sec"><h3>' + escapeHtml(sec.title) + "</h3><ul>" +
+            (sec.items || []).map((item) => "<li>" + escapeHtml(item) + "</li>").join("") +
+          "</ul></div>"
+        ).join("") + "</div>" +
+      "</section>"
+    ).join("");
+    practicePageShell("scenarios",
+      '<div class="note key"><svg class="note-ico" viewBox="0 0 24 24">' + NOTE_ICON.key + '</svg><div class="note-body"><strong>Key idea.</strong> These are model-answer outlines, not the only correct answers. Practice adapting them to the constraints an interviewer gives you.</div></div>' +
+      '<div class="paths-grid practice-ref-list">' + cards + "</div>",
+      anchor);
+  }
+  function renderInterviewPrompts(anchor) {
+    const cards = (Practice.interview || []).map((p) =>
+      '<section class="path-card practice-ref-detail" id="' + escapeHtml(p.id) + '" style="--tc:var(--accent)">' +
+        '<div class="path-kicker">Timed drill · ' + escapeHtml(p.timebox || "Practice") + "</div>" +
+        "<h2>" + escapeHtml(p.title) + "</h2>" +
+        '<p class="practice-prompt">' + escapeHtml(p.prompt) + "</p>" +
+        practiceLinks(p.links) +
+        '<div class="practice-outline two-col">' +
+          '<div class="practice-outline-sec"><h3>Expected moves</h3><ul>' + (p.expected || []).map((item) => "<li>" + escapeHtml(item) + "</li>").join("") + "</ul></div>" +
+          '<div class="practice-outline-sec"><h3>Follow-up pressure</h3><ul>' + (p.followups || []).map((item) => "<li>" + escapeHtml(item) + "</li>").join("") + "</ul></div>" +
+        "</div>" +
+      "</section>"
+    ).join("");
+    practicePageShell("interview", '<div class="paths-grid practice-ref-list">' + cards + "</div>", anchor);
+  }
+  function renderRubrics(anchor) {
+    const rubrics = Practice.rubrics || {};
+    const dimensions = '<section class="path-card practice-ref-detail rubric-dimensions" style="--tc:var(--accent)">' +
+      '<div class="path-kicker">What to score</div><h2>Dimensions</h2><ul>' +
+      (rubrics.dimensions || []).map((d) => "<li>" + escapeHtml(d) + "</li>").join("") +
+      "</ul></section>";
+    const bands = (rubrics.bands || []).map((band) =>
+      '<section class="path-card practice-ref-detail" id="' + escapeHtml(band.id) + '" style="--tc:var(--accent)">' +
+        '<div class="path-kicker">Rubric band</div>' +
+        "<h2>" + escapeHtml(band.title) + "</h2>" +
+        "<p>" + escapeHtml(band.summary) + "</p>" +
+        '<ul class="practice-check-list">' + (band.signals || []).map((s) => "<li>" + escapeHtml(s) + "</li>").join("") + "</ul>" +
+      "</section>"
+    ).join("");
+    practicePageShell("rubrics", dimensions + '<div class="paths-grid practice-ref-list">' + bands + "</div>", anchor);
+  }
+  function renderCheatsheets(anchor) {
+    const cards = (Practice.cheatsheets || []).map((sheet) =>
+      '<section class="path-card practice-ref-detail" id="' + escapeHtml(sheet.id) + '" style="--tc:var(--accent)">' +
+        '<div class="path-kicker">Cheat sheet</div>' +
+        "<h2>" + escapeHtml(sheet.title) + "</h2>" +
+        "<p>" + escapeHtml(sheet.summary) + "</p>" +
+        '<ul class="practice-check-list">' + (sheet.items || []).map((item) => "<li>" + escapeHtml(item) + "</li>").join("") + "</ul>" +
+      "</section>"
+    ).join("");
+    practicePageShell("cheatsheets", '<div class="paths-grid practice-ref-list">' + cards + "</div>", anchor);
+  }
+  function renderGlossary(anchor) {
+    const cards = (Practice.glossary || []).map((term) =>
+      '<section class="path-card practice-ref-detail glossary-term" id="' + escapeHtml(term.id) + '" style="--tc:var(--accent)">' +
+        '<div class="path-kicker">Glossary</div>' +
+        "<h2>" + escapeHtml(term.term) + "</h2>" +
+        "<p>" + escapeHtml(term.definition) + "</p>" +
+        '<p class="practice-use"><strong>Use it:</strong> ' + escapeHtml(term.useIt || "") + "</p>" +
+        practiceLinks(term.links) +
+      "</section>"
+    ).join("");
+    practicePageShell("glossary", '<div class="paths-grid practice-ref-list glossary-grid">' + cards + "</div>", anchor);
   }
 
   /* ---------------- practice mode ---------------- */
@@ -657,6 +952,16 @@
     });
     return out.trim() + "\n";
   }
+  function pathToMd(path) {
+    const lessons = pathLessons(path);
+    let out = "# " + path.title + " \u2014 Blueprint learning path\n\n";
+    out += "> " + path.desc + "\n\n";
+    lessons.forEach((f, i) => {
+      out += (i + 1) + ". [" + f.lesson.title + "](" + f.route + ") \u2014 " + f.track.short + " / " + f.mod.name + " (" + (f.lesson.minutes || 5) + " min)\n";
+      out += "   " + f.lesson.summary + "\n";
+    });
+    return out.trim() + "\n";
+  }
 
   function mountQuiz(slot, quiz) {
     let i = 0, score = 0, answered = false;
@@ -910,6 +1215,10 @@
     closeMobileNav();
     if (parts.length >= 3 && byKey[parts[0] + "/" + parts[1] + "/" + parts[2]]) {
       renderLesson(byKey[parts[0] + "/" + parts[1] + "/" + parts[2]]);
+    } else if (parts[0] === "paths") {
+      renderPaths();
+    } else if (["scenarios", "interview", "rubrics", "cheatsheets", "glossary"].includes(parts[0])) {
+      renderPracticeReferences(parts[0], parts[1]);
     } else if (parts[0] === "practice") {
       renderPractice({ mode: parts[1] === "weak" ? "weak" : "all" });
     } else if (parts[0] === "review") {
@@ -980,6 +1289,7 @@
   function paletteCommands() {
     const cmds = [
       { label: "Practice mode", sub: "Shuffled quiz \u00b7 all tracks", icon: "quiz", run: () => { location.hash = "#/practice"; } },
+      { label: "Learning paths", sub: "Guided lesson sequences", icon: "map", run: () => { location.hash = "#/paths"; } },
       { label: "Exam mode", sub: "Timed, scored, per-track breakdown", icon: "quiz", run: () => { location.hash = "#/exam"; } },
       { label: "Flashcards", sub: "Flip through key terms", icon: "lesson", run: () => { location.hash = "#/flashcards"; } },
       { label: "Drill weak spots", sub: weakQuestions().length + " missed question(s)", icon: "warn", run: () => { location.hash = "#/practice/weak"; } },
@@ -992,6 +1302,12 @@
       { label: "Reset progress", sub: "Clear completed lessons", icon: "reset", run: () => $("#resetProgress").click() },
       { label: "Go home", sub: "The atlas overview", icon: "home", run: () => { location.hash = "#/"; } }
     ];
+    practiceNav().forEach((item) => cmds.push({
+      label: item.title,
+      sub: item.summary || item.label || "Practice reference",
+      icon: item.icon || "lesson",
+      run: () => { location.hash = item.route; }
+    }));
     TRACKS.forEach((tr) => cmds.push({
       label: "Copy " + tr.short + " cheat sheet", sub: "Markdown \u00b7 " + tr.name, icon: "md",
       run: () => copyText(trackToMd(tr), () => toast(tr.short + " cheat sheet copied"))
@@ -1010,6 +1326,7 @@
     md: '<path d="M9 9h6v6H9zM4 15V5a1 1 0 0 1 1-1h10M8 9H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3"/>',
     warn: '<path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
     print: '<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/>',
+    map: '<path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/>',
     lesson: '<path d="M4 5h16M4 12h16M4 19h10"/>',
     star: '<path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/>',
     keyboard: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12"/>',

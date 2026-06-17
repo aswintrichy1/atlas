@@ -404,6 +404,36 @@ window.TRACKS.hld = {
           ]
         },
         {
+          id: "database-selection-deep-dive",
+          title: "Database selection deep dive",
+          summary: "Pick storage by workload shape: OLTP, OLAP, search, time-series, graph, vector, and the engine costs underneath.",
+          minutes: 9,
+          tags: ["database", "storage-engine", "selection"],
+          blocks: [
+            { t: "p", html: "A database choice is really three choices: <strong>workload</strong> (what queries dominate), <strong>data model</strong> (rows, documents, edges, vectors), and <strong>storage engine</strong> (how bytes are laid out and updated). Get those right before comparing vendor names." },
+            { t: "table", headers: ["Need", "Good fit", "Watch for"], rows: [
+              ["OLTP", "Row-store SQL or key-value store for short, selective reads/writes", "Hot rows, lock contention, transactional boundaries"],
+              ["OLAP", "Column store or warehouse for scans and aggregations", "Freshness lag, high concurrency cost, ETL complexity"],
+              ["Search", "Inverted index with analyzers, ranking and filters", "Relevance tuning, reindexing, eventual consistency"],
+              ["Time-series", "Append-optimized store partitioned by time and metric/entity", "High-cardinality tags and retention policy"],
+              ["Graph", "Native graph or relational tables tuned for traversals", "Supernodes and hard-to-shard relationship queries"],
+              ["Vector", "ANN index plus metadata filters for semantic retrieval", "Recall/latency trade-offs and tenant/ACL filtering"]
+            ] },
+            { t: "h", text: "Rows, columns, B-trees and LSM trees" },
+            { t: "compare",
+              bad: { title: "Row store + B-tree", items: ["Rows stored together; great for fetching one entity", "B-trees keep keys sorted for point and range reads", "In-place updates work well for OLTP", "Write amplification grows with many indexes"] },
+              good: { title: "Column store + LSM", items: ["Columns stored together; great for scanning one field across many rows", "LSM trees append writes then compact sorted files", "Excellent write throughput and compression", "Compaction creates read/write/space amplification"] }
+            },
+            { t: "ul", items: [
+              "<strong>NewSQL</strong> keeps SQL and transactions but distributes data with consensus; great when you need relational correctness plus scale, costly when latency and coordination dominate.",
+              "<strong>Hot partitions</strong> happen when one key, tenant, region or timestamp range absorbs too much traffic. Salt keys, shard by a higher-cardinality key, or split the tenant/resource.",
+              "<strong>Amplification</strong> is hidden cost: one logical write can become many index writes, replicated writes, compaction rewrites and cache invalidations."
+            ] },
+            { t: "note", variant: "key", html: "Start from access patterns: query predicates, sort order, freshness, write rate, retention, consistency, multi-tenancy and failure model. A boring database that matches the workload beats an exciting one that fights it." },
+            { t: "quiz", id: "hld-databases" }
+          ]
+        },
+        {
           id: "indexing",
           title: "Indexing",
           summary: "How a database finds a row without scanning the whole table — B-trees, composite indexes, and their write cost.",
@@ -533,6 +563,60 @@ window.TRACKS.hld = {
           ]
         },
         {
+          id: "zero-downtime-data-migrations",
+          title: "Zero-downtime data migrations",
+          summary: "Change data shape under live traffic with expand-contract, restartable backfills, verification, cutover and rollback.",
+          minutes: 11,
+          tags: ["database", "migration", "zero-downtime", "operations"],
+          blocks: [
+            { t: "p", html: "A <strong>zero-downtime migration</strong> changes data shape while reads and writes continue. The safe shape is: make old and new paths coexist, move data in small verified batches, then cut over with a rehearsed rollback." },
+            { t: "h", text: "The expand-contract pattern" },
+            { t: "ol", items: [
+              "<strong>Expand</strong>: add the new nullable column/table/index/path. Do not remove the old shape yet.",
+              "<strong>Bridge</strong>: ship code that understands both old and new shapes, usually behind a feature flag.",
+              "<strong>Backfill</strong>: copy old data into the new shape in small, restartable chunks.",
+              "<strong>Verify</strong>: compare counts, checksums, sampled rows and live CDC streams until drift is explainable.",
+              "<strong>Cut over</strong>: route reads to the new shape, then writes, while watching SLOs and mismatch metrics.",
+              "<strong>Contract</strong>: remove the old path only after the rollback window closes and stale clients are gone."
+            ] },
+            { t: "code", lang: "text", code:
+              "Phase 0  old read/write path only\n" +
+              "Phase 1  expand schema: add new_order_items, new indexes\n" +
+              "Phase 2  dual-write: old table + new table from the same command\n" +
+              "Phase 3  backfill historical rows with checkpoints\n" +
+              "Phase 4  shadow-read new table and compare, still return old result\n" +
+              "Phase 5  cut reads to new table, keep dual-write for rollback\n" +
+              "Phase 6  cut writes to new table, freeze/remove old path later"
+            },
+            { t: "h", text: "Backfills: checkpoint, throttle, verify" },
+            { t: "p", html: "Backfills should be <em>restartable</em>. Walk primary-key ranges or stable cursors, persist the last completed checkpoint, and make each batch idempotent. Throttle on database load, replica lag, queue depth and errors; the migration is background work, not the product." },
+            { t: "table", headers: ["Control", "Why it matters"], rows: [
+              ["Checkpoint", "Resume after deploys, crashes or manual pauses without scanning from the beginning."],
+              ["Throttle", "Keep lock time, IO, replication lag and cache churn below production limits."],
+              ["Idempotent batch", "Retrying batch 42 overwrites or upserts the same target rows, not duplicates them."],
+              ["Verification", "Counts catch big gaps; checksums and sampled row diffs catch subtle transforms."]
+            ] },
+            { t: "h", text: "Dual-write, dual-read, shadow-read" },
+            { t: "ul", items: [
+              "<strong>Dual-write</strong> sends each new mutation to old and new stores in one application command. Record failures explicitly; do not silently let the two stores drift.",
+              "<strong>Dual-read</strong> can read the new store first and fall back to old during rollout, but it can hide bugs if every miss quietly succeeds from old.",
+              "<strong>Shadow-read</strong> is safer before cutover: serve the old result to the user, read the new store in parallel, compare, and emit a mismatch metric.",
+              "<strong>CDC validation</strong> tails the change stream from the source and confirms every committed mutation reaches the target in order for each key."
+            ] },
+            { t: "note", variant: "key", html: "The migration dashboard should show progress, lag, mismatch rate, write failure rate, batch retries and rollback readiness. A green deploy is not enough; the data must be green too." },
+            { t: "h", text: "Cutover and rollback" },
+            { t: "p", html: "Cutover is a routing decision. Keep the old path warm for a defined window, keep dual-write until confidence is high, and make rollback mechanical: flip reads back, pause the backfill, preserve mismatch evidence, and replay missing writes from the durable log." },
+            { t: "compare",
+              bad: { title: "Risky migration", items: ["Big bang schema rewrite", "One giant UPDATE", "No checkpoint table", "Deletes old column immediately", "Rollback means restoring a backup"] },
+              good: { title: "Operational migration", items: ["Expand-contract", "Small idempotent batches", "Shadow reads and CDC validation", "Feature-flagged cutover", "Rollback path rehearsed before launch"] }
+            },
+            { t: "h", text: "Tenant and cell migrations" },
+            { t: "p", html: "Tenant or cell moves are the same pattern at a larger boundary: sequence writes, copy tenant-scoped data, replay changes, verify checksums, then atomically update the routing control plane. Keep the source read-capable until support, analytics and jobs agree on the new location." },
+            { t: "note", variant: "trap", html: "Never hardcode tenant ids, program ids, account names or dates into a migration plan. They belong in a runtime manifest or control-plane row so the same machinery works in every environment and for every tenant." },
+            { t: "quiz", id: "hld-data-migrations" }
+          ]
+        },
+        {
           id: "consistent-hashing",
           title: "Consistent hashing",
           summary: "Add or remove a node and move only ~1/N of the keys, not all of them. The algorithm behind elastic clusters.",
@@ -611,6 +695,33 @@ window.TRACKS.hld = {
             },
             { t: "quiz", id: "hld-cap" }
           ]
+        },
+        {
+          id: "quorums-consensus",
+          title: "Quorums & consensus",
+          summary: "When replicas disagree, quorum math and consensus protocols decide what is safe to read, write and coordinate.",
+          minutes: 8,
+          tags: ["distributed", "consensus", "quorum"],
+          blocks: [
+            { t: "p", html: "Replication gives durability and availability, but it creates a question: <em>which copy is authoritative right now?</em> Two families answer it. <strong>Quorums</strong> give tunable consistency for replicated data. <strong>Consensus</strong> elects one agreed leader or value when the system must make exactly one decision." },
+            { t: "h", text: "Quorum intuition" },
+            { t: "p", html: "With <strong>N</strong> replicas, write to <strong>W</strong> and read from <strong>R</strong>. If <strong>R + W &gt; N</strong>, every read overlaps at least one successful write, so it can discover the newest value." },
+            { t: "table", headers: ["Setting", "Behavior"], rows: [
+              ["N=3, W=2, R=2", "Balanced: survives one replica down and read/write sets overlap"],
+              ["W=1, R=1", "Fast but stale reads are possible"],
+              ["W=3, R=1", "Writes are slow/strict; reads are fast"],
+              ["Sloppy quorum", "Writes go to reachable fallback nodes during failure; availability improves, repair gets harder"],
+              ["Read repair", "A read notices stale replicas and repairs them in the background"]
+            ] },
+            { t: "h", text: "When you need consensus" },
+            { t: "ul", items: [
+              "Leader election: exactly one primary should accept writes.",
+              "Distributed locks and leases: only one worker owns a critical section.",
+              "Cluster membership and configuration: every node must agree on who is in the group.",
+              "Metadata stores: etcd, ZooKeeper and Consul exist so applications do not invent this badly."
+            ] },
+            { t: "note", variant: "key", html: "Do not build your own consensus protocol in an interview or a product. Name Raft/Paxos conceptually, then reach for a proven coordination system unless consensus is the product." }
+          ]
         }
       ]
     },
@@ -678,6 +789,57 @@ window.TRACKS.hld = {
             },
             { t: "note", variant: "key", html: "Kafka scales by splitting a topic into <strong>partitions</strong>; order is guaranteed <em>within</em> a partition, and the partition key (e.g. user_id) decides placement. More partitions = more parallelism, at the cost of cross-partition ordering." },
             { t: "note", variant: "tip", html: "Rule of thumb: need to <em>distribute tasks</em> to workers? Use a queue. Need to <em>broadcast events</em> to many systems and keep history? Use a log/stream." },
+          ]
+        },
+        {
+          id: "event-replay-backpressure",
+          title: "Event replay, poison messages & backpressure",
+          summary: "Streams are replayable, but replay is only safe when consumers are idempotent and overload has a pressure valve.",
+          minutes: 7,
+          tags: ["messaging", "streaming", "backpressure"],
+          blocks: [
+            { t: "p", html: "A retained log lets you fix a bug and replay history. That is a superpower and a foot-gun: the same events can hit downstream systems again, faster than they can process, and one bad event can poison a consumer forever." },
+            { t: "table", headers: ["Problem", "Production pattern"], rows: [
+              ["Consumer lag grows", "Scale consumers, reduce per-message work, or slow producers before retention expires"],
+              ["Poison message retries forever", "Move to DLQ after bounded attempts with reason and payload pointer"],
+              ["Replay duplicates side effects", "Idempotent consumer keyed by event id or business key"],
+              ["Out-of-order updates", "Partition by entity id and apply version checks"],
+              ["Downstream cannot keep up", "Backpressure: pause consumption, reject writes, shed low-priority work or buffer with limits"]
+            ] },
+            { t: "note", variant: "key", html: "Replay safety is a design requirement, not an ops trick. If a consumer sends emails, charges cards or mutates state, it must dedupe before side effects." },
+            { t: "note", variant: "trap", html: "An unbounded queue hides overload until it becomes data loss or an outage. Bounded queues and explicit backpressure fail earlier, but they fail honestly." }
+          ]
+        },
+        {
+          id: "event-driven-reliability",
+          title: "Advanced queues & event-driven reliability",
+          summary: "Transactional outbox/inbox, CDC, DLQs, ordering and replay safety for production event systems.",
+          minutes: 9,
+          tags: ["messaging", "reliability", "cdc", "outbox"],
+          blocks: [
+            { t: "p", html: "Event-driven systems fail in the gaps between a database commit, a publish, a retry and a consumer side effect. The reliable design makes each gap explicit and recoverable." },
+            { t: "table", headers: ["Risk", "Production pattern"], rows: [
+              ["DB write succeeds but publish fails", "Transactional outbox: write business row and outbox row in the same transaction, then relay later"],
+              ["Consumer mutates twice after retry", "Inbox/dedup table keyed by message id or business id before side effects"],
+              ["Bad payload blocks progress", "Bounded retries, DLQ with failure reason, and a safe replay tool"],
+              ["Consumer falls behind", "Lag alerts on time-behind and offset-behind, plus autoscaling or load shedding"],
+              ["Order matters per entity", "Partition by entity id and keep one ordered consumer lane per partition"],
+              ["Need change stream from DB", "CDC reads the DB log and emits durable events without app-level dual writes"]
+            ] },
+            { t: "code", lang: "text", code:
+              "Request transaction:\n" +
+              "  update orders set status='paid'\n" +
+              "  insert into outbox(event_id, type, payload, status='new')\n" +
+              "  commit\n\n" +
+              "Relay:\n" +
+              "  read unsent outbox rows -> publish -> mark sent\n\n" +
+              "Consumer:\n" +
+              "  if inbox has event_id: skip\n" +
+              "  else record event_id, apply idempotent side effect, commit"
+            },
+            { t: "note", variant: "warn", html: "<strong>Effectively-once</strong> is a better phrase than exactly-once for most architectures. Brokers can help with transactions and dedupe, but the business effect is correct only when the database write, external side effect and consumer dedupe are designed together." },
+            { t: "note", variant: "tip", html: "Replay from a stream is powerful only if handlers are version-aware, idempotent and bounded. Before replaying a month of events, run a small window, watch lag, and disable side effects that should not repeat, such as emails." },
+            { t: "quiz", id: "hld-messaging" }
           ]
         },
         {
@@ -802,6 +964,40 @@ window.TRACKS.hld = {
             { t: "p", html: "In a distributed fleet, a per-server limiter is too loose (N servers ⇒ N× the limit). Centralize counters in a shared store like <strong>Redis</strong> (atomic increments / Lua scripts), usually at the <strong>API gateway</strong>. Identify clients by API key, user id, or IP — and return <code class='tok'>Retry-After</code> so good clients back off politely." },
             { t: "quiz", id: "hld-messaging" }
           ]
+        },
+        {
+          id: "api-design-real-clients",
+          title: "API design for real clients",
+          summary: "Mobile apps, webhooks, retries, deprecations and partial failures need more than clean endpoint names.",
+          minutes: 8,
+          tags: ["api", "clients", "reliability"],
+          blocks: [
+            { t: "p", html: "A real API is used by mobile apps on old versions, partners with retry loops, batch jobs, webhooks, SDKs and dashboards. Design the contract for imperfect networks and slow client upgrades." },
+            { t: "table", headers: ["Client problem", "API design answer"], rows: [
+              ["Large changing lists", "Cursor pagination with stable sort keys, not offset pagination"],
+              ["Retry after timeout", "Idempotency keys on unsafe writes and replay of the original response"],
+              ["Asynchronous results", "Webhooks with signed payloads, event ids, retries and delivery status"],
+              ["Quota exceeded", "Standard rate-limit headers: limit, remaining, reset and Retry-After"],
+              ["One item fails in a batch", "Partial-failure response with per-item status and a correlation id"],
+              ["Mobile screen needs many resources", "Mobile BFF shapes a compact response and hides service fan-out"],
+              ["Old clients break on new errors", "Stable error envelope with code, message, retryability and docs-free remediation text"]
+            ] },
+            { t: "code", lang: "text", code:
+              "GET /orders?limit=50&cursor=eyJvZmZzZXQiOi4uLn0\n" +
+              "-> { items: [...], next_cursor: '...', has_more: true }\n\n" +
+              "POST /payments\n" +
+              "Idempotency-Key: tenant_42:8f0c...\n" +
+              "-> same key + same request returns the same final response\n\n" +
+              "429 Too Many Requests\n" +
+              "RateLimit-Limit: 1000\n" +
+              "RateLimit-Remaining: 0\n" +
+              "RateLimit-Reset: 60\n" +
+              "Retry-After: 60"
+            },
+            { t: "note", variant: "key", html: "Deprecation is an observability problem. Keep telemetry by client id, SDK version and endpoint/field usage so you know who still depends on old behavior before you remove it." },
+            { t: "note", variant: "trap", html: "Do not make clients parse English error messages. Messages are for humans; machines need stable error codes, retryability, field pointers and request ids." },
+            { t: "quiz", id: "hld-messaging" }
+          ]
         }
       ]
     },
@@ -867,11 +1063,11 @@ window.TRACKS.hld = {
         {
           id: "availability",
           title: "Availability & the nines",
-          summary: "What 99.99% actually buys you, and the patterns that protect uptime: redundancy, failover, and circuit breakers.",
+          summary: "What the nines buy, why critical-path dependencies multiply risk, and which patterns keep failures contained.",
           minutes: 7,
           tags: ["reliability", "availability"],
           blocks: [
-            { t: "p", html: "<strong>Availability</strong> is the fraction of time a system is operational, usually quoted in 'nines'. Each extra nine is roughly 10× harder and costlier than the last." },
+            { t: "p", html: "<strong>Availability</strong> is the fraction of time a system can serve users. The headline number is only useful when tied to a user journey: checkout, login, search, stream start, or message send." },
             {
               t: "table",
               headers: ["Availability", "Nickname", "Downtime / year", "Downtime / day"],
@@ -883,19 +1079,169 @@ window.TRACKS.hld = {
               ]
             },
             { t: "note", variant: "key", html: "Availability multiplies across <em>dependencies in series</em>: if a request needs services each at 99.9%, three of them give 0.999³ ≈ 99.7%. Reduce the number of things on the critical path, and add redundancy so a component's failure isn't the request's failure." },
-            { t: "h", text: "Patterns that protect uptime" },
+            { t: "h", text: "Patterns that protect the user path" },
             {
               t: "ul", items: [
-                "<strong>Redundancy</strong> — no single point of failure; N+1 everything on the critical path.",
-                "<strong>Failover</strong> — a healthy standby takes over automatically (active-passive or active-active).",
-                "<strong>Health checks</strong> — detect sick nodes and pull them from rotation fast.",
-                "<strong>Circuit breaker</strong> — stop calling a failing dependency for a cooldown so you fail fast instead of piling up.",
-                "<strong>Bulkheads</strong> — isolate resources so one overloaded feature can't sink the whole ship.",
-                "<strong>Graceful degradation</strong> — drop to a cached or simpler response instead of erroring.",
-                "<strong>Retries with backoff + jitter</strong> — recover from blips without synchronized retry storms."
+                "<strong>Redundancy</strong> — remove single points of failure with N+1 capacity on critical components.",
+                "<strong>Failover</strong> — route to a healthy standby or peer without manual heroics.",
+                "<strong>Health checks</strong> — remove sick instances before users discover them.",
+                "<strong>Circuit breakers</strong> — fail fast while a dependency recovers.",
+                "<strong>Bulkheads</strong> — reserve separate pools so one feature cannot exhaust shared resources.",
+                "<strong>Graceful degradation</strong> — serve a cached, simpler, or partial response when the full answer is unsafe.",
+                "<strong>Retries with backoff and jitter</strong> — recover from blips without synchronized retry storms."
               ]
             },
             { t: "note", variant: "trap", html: "Naive retries are dangerous: when a service wobbles, every client retrying at once creates a <strong>retry storm</strong> that finishes it off. Always use <em>exponential backoff with jitter</em>, cap attempts, and pair retries with a circuit breaker." }
+          ]
+        },
+        {
+          id: "slo-error-budgets",
+          title: "SLOs & error budgets",
+          summary: "Turn reliability from vibes into an explicit contract: what users need, how you measure it, and when risk must slow down.",
+          minutes: 7,
+          tags: ["reliability", "sre", "slo"],
+          blocks: [
+            { t: "p", html: "<strong>Reliability is a product feature</strong>. To engineer it, name the user-visible behavior, measure it as an <strong>SLI</strong>, set the target as an <strong>SLO</strong>, and use the remaining error budget to govern launch risk." },
+            { t: "table", headers: ["Term", "Example"], rows: [
+              ["SLI", "99.95% of checkout requests return success within 500 ms"],
+              ["SLO", "Meet that SLI over a rolling 30-day window"],
+              ["SLA", "Customer contract, usually looser than the internal SLO"],
+              ["Error budget", "If the SLO is 99.95%, the system may fail 0.05% of valid requests"]
+            ] },
+            { t: "note", variant: "key", html: "A budget creates a release policy. If the service is healthy, spend budget on launches. If the budget is burning too fast, freeze risky changes and fix reliability first." },
+            { t: "note", variant: "trap", html: "Do not set SLOs at 100%. Perfect targets make every tiny blip a policy violation and leave no room for deploys, maintenance or honest trade-offs." }
+          ]
+        },
+        {
+          id: "multi-region-resilience",
+          title: "Multi-region resilience",
+          summary: "Designing across regions is a business-continuity choice with hard trade-offs in data, routing and operations.",
+          minutes: 8,
+          tags: ["reliability", "multi-region", "disaster-recovery"],
+          blocks: [
+            { t: "p", html: "A single region can fail from power, network, control-plane or human error. <strong>Multi-region</strong> designs reduce that blast radius, but they add latency, data-consistency choices and operational complexity." },
+            { t: "table", headers: ["Pattern", "How it behaves"], rows: [
+              ["Backup / restore", "Cheapest; recovery can take hours. Good for low RTO systems."],
+              ["Pilot light", "Core data replicated; small standby footprint scales up during disaster."],
+              ["Warm standby", "A smaller live stack runs continuously and can take traffic faster."],
+              ["Active-active", "Multiple regions serve traffic all the time; hardest because writes and conflicts cross regions."]
+            ] },
+            { t: "h", text: "The two numbers to ask for" },
+            { t: "ul", items: [
+              "<strong>RTO</strong> (recovery time objective): how long can the system be down?",
+              "<strong>RPO</strong> (recovery point objective): how much data can the business afford to lose?",
+              "Low RTO + low RPO usually means higher cost, synchronous replication, or complex conflict handling."
+            ] },
+            { t: "note", variant: "key", html: "Active-active is not automatically better. For money, inventory and uniqueness, cross-region writes may need a single writer, quorum, escrow or conflict-resolution rule. Pick the model from business correctness, not from ambition." }
+          ]
+        },
+        {
+          id: "cell-based-architecture",
+          title: "Cell-based architecture & shuffle sharding",
+          summary: "Shrink blast radius by routing tenants into isolated mini-stacks, then use shuffle sharding to keep noisy neighbors from sharing every dependency.",
+          minutes: 8,
+          tags: ["reliability", "fault-isolation", "multi-tenant"],
+          blocks: [
+            { t: "p", html: "A <strong>cell</strong> is a bounded serving slice: app tier, queues, caches and datastores for a tenant or resource cohort. The goal is simple: a bad deploy, noisy tenant or sick dependency should hurt a known slice, not everyone." },
+            { t: "widget", id: "cellrouter" },
+            { t: "h", text: "How requests find the right cell" },
+            { t: "code", lang: "text", code:
+              "request(tenant_id)\n" +
+              "  -> edge router reads tenant_id / resource_id\n" +
+              "  -> cell map: tenant_42 -> cell-c\n" +
+              "  -> route only to cell-c services and data\n\n" +
+              "Control plane: assigns tenants, stores routing map, manages migrations\n" +
+              "Data plane: serves traffic inside one cell"
+            },
+            { t: "ul", items: [
+              "<strong>Partition key</strong> follows the isolation boundary: tenant, account, region + tenant, or resource owner.",
+              "<strong>Per-cell capacity</strong> is capped; new cohorts move to a new cell instead of growing blast radius forever.",
+              "<strong>Cell-local dependencies</strong> keep queues, caches, workers and primary stores from becoming global failure points.",
+              "<strong>Routing changes</strong> are deterministic, cached at the edge, observable and reversible."
+            ] },
+            { t: "note", variant: "trap", html: "<strong>Avoid synchronous cross-cell calls on the request path.</strong> They turn isolated cells back into one coupled system: cell A now fails when cell B is slow. Prefer async events, replicated read models, or a shared control plane that is not in the hot path." },
+            { t: "h", text: "Shuffle sharding" },
+            { t: "p", html: "<strong>Shuffle sharding</strong> assigns each tenant a small deterministic subset of workers, queues or partitions. Tenants may overlap on one member, but rarely on the whole subset, so noisy-neighbor impact stays narrow." },
+            { t: "table", headers: ["Design", "Failure blast radius"], rows: [
+              ["Shared pool", "One bad deploy or noisy tenant can affect everyone."],
+              ["Cells", "Only tenants in the affected cell are hit."],
+              ["Shuffle-sharded workers", "A noisy tenant is isolated to its assigned subset; most tenants do not overlap fully."]
+            ] },
+            { t: "note", variant: "key", html: "Cells are a reliability pattern, not a free lunch. They add routing state, migration workflows, per-cell deploy orchestration, data rebalancing, capacity fragmentation and harder analytics across cells." },
+            { t: "quiz", id: "hld-fault-isolation" }
+          ]
+        },
+        {
+          id: "multi-tenancy-operations",
+          title: "Multi-tenancy operations",
+          summary: "Pooled, bridge and silo models are only the start. Operability comes from quotas, cost, noisy-neighbor controls and tenant-aware rollouts.",
+          minutes: 8,
+          tags: ["multi-tenant", "operations", "saas"],
+          blocks: [
+            { t: "p", html: "Multi-tenancy is not just a database layout. It is a promise that tenants share a platform without sharing failures, data, cost surprises or rollout risk." },
+            { t: "table", headers: ["Model", "Shape", "Operational trade-off"], rows: [
+              ["Pooled", "Many tenants share app, DB tables, cache and queues", "Lowest cost, highest need for hard tenant filters and quotas"],
+              ["Bridge", "Shared app tier, separate schema/database/queue per tenant or tier", "Good balance; more migrations and routing metadata"],
+              ["Silo", "Dedicated stack per tenant or cell", "Best isolation, highest cost and fleet-management overhead"]
+            ] },
+            { t: "ul", items: [
+              "<strong>Per-tenant quotas</strong> on requests, jobs, storage, vector chunks, cache memory and queue depth keep one tenant from consuming the platform.",
+              "<strong>Cost attribution</strong> tags every request, job and storage object with tenant id so expensive tenants are visible and billable.",
+              "<strong>Noisy-neighbor dashboards</strong> show top tenants by CPU, DB time, cache misses, queue lag, error rate and p99 latency.",
+              "<strong>Tenant-aware deploy waves</strong> roll out by low-risk tenants, then normal tenants, then high-value or regulated tenants after metrics stay clean.",
+              "<strong>Cross-cell analytics</strong> should read replicated/exported data, not synchronously query every serving cell on a user request."
+            ] },
+            { t: "note", variant: "key", html: "Tenant isolation must appear in every substrate: DB row filters or schemas, cache key prefixes, queue partitions, search/vector metadata filters, object storage paths, logs, metrics and traces." },
+            { t: "note", variant: "trap", html: "A tenant_id column is not isolation by itself. Every query builder, cache key, queue consumer, log sink and admin tool must carry the tenant boundary, or the weakest path leaks data." },
+            { t: "quiz", id: "hld-fault-isolation" }
+          ]
+        },
+        {
+          id: "circuit-breakers-backpressure",
+          title: "Circuit breakers, bulkheads & backpressure",
+          summary: "Prevent small dependency failures from turning into cascading outages.",
+          minutes: 7,
+          tags: ["reliability", "resilience", "backpressure"],
+          blocks: [
+            { t: "p", html: "Cascading failure starts when one slow dependency makes callers wait, callers hold threads, queues grow, retries multiply, and unrelated features run out of shared resources. Resilience patterns exist to <em>stop propagation</em>." },
+            { t: "table", headers: ["Pattern", "Protects against"], rows: [
+              ["Circuit breaker", "Repeated calls to a known-failing dependency; fail fast during cooldown"],
+              ["Bulkhead", "One feature consuming every thread, connection or worker"],
+              ["Timeout", "Requests waiting forever and tying up resources"],
+              ["Backpressure", "Producers overwhelming consumers; slow or reject work before queues explode"],
+              ["Load shedding", "Drop low-priority work to preserve the core user path"]
+            ] },
+            { t: "code", lang: "text", code:
+              "Dependency starts timing out\n" +
+              "-> clients retry without jitter\n" +
+              "-> dependency sees more traffic while sick\n" +
+              "-> caller thread pools fill\n" +
+              "-> unrelated requests fail too\n\n" +
+              "Fix: timeout + bounded retries + jitter + circuit breaker + bulkhead" },
+            { t: "note", variant: "tip", html: "Backpressure is a kindness. Returning 429 or queue-full early is better than accepting work you cannot finish and timing out every user later." }
+          ]
+        },
+        {
+          id: "load-shedding-degradation",
+          title: "Load shedding & graceful degradation",
+          summary: "When the system is overloaded, protect the core path by rejecting low-value work and serving simpler responses on purpose.",
+          minutes: 7,
+          tags: ["reliability", "resilience", "overload"],
+          blocks: [
+            { t: "p", html: "<strong>Load shedding</strong> is deliberate refusal: when capacity is exhausted, reject or defer work before queues grow so large that everything times out. It is better to fail 5% quickly than accept 100% and fail them all slowly." },
+            { t: "h", text: "Design the priority ladder before the incident" },
+            { t: "table", headers: ["Tier", "Examples", "Overload action"], rows: [
+              ["Critical", "login, checkout, payment confirm", "keep serving; reserve capacity"],
+              ["Important", "search, recommendations, notifications", "serve cached/stale/simple result"],
+              ["Optional", "analytics beacons, personalization, previews", "drop, sample, or queue for later"]
+            ] },
+            { t: "p", html: "<strong>Graceful degradation</strong> is the user-facing half: the page still loads, but with a simpler experience. Examples: hide recommendations, show cached inventory with a freshness label, disable expensive filters, sample metrics, or switch to a smaller model." },
+            { t: "compare",
+              bad: { title: "Circuit breaker", items: ["Triggered by a failing dependency", "Stops calls to that dependency for a cooldown", "Goal: fail fast and let the dependency recover"] },
+              good: { title: "Load shedding", items: ["Triggered by local overload or saturation", "Drops low-priority requests before accepting them", "Goal: preserve capacity for the core path"] }
+            },
+            { t: "note", variant: "key", html: "Make shedding explicit and observable: return <code class='tok'>429</code> or <code class='tok'>503</code> with retry hints for clients, tag degraded responses, and alert on sustained shedding because it means demand exceeds safe capacity." },
+            { t: "note", variant: "trap", html: "Do not shed blindly. Randomly dropping payment confirmations while keeping homepage experiments alive is backwards. Reserve bulkheads and budgets for the paths the business cannot afford to corrupt." }
           ]
         },
         {
@@ -948,6 +1294,36 @@ window.TRACKS.hld = {
           ]
         },
         {
+          id: "incident-response-readiness",
+          title: "Incident response & operational readiness",
+          summary: "Prepare before the pager fires: severity, roles, runbooks, rollback, comms and learning loops.",
+          minutes: 8,
+          tags: ["reliability", "incident-response", "operations"],
+          blocks: [
+            { t: "p", html: "Operational readiness is design work. If nobody knows who leads, what to roll back, which dashboard matters, or how to tell users, the system is not production-ready even if the happy path works." },
+            { t: "table", headers: ["Readiness item", "Why it matters"], rows: [
+              ["Severity levels", "Everyone shares the same language for urgency and customer impact"],
+              ["Incident roles", "Commander, comms, scribe and subject experts avoid chaos"],
+              ["Runbooks", "Common failures have tested diagnosis and rollback steps"],
+              ["Kill switches", "Feature flags, load shedding and queue pauses stop bleeding fast"],
+              ["Rollback plan", "Every deploy has a known revert path and data-migration strategy"],
+              ["Status comms", "Customers and support get honest updates without distracting responders"],
+              ["Post-incident review", "Blameless timeline, contributing factors and tracked follow-ups"]
+            ] },
+            { t: "code", lang: "text", code:
+              "Triage loop:\n" +
+              "  1. Declare severity and incident commander\n" +
+              "  2. Identify user impact from SLIs, not guesses\n" +
+              "  3. Mitigate first: rollback, disable feature, shed load, fail over\n" +
+              "  4. Communicate current impact and next update time\n" +
+              "  5. Preserve timeline, then fix root causes after service is stable"
+            },
+            { t: "note", variant: "key", html: "A good incident process optimizes for <strong>MTTD</strong> (detect), <strong>MTTA</strong> (acknowledge) and <strong>MTTR</strong> (recover). Root-cause perfection can wait until users are safe." },
+            { t: "note", variant: "trap", html: "Do not page on unactionable symptoms or vanity metrics. Alerts should have an owner, a runbook, a severity rule and a clear user-impact reason." },
+            { t: "quiz", id: "hld-reliability" }
+          ]
+        },
+        {
           id: "observability",
           title: "Observability: metrics, logs & traces",
           summary: "You can't operate what you can't see. The three pillars, the four golden signals, and why tracing is non-negotiable in microservices.",
@@ -986,6 +1362,178 @@ window.TRACKS.hld = {
             { t: "note", variant: "trap", html: "<strong>Alert on symptoms, not causes.</strong> Page a human when users are affected (error rate up, latency past the SLO), not on every CPU blip — noisy alerts train people to ignore the pager. Good alerts are actionable, rare, and tied to an SLO." },
             { t: "note", variant: "tip", html: "Emit <strong>structured logs</strong> (JSON, not free text) with the trace id, and prefer <strong>histograms over averages</strong> for latency — an average hides the p99 tail where your unhappiest users live." },
             { t: "quiz", id: "hld-reliability" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "production-readiness",
+      name: "Capacity, Cost & Launch Readiness",
+      icon: "gauge",
+      lessons: [
+        {
+          id: "capacity-planning",
+          title: "Capacity planning from users to boxes",
+          summary: "Turn users into QPS, peak load, app instances, database capacity, queue workers and cache memory before launch day.",
+          minutes: 10,
+          tags: ["capacity", "estimation", "launch"],
+          blocks: [
+            { t: "p", html: "Capacity planning is the bridge between a design diagram and a production plan. Start from user behavior, convert it to average QPS, multiply for peak, then allocate capacity across the app tier, database, cache, queue and any third-party dependency." },
+            { t: "widget", id: "capacitycalc" },
+            { t: "h", text: "The capacity chain" },
+            { t: "ol", items: [
+              "<strong>Users:</strong> monthly active users, daily active users, session length and actions per session.",
+              "<strong>Average QPS:</strong> daily actions / 86,400. Split reads, writes and expensive operations separately.",
+              "<strong>Peak QPS:</strong> average QPS x peak multiplier. Consumer apps often see 3x-10x depending on time-of-day and launch events.",
+              "<strong>App instances:</strong> peak QPS / safe per-instance QPS, then add N+1 or N+2 headroom.",
+              "<strong>Database:</strong> model read QPS, write QPS, index cost, connection limits, storage growth and replication lag.",
+              "<strong>Queues:</strong> arrival rate vs worker drain rate. Backlog growth is a capacity bug even if the API still returns 200.",
+              "<strong>Cache:</strong> working-set size, item size, hit ratio target, eviction risk and hot-key plan."
+            ] },
+            { t: "code", lang: "text", code:
+              "Example chain:\n" +
+              "  2M DAU x 20 actions/day          = 40M actions/day\n" +
+              "  40M / 86,400                     ~= 463 QPS average\n" +
+              "  peak factor 5x                   ~= 2,315 QPS peak\n" +
+              "  app instance safe load 300 QPS   ~= 8 instances\n" +
+              "  N+2 headroom                     ~= 10 instances\n\n" +
+              "Then split the load:\n" +
+              "  reads -> cache + read replicas\n" +
+              "  writes -> primary/shards + queue workers\n" +
+              "  async work -> queue drain rate >= arrival rate"
+            },
+            { t: "table", headers: ["Layer", "Capacity question", "Failure smell"], rows: [
+              ["App", "How many safe QPS per instance at p95 CPU < 60-70%?", "Autoscaler chases load but p99 keeps rising."],
+              ["Database", "Can primary writes, read replicas and connections handle peak?", "CPU is fine but lock waits, IO or connections saturate."],
+              ["Queue", "Can workers drain faster than producers enqueue?", "Backlog age rises during every peak and never fully recovers."],
+              ["Cache", "Is hot working set smaller than memory with room for churn?", "Hit ratio collapses after deploys or traffic spikes."],
+              ["Third party", "Do provider quotas cover peak and retries?", "Your fallback path fails because the dependency rate-limits first."]
+            ] },
+            { t: "note", variant: "key", html: "Capacity is not one number. Track at least <strong>traffic</strong>, <strong>latency</strong>, <strong>errors</strong> and <strong>saturation</strong> for every critical layer, then decide what runs out first." },
+            { t: "note", variant: "trap", html: "Do not size only for the happy path. Retries, cache misses, replays, migrations and failover all add load exactly when the system is already stressed." }
+          ]
+        },
+        {
+          id: "cost-modeling",
+          title: "Cost modeling and unit economics",
+          summary: "Estimate compute, storage, bandwidth, egress, API and LLM costs early enough to change the architecture.",
+          minutes: 9,
+          tags: ["cost", "capacity", "finops"],
+          blocks: [
+            { t: "p", html: "A scalable design that loses money per request is not production-ready. Cost modeling turns architecture into unit economics: what does one user, one upload, one generated answer or one checkout cost to serve?" },
+            { t: "h", text: "The cost buckets" },
+            { t: "table", headers: ["Bucket", "What to estimate", "Design lever"], rows: [
+              ["Compute", "Instance count x hours, CPU-heavy workers, GPU/model serving", "Right-size, autoscale, batch, use cheaper tiers off peak."],
+              ["Storage", "Raw bytes x replication x retention x indexes/backups", "Lifecycle cold data, compress, delete derived data that can be rebuilt."],
+              ["Bandwidth", "Bytes served to clients and between services/regions", "Cache at edge, compress, avoid chatty cross-region calls."],
+              ["Egress", "Data leaving a cloud/provider boundary", "Keep compute near data, avoid unnecessary multi-cloud hot paths."],
+              ["API calls", "Paid provider calls, retries, webhooks, payment/search/email quotas", "Cache, batch, dedupe and add circuit breakers."],
+              ["LLM usage", "Input tokens + output tokens + embeddings + reranking", "Token budgets, semantic cache, model router, smaller fallback model."]
+            ] },
+            { t: "code", lang: "text", code:
+              "Monthly cost sketch:\n" +
+              "  app compute      = instances * hourly_rate * 730\n" +
+              "  object storage   = stored_TB * storage_rate * replicas/overhead\n" +
+              "  bandwidth        = outbound_TB * egress_rate\n" +
+              "  provider APIs    = calls * price_per_call\n" +
+              "  LLM feature      = (input_tokens + output_tokens) * model_rate\n" +
+              "                   + embedding_tokens * embedding_rate\n" +
+              "                   + reranker_calls * reranker_rate\n\n" +
+              "Unit cost = monthly cost / successful business events"
+            },
+            { t: "h", text: "Architecture choices that move cost" },
+            { t: "ul", items: [
+              "<strong>Cache hit ratio</strong> often dominates read-heavy cost: a 95% hit ratio means the database sees only 1 in 20 reads.",
+              "<strong>Data retention</strong> changes storage math more than database choice. Five years of raw events can dwarf the serving system.",
+              "<strong>Cross-region calls</strong> cost twice: latency plus egress. Keep user-facing paths local where possible.",
+              "<strong>LLM token budgets</strong> are product requirements. Decide maximum context, answer length, model class and retry policy deliberately.",
+              "<strong>Retries</strong> are hidden spend. Exponential backoff and idempotency prevent retry storms from multiplying cost and load."
+            ] },
+            { t: "note", variant: "tip", html: "Add a <strong>cost per successful request</strong> dashboard next to latency and errors. It catches regressions like a prompt change that doubles tokens or a cache bug that shifts traffic to a paid API." }
+          ]
+        },
+        {
+          id: "launch-readiness",
+          title: "Launch readiness and release gates",
+          summary: "N+1/N+2 capacity, load tests, canaries, rollbacks, dashboards and error-budget freezes.",
+          minutes: 10,
+          tags: ["launch", "release", "sre", "reliability"],
+          blocks: [
+            { t: "p", html: "Launch readiness is a checklist with teeth. It asks: if traffic arrives tomorrow, what breaks first, who sees it, how do we stop the rollout, and what feature can we turn off to protect the core path?" },
+            { t: "h", text: "N+1 and N+2 headroom" },
+            { t: "p", html: "<strong>N</strong> is the capacity required for expected peak. <strong>N+1</strong> means the fleet still works if one instance, node or zone-sized slice is unavailable. <strong>N+2</strong> adds another failure or deploy buffer. The right choice depends on blast radius and recovery time, not a universal rule." },
+            { t: "compare",
+              bad: { title: "Capacity without headroom", items: ["Passes a happy-path load test at 100%", "Autoscaling starts only after saturation", "One node loss pushes the rest above safe CPU", "No room for deploy overlap or retries"] },
+              good: { title: "Launch-ready capacity", items: ["Peak traffic fits below safe utilization", "N+1 or N+2 survives common failures", "Queue drain rate exceeds arrival rate", "Canary and rollback tested before launch"] }
+            },
+            { t: "h", text: "Load-test plan" },
+            { t: "ol", items: [
+              "<strong>Baseline:</strong> expected peak traffic, realistic read/write mix, representative payload sizes and cache warm state.",
+              "<strong>Stress:</strong> increase load until the first bottleneck is obvious; document the failure mode.",
+              "<strong>Soak:</strong> run for hours to find leaks, connection churn, queue drift and slow compaction effects.",
+              "<strong>Failover:</strong> kill an app node, cache node, worker pool member and replica; confirm traffic drains and recovers.",
+              "<strong>Cold-start:</strong> validate behavior after cache flush, deploy restart or a new region/cell coming online."
+            ] },
+            { t: "h", text: "Release gates" },
+            { t: "table", headers: ["Gate", "Pass signal"], rows: [
+              ["Canary", "1% then 10% traffic holds SLOs, error rate and saturation within guardrails."],
+              ["Rollback", "One command or automated policy restores the previous version and data compatibility is preserved."],
+              ["Dashboards", "Golden signals, business counters, queue age, cache hit ratio, dependency errors and cost are visible."],
+              ["Alerts", "Page on user-impacting burn rate, not on noisy internals alone."],
+              ["Error-budget freeze", "If the service is already burning budget, freeze risky launches until reliability recovers."],
+              ["Runbook", "Known failure modes have owners, links to dashboards and first mitigation steps."]
+            ] },
+            { t: "note", variant: "key", html: "A canary is only as good as the signals that guard it. Measure p95/p99 latency, errors, saturation and business success rate for both canary and control." },
+            { t: "note", variant: "trap", html: "Rollback is a product feature. If schema changes, caches, clients or background jobs make rollback impossible, call that out before launch day and use expand/contract migrations." },
+            { t: "quiz", id: "hld-production-readiness" }
+          ]
+        },
+        {
+          id: "design-doc-adr-practice",
+          title: "Design docs and ADR interview practice",
+          summary: "Practice turning architecture choices into clear decisions, trade-offs, risks and follow-up experiments.",
+          minutes: 8,
+          tags: ["design-doc", "adr", "interview"],
+          blocks: [
+            { t: "p", html: "A strong design doc is not a diagram dump. It is a decision record: the problem, constraints, options considered, recommendation, consequences, rollout plan and open risks. Interviews reward the same structure because it shows judgment under ambiguity." },
+            { t: "h", text: "One-page design doc skeleton" },
+            { t: "table", headers: ["Section", "What it must answer"], rows: [
+              ["Context", "What problem are we solving, for whom, and why now?"],
+              ["Goals / non-goals", "What outcomes matter, and what is intentionally out of scope?"],
+              ["Scale and SLOs", "Users, QPS, data growth, latency, availability and cost targets."],
+              ["Options", "At least two credible designs with trade-offs, not one pre-decided answer."],
+              ["Decision", "Chosen approach and why it fits the constraints better."],
+              ["Risks", "Failure modes, security/privacy concerns, cost risks and migration hazards."],
+              ["Launch plan", "Phases, canary, rollback, dashboards, owners and success criteria."]
+            ] },
+            { t: "h", text: "ADR shape" },
+            { t: "code", lang: "text", code:
+              "ADR: Use a queue between checkout and ticket issuance\n\n" +
+              "Status: Accepted\n" +
+              "Context: Ticket issuance can spike and provider calls are slow.\n" +
+              "Decision: Checkout writes an order event; workers issue tickets asynchronously.\n" +
+              "Consequences:\n" +
+              "  + API latency is protected from provider slowness\n" +
+              "  + retries and idempotency are centralized in workers\n" +
+              "  - users may see 'pending' for a short period\n" +
+              "  - queue age becomes a launch-critical metric"
+            },
+            { t: "h", text: "Interview drill" },
+            { t: "ul", items: [
+              "After sketching the design, ask: <em>what are my top two risks?</em> Then deep-dive those, not every box.",
+              "When choosing between SQL, NoSQL, queue, cache or region strategy, name the losing option and why it lost.",
+              "End with a launch story: load test, canary, dashboards, rollback and what you would defer.",
+              "Use ADR language for trade-offs: <strong>because</strong>, <strong>therefore</strong>, <strong>consequence</strong>."
+            ] },
+            { t: "h", text: "Rubric: design doc / ADR practice" },
+            { t: "ul", items: [
+              "<strong>Problem framing:</strong> goals, non-goals, scale, SLOs and constraints are explicit before solution boxes appear.",
+              "<strong>Options:</strong> at least two credible alternatives are compared, including why the losing option lost.",
+              "<strong>Decision quality:</strong> the recommendation ties back to user value, correctness, cost, operability and team constraints.",
+              "<strong>Risk handling:</strong> failure modes, security/privacy concerns, migration hazards and open questions have owners or experiments.",
+              "<strong>Launch readiness:</strong> canary, rollback, dashboards, success criteria and follow-up ADRs are named."
+            ] },
+            { t: "note", variant: "tip", html: "In interviews, a concise decision log beats a perfect-looking diagram. The interviewer wants to see how you choose, not just what boxes you remember." }
           ]
         }
       ]
@@ -1051,6 +1599,33 @@ window.TRACKS.hld = {
             { t: "note", variant: "key", html: "Sagas demand <strong>idempotent</strong> steps and <strong>compensations</strong> (retries are inevitable — the Reliability module's idempotency keys apply here) and they expose intermediate states, so design for them: an order can be 'pending' before it's 'confirmed'. Halo famously scaled to 11.6M users on exactly this pattern." },
             { t: "note", variant: "tip", html: "Prefer a saga for cross-service business transactions; reserve 2PC for the rare case where you truly cannot tolerate any intermediate inconsistency and the participants are few and fast. Often the best fix is to <em>redraw service boundaries</em> so the transaction lives inside one service." },
             { t: "quiz", id: "hld-architecture" }
+          ]
+        },
+        {
+          id: "api-schema-evolution",
+          title: "API versioning & schema evolution",
+          summary: "Production systems live for years. Contracts must evolve without breaking old clients or corrupting event consumers.",
+          minutes: 8,
+          tags: ["architecture", "api", "schema-evolution"],
+          blocks: [
+            { t: "p", html: "The first version of an API is easy; the tenth is architecture. Mobile apps, partners, services and event consumers update on different schedules, so a contract change must be rolled out as a compatibility plan, not a surprise." },
+            { t: "table", headers: ["Change", "Compatibility"], rows: [
+              ["Add optional response field", "Usually safe; old clients ignore it"],
+              ["Remove or rename a field", "Breaking; keep old field during migration"],
+              ["Make optional field required", "Breaking for old writers"],
+              ["Add enum value", "Can break clients that assume exhaustive lists"],
+              ["Change type or meaning", "Breaking even if the field name stays the same"]
+            ] },
+            { t: "h", text: "Safe evolution pattern" },
+            { t: "ol", items: [
+              "<strong>Expand</strong>: add the new field, endpoint or event version while keeping the old one.",
+              "<strong>Dual-write / dual-read</strong>: support both shapes and measure old usage.",
+              "<strong>Migrate consumers</strong>: publish a deadline, SDK update and test fixtures.",
+              "<strong>Contract-test</strong>: producer changes must pass consumer expectations in CI.",
+              "<strong>Contract</strong>: remove the old shape only after usage is gone."
+            ] },
+            { t: "note", variant: "key", html: "For events, prefer versioned schemas with backward/forward compatibility checks. A broken event schema can take down many consumers that the producer team never talks to." },
+            { t: "note", variant: "trap", html: "Versioning is not a license to abandon old clients forever. Every version needs ownership, telemetry and an end-of-life path, or support cost grows without bound." }
           ]
         }
       ]
@@ -1165,6 +1740,77 @@ window.TRACKS.hld = {
           ]
         },
         {
+          id: "mobile-offline-sync",
+          title: "Case study: mobile offline-first sync",
+          summary: "Design a notes/tasks app that works on airplanes: local DB source of truth, operation log, delta sync, conflict handling and battery-aware scheduling.",
+          minutes: 12,
+          tags: ["case-study", "mobile", "offline-first", "sync"],
+          blocks: [
+            { t: "p", html: "Offline-first design starts with a product promise: users can read and edit when the network disappears. The client renders from its <strong>local database</strong>; the server is the shared convergence point, not a dependency for every button press." },
+            { t: "h", text: "Requirements and constraints" },
+            { t: "ul", items: [
+              "Create, edit, delete and search notes while offline; the UI must update immediately.",
+              "Sync when connectivity returns, across multiple devices for the same account.",
+              "Survive app kills, battery saver, flaky networks and duplicate retries.",
+              "Converge deterministically, preserve user intent where possible, and surface hard conflicts clearly."
+            ] },
+            { t: "h", text: "Client data model" },
+            { t: "table", headers: ["Local table", "Responsibility"], rows: [
+              ["<code>notes</code>", "Materialized local view rendered by the UI; includes version, deleted flag and last local edit time."],
+              ["<code>sync_operations</code>", "Append-only operation log / sync queue: create, update field, delete, attach file, reorder."],
+              ["<code>sync_checkpoint</code>", "Last server cursor pulled, last operation pushed, retry state and device id."],
+              ["<code>conflicts</code>", "Records that need field merge or user resolution, with both local and remote values."]
+            ] },
+            { t: "code", lang: "text", code:
+              "User edit -> write local note + append operation atomically\n" +
+              "UI      -> observes local DB, no network wait\n" +
+              "Pusher  -> sends pending operations in order, with idempotency keys\n" +
+              "Puller  -> fetches server deltas after checkpoint cursor\n" +
+              "Merger  -> applies remote changes, resolves or records conflicts\n" +
+              "Cleaner -> compacts acked operations and old tombstones"
+            },
+            { t: "h", text: "Push and pull delta sync" },
+            { t: "p", html: "The client pushes pending operations with a stable <code class='tok'>operation_id</code>, <code class='tok'>device_id</code>, entity id and base version. The server dedupes, validates authorization, applies the change, and returns the new version. Pull sync asks for deltas after cursor C for the scoped collection." },
+            { t: "ul", items: [
+              "<strong>Checkpoints</strong> make sync resumable: if the app dies after sending operation 105 but before saving the ack, retrying 105 is safe because the server dedupes it.",
+              "<strong>Retries</strong> use exponential backoff and jitter; permanent validation errors move the operation to a failed state for user-visible repair.",
+              "<strong>Crash recovery</strong> replays the local DB plus unacked operations. Never keep the only copy of pending edits in memory.",
+              "<strong>Partial sync</strong> scopes data by workspace, project, folder, time window or subscription so a phone does not pull an entire company history."
+            ] },
+            { t: "h", text: "Deletes, tombstones and attachments" },
+            { t: "p", html: "Deletes need <strong>tombstones</strong>: a lightweight record saying entity X was deleted at version V. Without tombstones, another device can resurrect a deleted note because it simply never hears about the delete. Tombstones are retained until every active device checkpoint has advanced beyond them, then compacted." },
+            { t: "note", variant: "tip", html: "Large attachments usually sync out-of-band: first create metadata and a content hash in the operation log, then upload/download bytes with resumable chunks. The note can show a pending attachment badge while bytes catch up." },
+            { t: "h", text: "Conflict resolution" },
+            { t: "table", headers: ["Strategy", "Use when", "Trade-off"], rows: [
+              ["Last-write-wins (LWW)", "Low-value fields such as color or collapsed/expanded state", "Simple, but can discard a real edit."],
+              ["Hybrid logical clock (HLC)", "You need causality-ish ordering across devices without trusting wall clocks alone", "More robust than timestamps, still not business intent."],
+              ["Field-level merge", "Different fields changed independently, such as title vs reminder date", "Requires per-field versions or patches."],
+              ["User resolution", "Two edits changed the same important text or amount", "Slower, but preserves trust for high-value data."],
+              ["CRDT-style data type", "Collaborative counters, sets or text-like structures with well-defined merge rules", "Powerful for the right shape, but not magic; product rules and storage cost still matter."]
+            ] },
+            { t: "note", variant: "key", html: "Phrase conflict policy in product language: 'a deleted task stays deleted unless the user explicitly restores it' is clearer than 'delete wins'. The implementation follows the policy." },
+            { t: "h", text: "Battery, bandwidth and scheduling" },
+            { t: "ul", items: [
+              "Run a short foreground sync after user edits or app resume, then batch background work.",
+              "Prefer Wi-Fi and charging for heavy pulls, media uploads and index rebuilds.",
+              "Use OS background task APIs instead of a tight polling loop; mobile platforms will throttle abusive sync.",
+              "Compress and page deltas; skip low-priority collections on metered or poor networks.",
+              "Expose sync status: saved locally, syncing, synced, conflict, failed."
+            ] },
+            { t: "h", text: "Rubric: offline sync design review" },
+            { t: "ul", items: [
+              "<strong>Local-first UX:</strong> UI reads from local state and every edit is durable before the network call.",
+              "<strong>Retry safety:</strong> operations have stable ids, idempotent server handling and crash recovery for stale in-flight work.",
+              "<strong>Delta discipline:</strong> pull is cursor-based, scoped, paged and protected by authorization filters.",
+              "<strong>Conflict policy:</strong> field merge, tombstones, LWW and user resolution are chosen by product value, not convenience.",
+              "<strong>Mobile constraints:</strong> sync respects battery, bandwidth, background limits and attachment chunking.",
+              "<strong>Trust boundary:</strong> the server validates versions, invariants and permissions before advancing shared state."
+            ] },
+            { t: "note", variant: "trap", html: "Do not make the server accept arbitrary client state as truth. Clients send operations; the server validates authorization, versions and invariants before advancing the shared record." },
+            { t: "quiz", id: "hld-offline-sync" }
+          ]
+        },
+        {
           id: "real-world-tour",
           title: "A tour of real-world architectures",
           summary: "How the giants actually scaled — the recurring patterns behind Netflix, Instagram, Uber, S3 and more, summarized.",
@@ -1273,7 +1919,111 @@ window.TRACKS.hld = {
                 "<strong>Behavioral rounds</strong> reward concrete STAR stories (Situation, Task, Action, Result) — prepare 4\u20135 that show ownership, conflict resolution, and measurable impact."
               ]
             },
-            { t: "note", variant: "key", html: "Every one of these designs is assembled from the primitives in this track — load balancers, caches, sharded databases, queues, CDNs, idempotency, and the CAP trade-off. Master the building blocks and the 'design X' prompts become exercises in <em>composition</em>, not recall." }
+            { t: "note", variant: "key", html: "Every one of these designs is assembled from the primitives in this track — load balancers, caches, sharded databases, queues, CDNs, idempotency, and the CAP trade-off. Master the building blocks and the 'design X' prompts become exercises in <em>composition</em>, not recall." },
+            { t: "note", variant: "tip", html: "For timed drills with compact outlines, use the new <a class='inline' href='#/interview'>Interview prompts</a> page. Treat each outline as a calibration aid, not a script to memorize." }
+          ]
+        },
+        {
+          id: "production-capstone",
+          title: "Capstone: design a production marketplace",
+          summary: "A full HLD drill: requirements, APIs, data model, consistency, scaling, failure modes, observability and LLD handoff.",
+          minutes: 14,
+          tags: ["case-study", "capstone", "production"],
+          blocks: [
+            { t: "p", html: "Brief: design a ticket marketplace for high-demand events. Users search events, join a waiting room during drops, reserve seats, pay, receive tickets and get notifications. The system must survive flash traffic and never double-sell a seat." },
+            { t: "h", text: "1 · Clarify the contract" },
+            { t: "ul", items: [
+              "Functional: search events, view seats, reserve for a short hold, pay, issue ticket, transfer/refund later.",
+              "Non-functional: no double booking, checkout p99 under the SLO, graceful degradation during drops, auditable payment flow.",
+              "Scale: read-heavy browsing, bursty writes at sale start, strict correctness around inventory and money."
+            ] },
+            { t: "h", text: "2 · Core architecture" },
+            { t: "code", lang: "text", code:
+              "Client -> CDN/WAF -> API Gateway -> Search/Browse service -> cache/search index\n" +
+              "                         -> Waiting-room service -> token bucket / queue\n" +
+              "                         -> Inventory service -> strongly consistent seat store\n" +
+              "                         -> Order service -> saga orchestrator\n" +
+              "                         -> Payment service -> provider + ledger\n" +
+              "                         -> Notification service -> queue + workers" },
+            { t: "h", text: "3 · Deep dives interviewers expect" },
+            { t: "table", headers: ["Concern", "Design answer"], rows: [
+              ["Double-sell prevention", "Seat reservation uses conditional write or transaction on seat id with hold expiry."],
+              ["Flash crowd", "Waiting room admits users in controlled batches; browse path remains cached and degraded if needed."],
+              ["Payment retries", "Idempotency key per checkout and double-entry ledger for money movement."],
+              ["Cross-service workflow", "Saga: reserve seat -> authorize payment -> confirm order; compensate by releasing hold or refunding."],
+              ["Search freshness", "Event/search index is eventually consistent; checkout always verifies against inventory source of truth."],
+              ["Observability", "Trace checkout end to end; alert on SLO burn, payment failures, reservation conflicts and queue depth."]
+            ] },
+            { t: "h", text: "4 · LLD handoff" },
+            { t: "ul", items: [
+              "Model <strong>Seat</strong>, <strong>Hold</strong>, <strong>Order</strong>, <strong>PaymentAttempt</strong> and <strong>Ticket</strong> with explicit state machines.",
+              "Make commands idempotent: <code class='tok'>ReserveSeat(commandId)</code>, <code class='tok'>ConfirmPayment(idempotencyKey)</code>.",
+              "Use interfaces for payment provider, notification sender and clock so tests can simulate retries, expiry and provider failures.",
+              "Write invariants first: one confirmed ticket per seat per event; expired holds cannot confirm; refunds append ledger entries, never edit history."
+            ] },
+            { t: "h", text: "Rubric: production marketplace" },
+            { t: "ul", items: [
+              "<strong>Correctness:</strong> no double-sell path, reservation expiry is enforced, and payment/order/ticket states are auditable.",
+              "<strong>Scale:</strong> browse traffic is cacheable, drop traffic is admitted through a waiting room, and writes protect the inventory source of truth.",
+              "<strong>Reliability:</strong> retries are idempotent, the saga has compensations, and queues have DLQ/replay plans.",
+              "<strong>Operations:</strong> launch has capacity math, canary signals, dashboards, runbooks and rollback steps.",
+              "<strong>LLD handoff:</strong> entities, commands, state machines and invariants are clear enough for implementation."
+            ] },
+            { t: "note", variant: "key", html: "The senior answer separates <strong>browsing</strong> from <strong>booking</strong>. Browsing can be cached and eventually consistent; booking needs strong consistency, idempotency and auditability." },
+            { t: "note", variant: "tip", html: "Use this capstone as a template: every serious design needs a source of truth, hot-path scaling plan, failure-mode story, observability plan and clear LLD invariants." },
+            { t: "note", variant: "key", html: "After you work it once, compare against the compact <a class='inline' href='#/scenarios/ticket-marketplace-flash-sale'>ticket marketplace scenario outline</a> and grade yourself with the <a class='inline' href='#/rubrics'>rubric bands</a>." }
+          ]
+        },
+        {
+          id: "saas-reliability-review",
+          title: "Capstone: multi-tenant SaaS reliability review",
+          summary: "Start with a shared monolith, then evolve toward cells while managing routing, migration, deployment waves and cross-tenant analytics.",
+          minutes: 10,
+          tags: ["case-study", "capstone", "multi-tenant", "reliability"],
+          blocks: [
+            { t: "p", html: "Brief: a B2B SaaS product started as a shared monolith with one app fleet and one database. A few large tenants now create noisy-neighbor incidents, deploys affect everyone, and enterprise customers want stronger isolation. Review the reliability plan." },
+            { t: "h", text: "1 · Current state" },
+            { t: "ul", items: [
+              "One shared app tier, one shared primary database, one shared queue fleet.",
+              "Tenant id exists in most tables but is not always the leading index key.",
+              "Deploys are global: a bad release affects every tenant at once.",
+              "Analytics queries run against the same operational data model."
+            ] },
+            { t: "h", text: "2 · Evolve toward cells" },
+            { t: "code", lang: "text", code:
+              "Phase 0: shared monolith\n" +
+              "Phase 1: tenant_id as first-class partition key + per-tenant limits\n" +
+              "Phase 2: split queues/caches/workers by tenant cohort\n" +
+              "Phase 3: route selected tenants to isolated cells\n" +
+              "Phase 4: many cells + controlled migrations + cell-aware deploys"
+            },
+            { t: "table", headers: ["Concern", "Review question"], rows: [
+              ["Partition key", "Is tenant_id/account_id present in every hot table, event and cache key that must be isolated?"],
+              ["Migration", "Can a tenant be copied, dual-written, verified, cut over, and rolled back without downtime?"],
+              ["Routing", "Does the edge router resolve tenant -> cell before touching cell-local services?"],
+              ["Deployment waves", "Can we deploy to one empty/canary cell, then a small cell, then larger cells, watching SLOs each wave?"],
+              ["Noisy neighbor", "Are CPU, queue depth, DB pools, rate limits and background jobs budgeted per tenant or per cell?"],
+              ["Analytics", "How do we query across cells without hammering production stores or breaking tenant isolation?"]
+            ] },
+            { t: "h", text: "3 · Migration shape" },
+            { t: "ol", items: [
+              "<strong>Make tenant boundaries explicit</strong>: schema indexes, cache keys, queue partitioning and logs all carry tenant id.",
+              "<strong>Build the routing control plane</strong>: source of truth for tenant -> cell with audit trail and fast edge cache.",
+              "<strong>Move low-risk tenants first</strong>: small tenants, internal tenants, then one enterprise tenant with a rollback plan.",
+              "<strong>Deploy in waves</strong>: empty cell -> beta cell -> 1% tenants -> more cells; abort on error-budget burn.",
+              "<strong>Export analytics events</strong>: stream cell-local events into a warehouse/lake so cross-cell reporting is off the hot path."
+            ] },
+            { t: "h", text: "Rubric: SaaS reliability review" },
+            { t: "ul", items: [
+              "<strong>Isolation:</strong> tenant boundaries exist in data, cache, queues, search, logs, metrics and admin tools.",
+              "<strong>Blast radius:</strong> cells or cohorts limit noisy tenants, bad deploys and dependency failures to a known slice.",
+              "<strong>Migration safety:</strong> tenant moves use copy, replay, verification, cutover, rollback and audit trails.",
+              "<strong>Rollout control:</strong> deploy waves start with low-risk cohorts and stop on SLO/error-budget burn.",
+              "<strong>Analytics plan:</strong> cross-cell reporting uses an exported data plane, not synchronous production-cell queries."
+            ] },
+            { t: "note", variant: "key", html: "The cell target is not 'microservices everywhere'. It is <strong>bounded blast radius</strong>: a bad deploy, hot tenant or sick dependency should affect a known slice of tenants, with routing and migration tools mature enough to operate calmly." },
+            { t: "note", variant: "trap", html: "Analytics gets harder after cells. Cross-cell joins, global dashboards and support tools need a separate data plane; do not solve that by letting analysts query every production cell directly." },
+            { t: "note", variant: "tip", html: "Use the <a class='inline' href='#/scenarios/multi-tenant-saas-isolation'>multi-tenant SaaS isolation outline</a> as a self-review checklist for tenant boundaries, blast radius, migration safety and analytics." }
           ]
         }
       ]
@@ -1301,11 +2051,11 @@ window.TRACKS.hld = {
         {
           id: "rag-vector",
           title: "RAG & vector databases",
-          summary: "Ground a model in your own data by retrieving relevant chunks at query time — the antidote to hallucination.",
+          summary: "Ground a model in your own data by retrieving relevant chunks at query time — useful context, not a magic safety layer.",
           minutes: 7,
           tags: ["ai", "rag", "vector-db"],
           blocks: [
-            { t: "p", html: "<strong>Retrieval-Augmented Generation (RAG)</strong> fixes the LLM's two big gaps — it doesn't know your private data and it can confidently make things up. The idea: at query time, <em>retrieve</em> the most relevant snippets from your knowledge base and stuff them into the prompt as grounding, so the model answers from facts you supplied." },
+            { t: "p", html: "<strong>Retrieval-Augmented Generation (RAG)</strong> helps an LLM use private or fast-changing data by retrieving relevant snippets at query time and adding them to the prompt as context. It improves grounding when retrieval is good, but it does not eliminate hallucinations or prompt-injection risk." },
             { t: "code", lang: "text", code:
               "Indexing (offline):  docs ─► chunk ─► embed ─► store vectors\n\n" +
               "Query (online):\n" +
@@ -1314,6 +2064,121 @@ window.TRACKS.hld = {
             },
             { t: "p", html: "A <strong>vector database</strong> (Pinecone, Weaviate, pgvector, Milvus) stores each chunk as an <em>embedding</em> — a high-dimensional vector — and finds the nearest ones to a query vector using approximate nearest-neighbor search. It's the retrieval engine RAG runs on." },
             { t: "note", variant: "key", html: "RAG quality lives or dies on <strong>retrieval</strong>, not the model. Chunking strategy, embedding choice, top-k, and re-ranking matter more than swapping the LLM. Garbage retrieved → garbage generated." },
+          ]
+        },
+        {
+          id: "production-rag-system",
+          title: "Production RAG system design",
+          summary: "A shippable RAG system is retrieval, ranking, guardrails, evaluation, tracing and tenant isolation — not just a vector database call.",
+          minutes: 9,
+          tags: ["ai", "rag", "production", "evaluation"],
+          blocks: [
+            { t: "p", html: "A production RAG answer path is a search pipeline plus a generation step: normalize the query, retrieve candidates, enforce authorization and metadata filters, rerank evidence, build the prompt, call the model, check the response, and keep a trace." },
+            { t: "code", lang: "text", code:
+              "query -> rewrite/normalize\n" +
+              "      -> hybrid retrieval: vector top-k + keyword/BM25\n" +
+              "      -> filters: tenant, ACL, freshness, doc type\n" +
+              "      -> reranker picks the best evidence\n" +
+              "      -> prompt builder adds citations + instructions\n" +
+              "      -> LLM -> guardrails -> answer + trace"
+            },
+            { t: "h", text: "Design choices that matter" },
+            { t: "table", headers: ["Concern", "Production answer"], rows: [
+              ["Hybrid retrieval", "Combine vector similarity with lexical search so exact terms, ids and rare names are not lost."],
+              ["Filters", "Apply tenant, ACL, region, freshness and document-type filters before prompt construction."],
+              ["Reranking", "Use a cross-encoder or lightweight ranker to reorder the top candidates for relevance."],
+              ["Evals", "Keep a golden eval set of representative questions, expected evidence and quality rubrics."],
+              ["Traces", "Record retrieved chunk ids, scores, filters, prompt version, model, latency and cost."],
+              ["Cost/latency", "Tune top-k, chunk size, cache hits, model choice and streaming; every token has price and delay."],
+              ["Guardrails", "Moderate unsafe requests, strip sensitive data, constrain tool access and require citations where the UX promises them."],
+              ["Tenant isolation", "Separate namespaces or enforce hard filters so one tenant's documents never appear in another tenant's context."]
+            ] },
+            { t: "note", variant: "trap", html: "Do not market RAG as a cure for hallucination or prompt injection. Retrieved context can be irrelevant, stale, malicious or incomplete; the system still needs evals, monitoring, source attribution and safety controls." },
+            { t: "note", variant: "key", html: "Debug RAG like search first. For a bad answer, ask whether the right evidence was indexed, retrieved, filtered, ranked, fit into the prompt and used faithfully." }
+          ]
+        },
+        {
+          id: "rag-failure-modes-llmops",
+          title: "Production RAG failure modes and LLMOps",
+          summary: "Separate ingestion from online retrieval, evaluate quality continuously, and design fallbacks for stale indexes, bad retrieval, injection, outages and rate limits.",
+          minutes: 11,
+          tags: ["ai", "rag", "llmops", "failure-modes", "production"],
+          blocks: [
+            { t: "p", html: "Production RAG has two paths that meet at the index: <strong>ingestion</strong> turns documents into searchable chunks; the <strong>online path</strong> retrieves evidence and asks the model to answer. Observe them separately or every failure becomes 'the LLM is wrong'." },
+            { t: "code", lang: "text", code:
+              "Ingestion path (offline / async):\n" +
+              "  source docs -> parse -> chunk -> embed -> index -> freshness checks\n\n" +
+              "Online query path (request time):\n" +
+              "  user query -> rewrite -> hybrid retrieve -> metadata/ACL filters\n" +
+              "             -> rerank -> prompt build -> model -> safety checks\n" +
+              "             -> answer with citations + trace"
+            },
+            { t: "h", text: "Retrieval quality controls" },
+            { t: "table", headers: ["Control", "Why it matters"], rows: [
+              ["Chunking", "Too small loses context; too large wastes tokens and hides the exact evidence."],
+              ["Embedding refresh", "Docs, chunkers and embedding models change; stale vectors silently degrade recall."],
+              ["Hybrid retrieval", "Vector search handles meaning; keyword/BM25 preserves exact ids, names and rare terms."],
+              ["Metadata filters", "Tenant, ACL, product, region, date and doc-type filters prevent wrong or unauthorized context."],
+              ["Reranking", "A stronger ranking pass helps the best evidence survive before prompt truncation."],
+              ["Golden eval set", "Representative questions with expected evidence catch regressions before users do."]
+            ] },
+            { t: "h", text: "Failure modes to design for" },
+            { t: "table", headers: ["Failure", "Symptom", "Mitigation"], rows: [
+              ["Stale index", "Answer ignores a recent policy or release note.", "Freshness SLO, index lag dashboard, incremental reindex and stale-data warning."],
+              ["Bad retrieval", "Model answers confidently from irrelevant chunks.", "Trace chunk ids/scores, hybrid search, reranker, eval cases for hard queries."],
+              ["Prompt injection in docs", "Retrieved text tries to override system instructions or exfiltrate data.", "Treat retrieved docs as untrusted data, isolate instructions, quote context, filter unsafe content and limit tool authority."],
+              ["Vector store outage", "Retrieval times out or returns empty results.", "Timeout budget, keyword fallback, cached answers for safe FAQs, graceful 'sources unavailable' response."],
+              ["Provider rate limit", "LLM calls fail during peak or retry storms.", "Model router, smaller fallback model, backoff, queue low-priority work, token budgets."],
+              ["Context overflow", "Good evidence is retrieved but dropped from the prompt.", "Rerank, dedupe chunks, summarize long docs and enforce per-section token budgets."],
+              ["Unauthorized context", "Tenant A's document appears in Tenant B's prompt.", "Hard namespace separation or mandatory ACL filters before prompt construction."]
+            ] },
+            { t: "note", variant: "trap", html: "<strong>RAG reduces uncertainty only when retrieval is good.</strong> It does not prove truth, erase hallucinations or neutralize prompt injection. The system still needs source attribution, safety checks, evals and human escalation for high-risk answers." },
+            { t: "h", text: "LLMOps operating loop" },
+            { t: "ol", items: [
+              "<strong>Version everything:</strong> prompt, chunker, embedding model, retriever config, reranker and generation model.",
+              "<strong>Trace every answer:</strong> query, user/tenant scope, retrieved chunk ids, scores, filters, prompt version, model, token count, latency, cost and safety outcome.",
+              "<strong>Evaluate continuously:</strong> run a golden set for faithfulness, relevance, citation support and safety before each rollout.",
+              "<strong>Route deliberately:</strong> use a model router for cheap/simple vs hard/high-risk queries, with fallback when a provider is slow or unavailable.",
+              "<strong>Cache safely:</strong> semantic cache repeated low-risk answers, but include tenant, permissions, freshness and prompt/model version in the cache key.",
+              "<strong>Budget tokens:</strong> reserve tokens for instructions, evidence, answer and tool outputs so one long document cannot crowd out everything else."
+            ] },
+            { t: "table", headers: ["Metric", "Question it answers"], rows: [
+              ["Faithfulness", "Is the answer supported by the retrieved evidence?"],
+              ["Relevance", "Did retrieval return evidence that actually answers the question?"],
+              ["Safety", "Did the system refuse or constrain unsafe, private or policy-violating requests?"],
+              ["Grounded citation rate", "When the UI promises sources, does each claim point to usable evidence?"],
+              ["Cost per answer", "Did a prompt/model/router change make the feature uneconomical?"],
+              ["Index freshness", "How old is the newest searchable representation of each source?"]
+            ] },
+            { t: "note", variant: "key", html: "Use the stage-by-stage checklist: <strong>indexed?</strong> -> <strong>retrieved?</strong> -> <strong>filtered?</strong> -> <strong>ranked?</strong> -> <strong>fit in prompt?</strong> -> <strong>used faithfully?</strong> It turns a vague report into an owner and a fix." },
+            { t: "quiz", id: "hld-rag-llmops" }
+          ]
+        },
+        {
+          id: "search-ranking-recommendations",
+          title: "Search, ranking & recommendations",
+          summary: "Retrieval finds candidates; ranking orders them; recommendations personalize the next best items.",
+          minutes: 8,
+          tags: ["search", "ranking", "recommendations", "ai"],
+          blocks: [
+            { t: "p", html: "Search systems are usually a pipeline, not one query. You retrieve a broad candidate set cheaply, rank the best items with richer signals, then evaluate whether users actually found value." },
+            { t: "code", lang: "text", code:
+              "query/user context\n" +
+              "  -> candidate retrieval: inverted index, vector ANN, graph neighbors, popularity\n" +
+              "  -> filters: tenant, ACL, freshness, inventory, language\n" +
+              "  -> ranking: lexical score + semantic score + business/user signals\n" +
+              "  -> diversify, dedupe, paginate, log impressions and clicks"
+            },
+            { t: "table", headers: ["Layer", "Common choices"], rows: [
+              ["Candidate retrieval", "BM25/inverted index, vector similarity, collaborative filtering, graph expansion"],
+              ["Ranking signals", "Text match, embedding score, recency, popularity, user affinity, quality, availability"],
+              ["Recommendation patterns", "Similar items, users-who-liked-X, trending, personalized feed, cold-start fallbacks"],
+              ["Metrics", "Offline relevance labels, click-through, conversion, dwell time, diversity, latency"],
+              ["Safety", "Tenant/ACL filters before ranking, bias checks, spam controls, explainable fallbacks"]
+            ] },
+            { t: "note", variant: "key", html: "Ranking is product logic. The highest cosine similarity is not always the best result; freshness, authority, diversity, business rules and user intent all shape the final order." },
+            { t: "note", variant: "trap", html: "Do not let personalization bypass access control. Authorization and tenant filters must happen before candidates enter the prompt, ranking model or recommendation feed." },
+            { t: "quiz", id: "hld-ai" }
           ]
         },
         {
@@ -1391,6 +2256,37 @@ window.TRACKS.hld = {
               good: { title: "JWT (stateless tokens)", items: ["Signed token carries the claims; server stores nothing", "Scales effortlessly — any node can verify", "✗ Hard to revoke before expiry; keep them short-lived + refresh"] }
             },
             { t: "note", variant: "warn", html: "<strong>Never store passwords in plaintext or with fast hashes.</strong> Use a slow, salted password hash (bcrypt, scrypt, Argon2) so a database leak doesn't hand attackers everyone's credentials. The salt defeats rainbow tables; the slowness defeats brute force." },
+          ]
+        },
+        {
+          id: "security-threat-modeling",
+          title: "Security threat modeling for HLD",
+          summary: "Design auth, tenant isolation, abuse controls, secrets and RAG safety as first-class boxes in the architecture.",
+          minutes: 10,
+          tags: ["security", "threat-modeling", "multi-tenant", "rag"],
+          blocks: [
+            { t: "p", html: "Threat modeling asks: what are we protecting, who can attack it, where are the trust boundaries, and what controls make abuse hard? In HLD, draw security as boxes and flows, not as a footnote." },
+            { t: "table", headers: ["Threat area", "HLD controls to name"], rows: [
+              ["Authentication", "MFA for sensitive users, secure password hashing, session rotation, device/risk signals"],
+              ["Authorization", "Resource-scoped checks on every request; tenant + resource id enforced in queries"],
+              ["Tenant isolation", "DB row/schema boundaries, cache key prefixes, queue partitions, vector metadata filters, log redaction"],
+              ["API abuse", "Rate limits, quotas, bot/fraud rules, idempotency, anomaly alerts and abuse playbooks"],
+              ["Secrets and TLS", "Secrets manager, rotation, short-lived credentials, TLS everywhere, certificate lifecycle"],
+              ["Sessions and JWTs", "HttpOnly/Secure/SameSite cookies, short JWT TTLs, refresh-token rotation and revocation"],
+              ["RAG-specific risks", "Prompt injection, poisoned documents, cross-tenant retrieval, unsafe tool calls and citation spoofing"]
+            ] },
+            { t: "h", text: "Resource-scoped authorization" },
+            { t: "p", html: "The authorization check must bind <strong>user, tenant, action and resource</strong>. Avoid designs where the app fetches by raw id and checks later; prefer scoped reads like <code class='tok'>tenant_id + resource_id</code> at the data layer, plus policy checks at service boundaries." },
+            { t: "ul", items: [
+              "<strong>DB</strong>: include tenant/resource predicates in every query and constrain admin tools the same way.",
+              "<strong>Cache</strong>: prefix keys by tenant and never cache an authorization-dependent response under a global key.",
+              "<strong>Queues</strong>: carry tenant id, trace id and authorization context; consumers re-check before side effects.",
+              "<strong>Vector/search</strong>: apply tenant and ACL filters before ranking or prompt construction.",
+              "<strong>Logs</strong>: keep correlation ids, redact secrets/PII, and avoid raw prompts or tokens unless explicitly approved."
+            ] },
+            { t: "note", variant: "key", html: "For RAG, the most dangerous bug is retrieval crossing a permission boundary. Treat documents as protected resources: index ACL metadata, filter before top-k reaches the model, and test with swapped-tenant prompts." },
+            { t: "note", variant: "trap", html: "A signed JWT proves claims were issued; it does not prove the user may access a specific invoice, document or tenant. Authorization is a fresh resource decision, not a token-parsing exercise." },
+            { t: "quiz", id: "hld-protocols" }
           ]
         },
         {

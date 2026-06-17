@@ -266,6 +266,95 @@ window.TRACKS.defense = {
           ]
         },
         {
+          id: "cyber-resilience-recovery",
+          title: "Cyber resilience & recovery",
+          summary: "Recovery is designed before the outage. RTO, RPO, backups and communications decide whether an incident becomes a business crisis.",
+          minutes: 9,
+          tags: ["resilience", "recovery", "ransomware"],
+          blocks: [
+            { t: "p", html: "<strong>Cyber resilience</strong> asks a blunt question: when security fails, can the organization keep critical functions running and recover cleanly? Prevention matters, but recovery planning decides how much damage becomes permanent." },
+            { t: "h", text: "BIA, RTO and RPO" },
+            {
+              t: "table",
+              headers: ["Term", "Meaning", "Example decision"],
+              rows: [
+                ["BIA", "Business Impact Analysis: which processes matter most and what downtime costs", "Payroll can pause longer than emergency dispatch"],
+                ["RTO", "Recovery Time Objective: how quickly a system must return", "Customer login back within 4 hours"],
+                ["RPO", "Recovery Point Objective: how much data loss is tolerable", "No more than 15 minutes of orders lost"],
+                ["Runbook", "The tested steps, owners and dependencies for recovery", "Restore database, validate app, reopen traffic"]
+              ]
+            },
+            { t: "h", text: "Backups that survive ransomware" },
+            {
+              t: "ul", items: [
+                "<strong>Immutable or offline copies</strong> stop attackers from encrypting or deleting every backup.",
+                "Separate backup credentials from production admins; a domain admin compromise should not own recovery.",
+                "Test restores on a schedule and measure whether they meet the RTO and RPO.",
+                "Keep clean build media, infrastructure templates and key material available for a rebuild."
+              ]
+            },
+            { t: "h", text: "Ransomware decision flow" },
+            {
+              t: "ol", items: [
+                "<strong>Stabilize</strong>: isolate affected systems, preserve evidence and protect backups.",
+                "<strong>Assess</strong>: determine business impact, data exposure, restore options and legal obligations.",
+                "<strong>Decide</strong>: leadership, legal, security and business owners choose a path using pre-agreed criteria.",
+                "<strong>Recover</strong>: rebuild from trusted sources, restore clean data, rotate credentials and monitor for reinfection.",
+                "<strong>Communicate</strong>: use crisis channels that do not depend on compromised email or chat."
+              ]
+            },
+            { t: "note", variant: "key", html: "<strong>Restore testing is the control.</strong> A backup that has never been restored is only a hope. Practice proves the data, credentials, runbook, staffing and dependencies actually work together." },
+            { t: "note", variant: "tip", html: "Crisis communications should be drafted and rehearsed before the incident: who informs employees, customers, regulators, partners and executives, and what channel is trusted if normal collaboration tools are down." },
+            { t: "quiz", id: "defense-resilience" }
+          ]
+        },
+        {
+          id: "edge-kev-triage",
+          title: "Edge devices & KEV triage",
+          summary: "Internet-facing appliances are high-value targets. Triage them by exposure, active exploitation, and recovery impact.",
+          minutes: 7,
+          tags: ["edge", "kev", "triage", "operations"],
+          blocks: [
+            { t: "p", html: "<strong>Edge devices</strong> sit where attackers can reach them: VPN concentrators, firewalls, identity proxies, mail gateways, routers, and remote-management appliances. They often have broad network reach, hold sensitive config, and lag behind normal endpoint tooling." },
+            { t: "note", variant: "warn", html: "This is defensive triage only. Do not reproduce exploit steps or test live appliances outside an authorized change window. The defender's job is to identify exposure, patch, contain, and verify." },
+            { t: "h", text: "Why edge bugs get urgent" },
+            {
+              t: "ul", items: [
+                "They are usually <strong>internet-facing</strong>, so attackers can scan them at scale.",
+                "They may sit <strong>before</strong> normal authentication, logging, or endpoint controls.",
+                "A compromise can expose VPN sessions, device config, routing, or credentials.",
+                "Patching can be operationally sensitive, so teams delay it unless triage is crisp."
+              ]
+            },
+            { t: "h", text: "KEV-driven triage loop" },
+            {
+              t: "ol", items: [
+                "<strong>Inventory</strong> every edge device, firmware version, owner, internet exposure, and management path.",
+                "<strong>Match</strong> advisories against CISA KEV, vendor notices, asset criticality, and whether the device is reachable from the internet.",
+                "<strong>Prioritize</strong> known-exploited plus exposed devices first, even if another finding has a higher theoretical score.",
+                "<strong>Contain</strong> by disabling exposed management, restricting source IPs, rotating device-held secrets, and watching for suspicious sessions.",
+                "<strong>Verify</strong> patch level, clean configuration, logs, and backup/restore readiness after remediation."
+              ]
+            },
+            { t: "table",
+              headers: ["Signal", "Triage meaning"],
+              rows: [
+                ["KEV listed", "Treat as active exploitation risk, not a theoretical bug"],
+                ["Internet exposed", "Patch or mitigate before internal-only assets"],
+                ["Pre-auth path", "Higher urgency because credentials may not be required"],
+                ["No EDR/log coverage", "Add network and appliance logging before and after patching"]
+              ]
+            },
+            { t: "note", variant: "key", html: "Edge-device response is part patching and part incident response. If an exposed appliance had a known-exploited flaw, assume credentials and sessions may be suspect until logs, config, and secrets are reviewed." },
+            { t: "stat", items: [
+              { v: "Expose", k: "is it reachable?" },
+              { v: "KEV", k: "is it exploited?" },
+              { v: "Contain", k: "limit management paths" },
+              { v: "Verify", k: "patch, logs, secrets" }
+            ] }
+          ]
+        },
+        {
           id: "security-operations",
           title: "Security operations & culture",
           summary: "Tools don't defend organizations — people and process running continuously do.",

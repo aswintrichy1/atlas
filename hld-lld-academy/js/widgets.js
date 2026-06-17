@@ -522,5 +522,311 @@
     paint();
   };
 
+  /* ---------------------------------------------------------------
+     8. CELL ROUTER DRILL
+  --------------------------------------------------------------- */
+  Widgets.cellrouter = function (mount) {
+    shell(mount, "drill", "Cell Router Drill",
+      "Pick a tenant and incident. Compare how much of the customer base is exposed in a shared fleet, a cell-based design, and shuffle-sharded workers.");
+
+    const TENANTS = 240;
+    const CELL_COUNT = 8;
+    const WORKER_COUNT = 16;
+    const SHUFFLE_SIZE = 3;
+    const tenants = Array.from({ length: TENANTS }, (_, i) => "tenant-" + String(i + 1).padStart(3, "0"));
+    let activeTenant = "tenant-042";
+    let scenario = "noisy";
+
+    function cellOf(tenant) {
+      return hashStr(tenant, CELL_COUNT);
+    }
+    function subsetOf(tenant) {
+      const set = [];
+      let salt = 0;
+      while (set.length < SHUFFLE_SIZE) {
+        const w = hashStr(tenant + ":" + salt, WORKER_COUNT);
+        if (!set.includes(w)) set.push(w);
+        salt++;
+      }
+      return set.sort((a, b) => a - b);
+    }
+    function sameSubset(a, b) {
+      const aa = subsetOf(a), bb = subsetOf(b);
+      return aa.length === bb.length && aa.every((v, i) => v === bb[i]);
+    }
+    function overlapsBadWorker(tenant, badWorker) {
+      return subsetOf(tenant).includes(badWorker);
+    }
+    function pct(n) {
+      return ((n / TENANTS) * 100).toFixed(n === TENANTS ? 0 : 1) + "%";
+    }
+
+    const seg = h("div", { class: "w-seg" });
+    [["noisy", "Noisy tenant"], ["deploy", "Bad deploy"]].forEach(([val, label], idx) => {
+      const b = h("button", { class: idx === 0 ? "active" : "" }, label);
+      b.addEventListener("click", () => {
+        scenario = val;
+        seg.querySelectorAll("button").forEach((x) => x.classList.remove("active"));
+        b.classList.add("active");
+        paint();
+      });
+      seg.appendChild(b);
+    });
+
+    const tenantSelect = h("select", {});
+    tenants.forEach((tenant) => {
+      const opt = h("option", { value: tenant }, tenant);
+      if (tenant === activeTenant) opt.setAttribute("selected", "selected");
+      tenantSelect.appendChild(opt);
+    });
+    tenantSelect.addEventListener("change", () => {
+      activeTenant = tenantSelect.value;
+      paint();
+    });
+
+    const stage = h("div", { class: "w-stage" });
+    const readout = h("div", { class: "w-readout" });
+
+    function card(title, value, detail, accent) {
+      return h("div", {
+        class: "lru-cell",
+        style: "width:min(100%, 190px);height:auto;min-height:104px;padding:14px;text-align:left;display:block;border-color:" + accent
+      },
+        h("div", { class: "srv-name", style: "margin-bottom:8px" }, title),
+        h("div", { class: "srv-count", style: "color:" + accent + ";font-size:1.5rem" }, value),
+        h("div", { class: "srv-weight", style: "margin-top:8px;line-height:1.35" }, detail)
+      );
+    }
+
+    function paint() {
+      const activeCell = cellOf(activeTenant);
+      const activeSubset = subsetOf(activeTenant);
+      const badWorker = activeSubset[0];
+      const sharedAffected = TENANTS;
+      const cellAffected = tenants.filter((t) => cellOf(t) === activeCell).length;
+      const shuffleAffected = scenario === "deploy"
+        ? tenants.filter((t) => overlapsBadWorker(t, badWorker)).length
+        : tenants.filter((t) => sameSubset(t, activeTenant)).length;
+
+      stage.innerHTML = "";
+      const grid = h("div", { style: "display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px" },
+        card("Shared fleet", pct(sharedAffected), "One shared app/queue/worker pool exposes every tenant.", "var(--rose)"),
+        card("Cell-based", pct(cellAffected), "Only tenants in cell-" + (activeCell + 1) + " are exposed.", "var(--cyan)"),
+        card("Shuffle shard", pct(shuffleAffected), scenario === "deploy"
+          ? "Worker-" + (badWorker + 1) + " is bad; tenants using it are exposed."
+          : "Only tenants with the same worker subset are exposed.", "var(--accent)")
+      );
+      const route = h("div", { class: "lru-log", style: "margin-top:16px;line-height:1.6" },
+        activeTenant + " -> cell-" + (activeCell + 1) +
+        " -> workers [" + activeSubset.map((w) => "w" + (w + 1)).join(", ") + "]"
+      );
+      stage.appendChild(grid);
+      stage.appendChild(route);
+
+      readout.innerHTML = "";
+      readout.appendChild(h("span", { class: "ro" }, "tenants ", h("b", {}, String(TENANTS))));
+      readout.appendChild(h("span", { class: "ro" }, "cells ", h("b", {}, String(CELL_COUNT))));
+      readout.appendChild(h("span", { class: "ro" }, "shuffle subset ", h("b", {}, SHUFFLE_SIZE + "/" + WORKER_COUNT)));
+    }
+
+    mount.appendChild(h("div", { class: "widget-controls" },
+      seg,
+      h("label", { class: "w-field" }, "tenant ", tenantSelect),
+      h("button", { class: "w-btn", onclick: () => {
+        activeTenant = tenants[hashStr(activeTenant + Date.now(), tenants.length)];
+        tenantSelect.value = activeTenant;
+        paint();
+      } }, "Random tenant")
+    ));
+    mount.appendChild(stage);
+    mount.appendChild(readout);
+    paint();
+  };
+
+  /* ---------------------------------------------------------------
+     9. CAPACITY PLANNING CALCULATOR
+  --------------------------------------------------------------- */
+  Widgets.capacitycalc = function (mount) {
+    shell(mount, "calculator", "Capacity Planning Calculator",
+      "Convert users and actions into average QPS, peak QPS and first-pass app-instance count.");
+
+    const fields = {
+      dau: { label: "daily active users", value: 2000000, min: 1 },
+      actions: { label: "actions / user / day", value: 20, min: 1 },
+      peak: { label: "peak multiplier", value: 5, min: 1 },
+      perInstance: { label: "safe QPS / instance", value: 300, min: 1 },
+      headroom: { label: "headroom instances", value: 2, min: 0 }
+    };
+
+    const inputs = {};
+    const controls = h("div", { class: "widget-controls" });
+    Object.keys(fields).forEach((key) => {
+      const f = fields[key];
+      const input = h("input", {
+        type: "number",
+        min: String(f.min),
+        value: String(f.value),
+        class: "w-input",
+        oninput: () => paint()
+      });
+      inputs[key] = input;
+      controls.appendChild(h("label", { class: "w-field" }, h("span", {}, f.label), input));
+    });
+
+    const readout = h("div", { class: "w-readout" });
+    const table = h("div", { class: "w-stage" });
+
+    function num(key) {
+      const v = Number(inputs[key].value);
+      return Number.isFinite(v) && v >= fields[key].min ? v : fields[key].min;
+    }
+    function fmt(n) {
+      return Math.round(n).toLocaleString("en-US");
+    }
+    function row(label, value, note) {
+      return h("div", { class: "capcalc-row" },
+        h("span", { class: "capcalc-label" }, label),
+        h("strong", { class: "capcalc-value" }, value),
+        h("small", { class: "capcalc-note" }, note)
+      );
+    }
+    function paint() {
+      const dailyActions = num("dau") * num("actions");
+      const avgQps = dailyActions / 86400;
+      const peakQps = avgQps * num("peak");
+      const baseInstances = Math.ceil(peakQps / num("perInstance"));
+      const totalInstances = baseInstances + Math.floor(num("headroom"));
+
+      readout.innerHTML = "";
+      readout.appendChild(h("span", { class: "ro" }, "avg QPS ", h("b", {}, fmt(avgQps))));
+      readout.appendChild(h("span", { class: "ro" }, "peak QPS ", h("b", {}, fmt(peakQps))));
+      readout.appendChild(h("span", { class: "ro" }, "instances ", h("b", {}, String(totalInstances))));
+
+      table.innerHTML = "";
+      table.appendChild(row("Daily actions", fmt(dailyActions), "DAU x actions per user"));
+      table.appendChild(row("Average QPS", fmt(avgQps), "daily actions / 86,400 seconds"));
+      table.appendChild(row("Peak QPS", fmt(peakQps), "average QPS x peak multiplier"));
+      table.appendChild(row("Base instances", String(baseInstances), "ceil(peak QPS / safe per-instance QPS)"));
+      table.appendChild(row("Launch target", String(totalInstances), "base instances + planned headroom"));
+    }
+
+    mount.appendChild(controls);
+    mount.appendChild(readout);
+    mount.appendChild(table);
+    paint();
+  };
+
+  /* ---------------------------------------------------------------
+     9. CAPACITY PLANNER
+  --------------------------------------------------------------- */
+  Widgets.capacitycalc = function (mount) {
+    shell(mount, "calculator", "Capacity Calculator",
+      "Convert user activity into rough QPS, app instances, database load, queue workers and cache memory. Treat the output as a starting point for load tests, not a promise.");
+
+    const defaults = {
+      dau: 2000000,
+      actions: 20,
+      peak: 5,
+      instanceQps: 300,
+      headroom: 2,
+      readPct: 85,
+      cacheHit: 90,
+      workerRate: 80,
+      hotItemsM: 8,
+      itemKb: 2
+    };
+    const inputs = {};
+
+    function num(name) {
+      const v = Number(inputs[name].value);
+      return Number.isFinite(v) && v > 0 ? v : 0;
+    }
+    function clampPct(v) {
+      return Math.min(100, Math.max(0, v));
+    }
+    function fmt(n, digits = 0) {
+      if (!Number.isFinite(n)) return "0";
+      if (n >= 1000000) return (n / 1000000).toFixed(n >= 10000000 ? 0 : 1) + "M";
+      if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k";
+      return n.toFixed(digits);
+    }
+    function field(name, label, suffix, step) {
+      const input = h("input", {
+        type: "number",
+        min: "0",
+        step: step || "1",
+        value: String(defaults[name]),
+        style: "width:92px"
+      });
+      input.addEventListener("input", paint);
+      inputs[name] = input;
+      return h("label", { class: "w-field" }, label + " ", input, suffix ? h("b", {}, suffix) : null);
+    }
+    function metric(title, value, detail, accent) {
+      return h("div", {
+        class: "lru-cell",
+        style: "width:min(100%, 190px);height:auto;min-height:116px;padding:14px;text-align:left;display:block;border-color:" + accent
+      },
+        h("div", { class: "srv-name", style: "margin-bottom:8px" }, title),
+        h("div", { class: "srv-count", style: "color:" + accent + ";font-size:1.45rem" }, value),
+        h("div", { class: "srv-weight", style: "margin-top:8px;line-height:1.35" }, detail)
+      );
+    }
+
+    const controls = h("div", { class: "widget-controls" },
+      field("dau", "DAU", "", "1000"),
+      field("actions", "actions/day", "", "1"),
+      field("peak", "peak x", "", "0.5"),
+      field("instanceQps", "safe QPS/instance", "", "10"),
+      field("headroom", "N+", "", "1"),
+      field("readPct", "read %", "", "5"),
+      field("cacheHit", "cache hit %", "", "5"),
+      field("workerRate", "worker jobs/s", "", "5"),
+      field("hotItemsM", "hot items M", "", "0.5"),
+      field("itemKb", "item KB", "", "0.5")
+    );
+    const stage = h("div", { class: "w-stage" });
+    const readout = h("div", { class: "w-readout" });
+
+    function paint() {
+      const dau = num("dau");
+      const dailyActions = dau * num("actions");
+      const avgQps = dailyActions / 86400;
+      const peakQps = avgQps * num("peak");
+      const appNeeded = Math.ceil(peakQps / Math.max(1, num("instanceQps")));
+      const appWithHeadroom = appNeeded + Math.round(num("headroom"));
+      const readPct = clampPct(num("readPct"));
+      const writePct = Math.max(0, 100 - readPct);
+      const cacheHit = clampPct(num("cacheHit"));
+      const readQps = peakQps * (readPct / 100);
+      const writeQps = peakQps * (writePct / 100);
+      const dbReadQps = readQps * (1 - cacheHit / 100);
+      const workerNeeded = Math.ceil(writeQps / Math.max(1, num("workerRate")));
+      const workerWithHeadroom = workerNeeded + Math.round(num("headroom"));
+      const cacheGb = (num("hotItemsM") * 1000000 * num("itemKb")) / (1024 * 1024) * 1.3;
+
+      stage.innerHTML = "";
+      stage.appendChild(h("div", { style: "display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px" },
+        metric("Average QPS", fmt(avgQps, 1), fmt(dailyActions) + " actions/day / 86,400", "var(--accent)"),
+        metric("Peak QPS", fmt(peakQps, 1), "average x " + num("peak") + " peak factor", "var(--cyan)"),
+        metric("App instances", String(appWithHeadroom), appNeeded + " for load + N+" + Math.round(num("headroom")), "var(--violet)"),
+        metric("DB reads", fmt(dbReadQps, 1), fmt(readQps, 1) + " read QPS after " + cacheHit + "% cache hit", "var(--rose)"),
+        metric("DB writes", fmt(writeQps, 1), writePct.toFixed(0) + "% of peak traffic", "var(--amber)"),
+        metric("Queue workers", String(workerWithHeadroom), workerNeeded + " to drain writes + headroom", "var(--cyan-deep)"),
+        metric("Cache memory", cacheGb.toFixed(cacheGb >= 10 ? 0 : 1) + " GB", "hot set x item size x 1.3 overhead", "var(--accent-2)")
+      ));
+
+      readout.innerHTML = "";
+      readout.appendChild(h("span", { class: "ro" }, "read/write ", h("b", {}, readPct.toFixed(0) + "/" + writePct.toFixed(0))));
+      readout.appendChild(h("span", { class: "ro" }, "cache miss QPS ", h("b", {}, fmt(dbReadQps, 1))));
+      readout.appendChild(h("span", { class: "ro" }, "queue drain target ", h("b", {}, "> " + fmt(writeQps, 1) + "/s")));
+    }
+
+    mount.appendChild(controls);
+    mount.appendChild(stage);
+    mount.appendChild(readout);
+    paint();
+  };
+
   window.Widgets = Widgets;
 })();

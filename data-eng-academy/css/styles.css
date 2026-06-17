@@ -619,8 +619,77 @@ table.data td:first-child { font-weight: 600; }
 .practice-banner .pb-text p { color: var(--text-dim); font-size: 0.9rem; }
 .practice-banner .pb-go { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: var(--violet); }
 .practice-banner .pb-go svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.paths-banner { display: flex; align-items: center; gap: 18px; margin: 14px 0 6px; padding: 22px 24px; border-radius: var(--radius-lg); border: 1px solid var(--glass-border); background: linear-gradient(115deg, color-mix(in srgb, var(--cyan) 14%, var(--surface)), var(--surface)); transition: 0.2s var(--ease); }
+.paths-banner:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--cyan) 45%, transparent); }
+.paths-banner .pb-ico { flex-shrink: 0; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--cyan) 20%, transparent); }
+.paths-banner .pb-ico svg { width: 26px; height: 26px; fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.paths-banner .pb-text { flex: 1; min-width: 0; }
+.paths-banner .pb-text h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; margin-bottom: 3px; }
+.paths-banner .pb-text p { color: var(--text-dim); font-size: 0.9rem; }
+.paths-banner .pb-go { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: var(--cyan); }
+.paths-banner .pb-go svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .practice-page .practice-sizes { margin-top: 16px; }
-@media (max-width: 560px) { .practice-banner .pb-go span { display: none; } .practice-banner { padding: 18px; gap: 14px; } }
+@media (max-width: 560px) { .practice-banner .pb-go span, .paths-banner .pb-go { display: none; } .practice-banner, .paths-banner { padding: 18px; gap: 14px; } }
+
+/* ---------- Guided paths ---------- */
+.paths-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.path-card { border: 1px solid var(--glass-border); border-radius: var(--radius-lg); background: var(--surface); padding: 22px; overflow: hidden; }
+.path-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.path-level, .path-count { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tc); }
+.path-count { color: var(--text-faint); letter-spacing: 0.04em; }
+.path-card h2 { font-family: var(--font-display); font-size: 1.45rem; line-height: 1.1; margin-bottom: 8px; }
+.path-card p { color: var(--text-dim); font-size: 0.92rem; margin-bottom: 14px; }
+.path-progress { height: 7px; border-radius: 7px; background: var(--line); overflow: hidden; margin-bottom: 16px; }
+.path-progress i { display: block; height: 100%; border-radius: 7px; background: linear-gradient(90deg, color-mix(in srgb, var(--tc) 68%, transparent), var(--tc)); }
+.path-steps { list-style: none; padding: 0; margin: 0 0 18px; display: flex; flex-direction: column; gap: 8px; }
+.path-steps li { margin: 0; }
+.path-steps li::before { display: none; }
+.path-steps a { display: flex; gap: 10px; padding: 10px 11px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface-solid); transition: 0.16s; }
+.path-steps a:hover { border-color: color-mix(in srgb, var(--tc) 60%, transparent); transform: translateX(2px); }
+.path-step-num { flex-shrink: 0; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; color: var(--tc); margin-top: 1px; }
+.path-step-main { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.path-step-main strong { color: var(--text); font-size: 0.9rem; line-height: 1.25; }
+.path-step-main em { color: var(--text-faint); font-family: var(--font-mono); font-style: normal; font-size: 0.64rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.path-copy { width: 100%; justify-content: center; }
+
+/* ---------- Practice content library ---------- */
+.practice-link-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin: 20px 0 10px; }
+.practice-link-card { position: relative; padding: 18px; border-radius: var(--radius); border: 1px solid var(--glass-border); background: var(--surface); overflow: hidden; transition: 0.22s var(--ease); }
+.practice-link-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(16rem 12rem at 112% -18%, var(--pc), transparent 60%); opacity: 0.13; transition: opacity 0.22s; }
+.practice-link-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--pc) 46%, transparent); }
+.practice-link-card:hover::before { opacity: 0.22; }
+.practice-link-card .plc-kicker { position: relative; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pc); }
+.practice-link-card h3 { position: relative; font-family: var(--font-display); font-size: 1.15rem; line-height: 1.12; margin: 9px 0 5px; }
+.practice-link-card p { position: relative; color: var(--text-dim); font-size: 0.85rem; min-height: 2.8em; }
+.practice-link-card em { position: relative; display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-family: var(--font-mono); font-style: normal; font-size: 0.68rem; color: var(--pc); }
+.practice-link-card em svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+.practice-content-page { max-width: 980px; }
+.practice-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 28px; }
+.practice-tabs a { border: 1px solid var(--glass-border); border-radius: 13px; background: var(--surface); padding: 12px 14px; transition: 0.18s; }
+.practice-tabs a:hover, .practice-tabs a.active { border-color: color-mix(in srgb, var(--pc) 54%, transparent); background: color-mix(in srgb, var(--pc) 10%, var(--surface)); transform: translateY(-1px); }
+.practice-tabs strong { display: block; font-size: 0.9rem; color: var(--text); }
+.practice-tabs span { display: block; margin-top: 2px; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.04em; color: var(--text-faint); }
+.practice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.practice-card { scroll-margin-top: 84px; border: 1px solid var(--glass-border); border-radius: var(--radius-lg); background: var(--surface); padding: 22px; margin: 0 0 18px; }
+.practice-card.wide { margin-bottom: 22px; }
+.practice-card-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 10px; }
+.practice-card-head span { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.practice-card-head a { font-family: var(--font-mono); color: var(--text-faint); border-bottom: 1px solid transparent; }
+.practice-card-head a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.practice-card h2 { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.12; margin-bottom: 9px; }
+.practice-card h3 { font-family: var(--font-display); font-size: 0.98rem; margin: 18px 0 8px; color: var(--accent); }
+.practice-card p { color: var(--text-dim); font-size: 0.94rem; }
+.practice-card .prompt { color: var(--text); font-size: 1rem; }
+.practice-card ul, .practice-card ol { list-style: none; padding: 0; margin: 0; }
+.practice-card li { position: relative; padding-left: 24px; margin: 8px 0; color: var(--text); font-size: 0.92rem; }
+.practice-card ul li::before { content: ""; position: absolute; left: 3px; top: 10px; width: 7px; height: 7px; border: 1.5px solid var(--accent); border-radius: 2px; transform: rotate(45deg); }
+.practice-card ol { counter-reset: practice-step; }
+.practice-card ol li::before { counter-increment: practice-step; content: counter(practice-step); position: absolute; left: 0; top: 1px; width: 17px; height: 17px; display: grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 6px; font-family: var(--font-mono); font-size: 0.66rem; color: var(--accent); }
+.practice-refs { margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--text-faint); font-size: 0.82rem; }
+.practice-refs a { color: var(--accent); border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.practice-refs a:hover { border-bottom-color: var(--accent); }
+.glossary-card h2 { color: var(--accent); }
 
 /* ---------- Command palette ---------- */
 .palette { position: fixed; inset: 0; z-index: 300; background: color-mix(in srgb, var(--ink-900) 62%, transparent); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding: 12vh 20px 20px; }

@@ -154,6 +154,81 @@
     paint();
   };
 
+  /* 4 — Flink state drill */
+  window.Widgets["de-stream-flink-state"] = function (mount) {
+    shell(mount, "drill", "Flink Stateful Ops Drill",
+      "Pick the right production move for each stateful streaming scenario.");
+    var cases = [
+      {
+        prompt: "A keyed fraud job must remember the last card swipe per account, and accounts are spread across parallel subtasks.",
+        options: ["Use keyed state partitioned by account_id", "Keep one global in-memory map", "Round-robin the events", "Write every event to CSV"],
+        answer: 0,
+        reason: "Keyed state is co-located with the keyed stream partition, so each account's history moves with the subtask that owns that key."
+      },
+      {
+        prompt: "The job needs a planned code upgrade and may change parallelism. You want a portable recovery point.",
+        options: ["Rely on the next automatic checkpoint", "Take a savepoint before deploying", "Disable checkpoints", "Drop the state backend"],
+        answer: 1,
+        reason: "Checkpoints are automatic failure recovery; savepoints are operator-triggered, durable upgrade and migration points."
+      },
+      {
+        prompt: "A dedupe set grows forever because old order ids are never useful after 24 hours.",
+        options: ["Add state TTL and cleanup", "Increase heap forever", "Turn off keyBy", "Use processing time only"],
+        answer: 0,
+        reason: "State TTL bounds remembered keys and lets the backend clean expired entries instead of turning correctness state into a memory leak."
+      },
+      {
+        prompt: "The sink supports transactions. A crash can happen after records are written but before the source offset is committed.",
+        options: ["Use a transactional exactly-once sink with checkpoints", "Commit offsets before writing", "Use at-most-once mode", "Ignore duplicate writes"],
+        answer: 0,
+        reason: "Flink coordinates checkpoint completion with transactional sinks so output becomes visible only when the matching checkpoint succeeds."
+      },
+      {
+        prompt: "Checkpoint duration and input lag are rising after a downstream service slows down.",
+        options: ["Treat it as backpressure and tune/restart with bounded retries", "Delete old savepoints", "Increase watermark delay only", "Add more quiz questions"],
+        answer: 0,
+        reason: "Backpressure propagates upstream, stretching checkpoint alignment and lag. Restart strategies help with transient faults, but sustained pressure needs capacity or sink fixes."
+      }
+    ];
+    var cur = 0, picked = -1, correct = 0, seen = {};
+    var stage = h("div", { class: "w-stage" });
+    var readout = h("div", { class: "w-readout" });
+    function paint() {
+      var c = cases[cur];
+      stage.innerHTML = "";
+      stage.appendChild(h("p", { style: "margin:0 0 12px;color:var(--text);font-weight:700" }, c.prompt));
+      var opts = h("div", { class: "grid-board", style: "grid-template-columns:repeat(2,minmax(120px,1fr));gap:6px" });
+      c.options.forEach(function (o, i) {
+        var cls = "grid-cell";
+        if (picked === i) cls += i === c.answer ? " dp-cur" : " dp-fill";
+        var b = h("button", { class: cls, style: "width:auto;height:auto;padding:10px;text-align:left" }, o);
+        b.addEventListener("click", function () {
+          picked = i;
+          if (!seen[cur] && i === c.answer) correct++;
+          seen[cur] = true;
+          paint();
+        });
+        opts.appendChild(b);
+      });
+      stage.appendChild(opts);
+      if (picked >= 0) {
+        stage.appendChild(h("div", { class: "note " + (picked === c.answer ? "key" : "trap"), style: "margin-top:12px" },
+          h("div", { class: "note-body" }, h("strong", {}, picked === c.answer ? "Correct. " : "Review. "), c.reason)));
+      }
+      readout.innerHTML = "";
+      readout.appendChild(ro("scenario", (cur + 1) + " / " + cases.length, true));
+      readout.appendChild(ro("first-try correct", correct + " / " + Object.keys(seen).length));
+    }
+    mount.appendChild(h("div", { class: "widget-controls" },
+      h("button", { class: "w-btn", onclick: function () { cur = Math.max(0, cur - 1); picked = -1; paint(); } }, "Prev"),
+      h("button", { class: "w-btn primary", onclick: function () { cur = Math.min(cases.length - 1, cur + 1); picked = -1; paint(); } }, "Next"),
+      h("button", { class: "w-btn ghost", onclick: function () { cur = 0; picked = -1; correct = 0; seen = {}; paint(); } }, "Reset")
+    ));
+    mount.appendChild(stage);
+    mount.appendChild(readout);
+    paint();
+  };
+
   /* =====================================================================
      QUIZZES
      ===================================================================== */
@@ -231,6 +306,42 @@
         }
       ]
     },
+    "de-streaming-flink-state": {
+      title: "Flink stateful ops checkpoint",
+      sub: "State backends, checkpoints, savepoints and sinks.",
+      questions: [
+        {
+          q: "In Flink, keyed state is stored and recovered according to\u2026",
+          options: ["The event's key and the subtask that owns that key range", "The order records appear in the source file", "A single global coordinator map", "The sink partition only"],
+          answer: 0,
+          explain: "Keyed state is partitioned by key group and assigned to subtasks. On rescale or recovery, key groups move with their state so each key remains consistent."
+        },
+        {
+          q: "What is the practical difference between a checkpoint and a savepoint?",
+          options: ["They are identical names for the same file", "Checkpoints are automatic failure recovery points; savepoints are manually triggered durable points for upgrades and migrations", "Savepoints are faster but unsafe", "Checkpoints store only source offsets"],
+          answer: 1,
+          explain: "Checkpoints are frequent, system-managed recovery snapshots. Savepoints are user-controlled and kept for planned job changes, rollback, and stateful upgrades."
+        },
+        {
+          q: "State TTL is mainly used to\u2026",
+          options: ["Guarantee network delivery", "Bound old keyed state and allow cleanup after it is no longer useful", "Disable exactly-once sinks", "Force every key into one partition"],
+          answer: 1,
+          explain: "TTL prevents unbounded state growth by expiring entries such as old dedupe keys, stale sessions, or reference values after the correctness window has passed."
+        },
+        {
+          q: "A Flink exactly-once sink usually depends on\u2026",
+          options: ["Blind appends and no retries", "Checkpoint coordination plus idempotent or transactional commits", "At-most-once sources", "Disabling backpressure"],
+          answer: 1,
+          explain: "Flink can restore state and offsets consistently, but the sink must commit in the same failure boundary, often with transactions or an idempotent upsert protocol."
+        },
+        {
+          q: "Rising checkpoint duration, input lag and busy downstream tasks are a signal of\u2026",
+          options: ["Backpressure", "A savepoint completing successfully", "Schema evolution", "A partition overwrite"],
+          answer: 0,
+          explain: "Backpressure from a slow sink or hot operator propagates upstream, increasing lag and making checkpoint alignment and completion slower."
+        }
+      ]
+    },
     "de-streaming-architecture": {
       title: "Streaming architectures checkpoint",
       sub: "Lambda, Kappa and streaming ETL.",
@@ -266,7 +377,7 @@
   window.TRACKS.streaming = {
     id: "streaming", name: "Streaming & Real-time", short: "STREAM",
     tagline: "Process data the moment it arrives", color: "#fb7185",
-    blurb: "Unbounded data done right: the log abstraction, delivery semantics, Kafka topics/partitions/consumer groups, windowing, event time vs processing time and watermarks, stateful processing and joins, exactly-once with checkpoints, and Lambda vs Kappa architectures.",
+    blurb: "Unbounded data done right: the log abstraction, delivery semantics, Kafka topics/partitions/consumer groups, windowing, event time vs processing time and watermarks, Flink stateful operations, state backends, checkpoint/savepoint recovery, exactly-once sinks, and Lambda vs Kappa architectures.",
     modules: [
       {
         id: "fundamentals", name: "Streaming Fundamentals", icon: "compass",
@@ -398,6 +509,31 @@
               ] },
               { t: "note", variant: "key", html: "State is the hard, valuable part of streaming \u2014 and it must survive failures. That\u2019s why state is checkpointed, which is exactly the next lesson." },
               { t: "note", variant: "trap", html: "Unbounded state is a memory leak: a stream-stream join or dedup must bound its state with time-to-live or a window, or it grows forever." }
+            ]
+          },
+          {
+            id: "flink-stateful-ops", title: "Flink stateful operations",
+            summary: "How production Flink jobs manage keyed state, checkpoints, savepoints, TTL, backpressure and exactly-once sinks.",
+            minutes: 9, tags: ["flink", "state", "checkpointing"],
+            blocks: [
+              { t: "p", html: "<strong>Apache Flink</strong> treats state as a managed, fault-tolerant part of the job rather than an accidental in-memory cache. After " + tok("keyBy") + ", each key belongs to a key group owned by one parallel subtask, and that subtask reads and writes the key\u2019s <strong>keyed state</strong> locally." },
+              { t: "table", headers: ["Concept", "Use it for", "Production concern"], rows: [
+                ["Keyed state", "Counts, dedupe sets, last-seen values per key", "Choose a key with enough cardinality; hot keys become hot subtasks"],
+                ["State backend", "Where state physically lives: heap for small/fast state, RocksDB-style embedded storage for large state", "Large state increases checkpoint time and recovery time"],
+                ["Checkpoint", "Automatic recovery point containing state plus source positions", "Tune interval, timeout and storage; monitor duration"],
+                ["Savepoint", "Manual, durable point for upgrades, rollback and rescaling", "Take one before risky deployments"],
+                ["State TTL", "Expire stale keyed entries after a correctness window", "TTL must match business semantics, not just memory pressure"]
+              ] },
+              { t: "widget", id: "de-stream-flink-state" },
+              { t: "p", html: "A checkpoint is Flink\u2019s normal failure boundary: sources mark positions, operators snapshot state, and sinks commit only when the checkpoint completes. A <strong>savepoint</strong> uses the same idea but is operator-triggered and intended for controlled lifecycle operations such as changing code, moving clusters or adjusting parallelism." },
+              { t: "p", html: "<strong>Backpressure</strong> means a downstream operator or sink cannot keep up, so upstream tasks slow down. In Flink that shows up as rising input lag, high busy time, full network buffers and slower checkpoints. Restart strategies handle transient failures, but sustained backpressure is a capacity, skew or sink problem." },
+              { t: "compare",
+                bad: { title: "Fragile stateful job", items: ["Global mutable maps", "No TTL on dedupe/join state", "Offsets committed before output", "Restarts without bounded retries", "Blind append sink"] },
+                good: { title: "Recoverable Flink job", items: ["State keyed by business id", "Backend sized for state volume", "Checkpoints to durable storage", "Savepoints before upgrades", "Idempotent or transactional sink"] }
+              },
+              { t: "note", variant: "key", html: "Production stateful streaming is a contract: <strong>keyed state + durable checkpoints + bounded state + a cooperative sink</strong>. The engine can restore the computation only if your state and output protocol are designed for recovery." },
+              { t: "note", variant: "trap", html: "A restart strategy is not a data guarantee. It decides <em>when</em> to retry; checkpoints and sink commits decide <em>what data state</em> the retry resumes from." },
+              { t: "quiz", id: "de-streaming-flink-state" }
             ]
           },
           {

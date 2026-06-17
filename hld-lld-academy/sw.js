@@ -4,14 +4,13 @@
    same-origin asset (fonts, etc.) on first fetch. The whole app works
    with no network after the first visit.
    ===================================================================== */
-const CACHE = "blueprint-v6";
+const CACHE = "blueprint-v13";
 const CORE = [
   "./",
   "./index.html",
   "./css/styles.css",
   "./css/exam.css",
   "./css/pwa.css",
-  "./fonts/fonts.css",
   "./js/widgets.js",
   "./js/widgets-dsa.js",
   "./js/widgets-patterns.js",
@@ -20,6 +19,7 @@ const CORE = [
   "./js/curriculum-lld.js",
   "./js/curriculum-dsa.js",
   "./js/curriculum-patterns.js",
+  "./js/practice-content.js",
   "./js/exam.js",
   "./js/pwa.js",
   "./js/app.js",

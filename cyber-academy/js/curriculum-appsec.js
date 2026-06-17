@@ -238,6 +238,287 @@ window.TRACKS.appsec = {
           ]
         },
         {
+          id: "api-security-deep-dive",
+          title: "API security deep dive",
+          summary: "Modern APIs expose objects, functions and business flows. Defend each trust boundary explicitly.",
+          minutes: 9,
+          tags: ["api", "authz", "graphql", "grpc"],
+          blocks: [
+            { t: "p", html: "API security is application security with fewer browser guardrails and more automation. REST routes, GraphQL resolvers and gRPC methods all cross trust boundaries: client to edge, edge to service, service to data store, and service to service. Every boundary needs authentication, authorization, schema validation, rate limits and logs that match the resource being touched." },
+            { t: "h", text: "REST, GraphQL and gRPC trust boundaries" },
+            {
+              t: "table",
+              headers: ["API style", "Where trust commonly breaks", "Defensive move"],
+              rows: [
+                ["<strong>REST</strong>", "Object ids in paths and nested resources become direct object references.", "Scope every query to the caller and tenant; authorize the object before returning it."],
+                ["<strong>GraphQL</strong>", "One endpoint hides many fields, nested objects and resolver paths.", "Apply field/object authorization in resolvers, query depth limits and persisted operations where appropriate."],
+                ["<strong>gRPC</strong>", "Strong schemas can create false confidence; service methods still perform sensitive actions.", "Validate messages semantically, authenticate callers with service identity, and authorize every method."]
+              ]
+            },
+            { t: "note", variant: "key", html: "<strong>A schema proves shape, not permission.</strong> A request can be valid JSON, a valid GraphQL query, or a valid protobuf message and still ask for data or actions the caller must not reach." },
+            { t: "h", text: "The API authorization trio" },
+            {
+              t: "table",
+              headers: ["Failure", "Question the server forgot to ask", "Example defensive control"],
+              rows: [
+                ["<strong>BOLA</strong><br>Broken Object Level Authorization", "May this caller access this specific object?", "Fetch resources through tenant/user-scoped queries, not global ids."],
+                ["<strong>BFLA</strong><br>Broken Function Level Authorization", "May this caller invoke this function at all?", "Authorize methods and routes server-side; hiding buttons is only UX."],
+                ["<strong>BOPLA</strong><br>Broken Object Property Level Authorization", "May this caller read or write this specific field?", "Use response DTOs and explicit writable-field allow-lists."]
+              ]
+            },
+            { t: "p", html: "Object, function and property checks are separate. A user may read one invoice but not refund it. A support analyst may view account status but not export tax identifiers. An admin may update a display name but not directly set <code>isSuperAdmin</code> from a request body." },
+            { t: "h", text: "Schema validation and mass assignment" },
+            {
+              t: "compare",
+              bad: { title: "Common API shortcuts", items: ["Bind the entire request body onto a database model", "Accept unknown fields and ignore the scary ones later", "Return internal objects directly from the ORM", "Trust GraphQL selection sets to protect sensitive fields"] },
+              good: { title: "Safer contract design", items: ["Reject unknown fields and enforce types, lengths and enum values", "Use separate input/output DTOs per role and operation", "Allow-list writable fields explicitly", "Run authorization before serialization and before mutation"] }
+            },
+            { t: "note", variant: "trap", html: "<strong>Mass assignment</strong> turns convenience into privilege escalation: the API accepts a field the UI never showed, and the framework writes it anyway. The fix is an explicit allow-list of fields for each operation." },
+            { t: "h", text: "Rate limits are not just request counts" },
+            { t: "p", html: "APIs also fail through business-flow abuse: coupon guessing, inventory hoarding, login-code spraying, password-reset flooding, scraping, and GraphQL queries that are technically valid but too expensive. Rate limit by user, IP, tenant, device and action; add quotas, idempotency keys, query complexity limits and anomaly alerts." },
+            { t: "h", text: "Inventory and versioning" },
+            {
+              t: "ul", items: [
+                "Keep an <strong>API inventory</strong>: owner, data classification, auth method, internet exposure, version, consumers and deprecation date.",
+                "Retire shadow and forgotten endpoints; old versions often keep old authorization bugs.",
+                "Document which API is public, partner, internal or admin, then enforce that boundary at the gateway and service.",
+                "Log object ids, method names, auth decisions and rate-limit decisions with sensitive fields minimized."
+              ]
+            },
+            { t: "note", variant: "key", html: "The best API test is simple to state: for every object, field and function, prove that a caller who should be denied is denied <em>server-side</em>." },
+            { t: "quiz", id: "appsec-api-security" }
+          ]
+        },
+        {
+          id: "secure-coding-by-stack",
+          title: "Secure coding by stack",
+          summary: "Translate AppSec principles into framework choices: safe query APIs, output encoding, file handling, parser hardening and secret-safe logs.",
+          minutes: 9,
+          tags: ["secure-coding", "frameworks", "hardening"],
+          blocks: [
+            { t: "p", html: "Secure coding is not a separate language from engineering. It is choosing the safe API your stack already provides, keeping untrusted input as data, and making risky operations visible without leaking secrets." },
+            { t: "h", text: "The stack-safe checklist" },
+            { t: "table", headers: ["Risk", "Use the stack's safe path"], rows: [
+              ["SQL or NoSQL injection", "<strong>Safe query APIs</strong>: prepared statements, bind parameters, query builders used without raw concatenation, and allow-listed dynamic identifiers."],
+              ["XSS", "<strong>Framework output encoding</strong>: template auto-escaping, React text rendering, contextual encoders for attributes and routes, and sanitization only for approved rich text."],
+              ["File upload abuse", "<strong>File handling</strong>: server-generated names, size limits, magic-byte checks, scanning, storage outside web roots, and download through authorization handlers."],
+              ["Unsafe parsing", "<strong>Deserialization and XML hardening</strong>: JSON with schema validation, safe YAML only, no native object deserialization, DTDs disabled, no external entities or network fetches."],
+              ["Leaky telemetry", "<strong>Logging without secrets</strong>: structured logs with request IDs, sanitized line breaks, redacted tokens and passwords, and no raw session IDs or customer secrets."]
+            ] },
+            { t: "h", text: "Examples by habit" },
+            { t: "compare",
+              bad: { title: "Risky habit", items: ["Build SQL with string concatenation", "Disable template escaping to make markup render", "Store uploads under a public path with the original filename", "Parse XML with default entity settings", "Log complete request bodies and headers"] },
+              good: { title: "Safer habit", items: ["Bind values through the database driver", "Let the framework render text and sanitize only approved HTML", "Generate object IDs and serve files through checked endpoints", "Reject DTDs and external entities before parsing", "Log stable IDs and redacted fields only"] }
+            },
+            { t: "h", text: "Refactor review drill" },
+            { t: "p", html: "When reviewing code, ask which safe primitive should replace the risky one. The answer should be specific to the stack: prepared statements, template text rendering, upload handlers, safe parsers and redaction filters." },
+            { t: "widget", id: "securecode" },
+            { t: "note", variant: "key", html: "The goal is not to memorize every framework. Learn the invariant: <strong>separate code from data, encode on output, isolate files, harden parsers, and never put secrets in logs.</strong>" },
+            { t: "quiz", id: "appsec-secure-coding" }
+          ]
+        }
+      ]
+    },
+    /* ============================ AI SECURITY ============================ */
+    {
+      id: "ai-security",
+      name: "AI security",
+      icon: "spark",
+      lessons: [
+        {
+          id: "ai-app-security",
+          title: "AI application security",
+          summary: "LLM features add new trust boundaries: prompts, retrieval, tools, and approvals all need explicit control.",
+          minutes: 8,
+          tags: ["ai", "llm", "rag", "threat-modeling"],
+          blocks: [
+            { t: "p", html: "AI features are applications with a new trust boundary. They accept input, retrieve data and may call tools; prompts, retrieved text and model output must be treated as untrusted data." },
+            { t: "h", text: "The four recurring risk patterns" },
+            {
+              t: "table",
+              headers: ["Risk", "Defensive question"],
+              rows: [
+                ["<strong>Prompt injection</strong>", "Can user or retrieved text override system instructions?"],
+                ["<strong>RAG access failure</strong>", "Does retrieval enforce the caller's authorization before content reaches the model?"],
+                ["<strong>Excessive agency</strong>", "Can the model take sensitive actions without a human or policy gate?"],
+                ["<strong>Tool permission drift</strong>", "Are plugins/tools scoped to the task, logged, and denied by default?"]
+              ]
+            },
+            { t: "note", variant: "key", html: "Model instructions are not a security boundary. A prompt can guide behavior, but authorization, data filtering, tool allow-lists, and transaction approval must live in normal application code." },
+            { t: "h", text: "RAG: retrieval before reasoning" },
+            {
+              t: "ul", items: [
+                "Filter vector-search results by <strong>tenant, user, document ACL, and purpose</strong> before sending context to the model.",
+                "Separate trusted system instructions from untrusted retrieved text; label sources so the model can cite without obeying them.",
+                "Watch for retriever poisoning: low-quality or malicious documents that steer answers away from policy.",
+                "Log which documents were retrieved so sensitive answers can be audited later."
+              ]
+            },
+            { t: "h", text: "Safe support-bot case study" },
+            { t: "p", html: "A support bot can answer account questions and draft refund requests, but the model should never become the authority. Scope retrieval to the current customer and approved help articles, make refund tools create pending requests only, and require policy or human approval for account changes." },
+            { t: "compare",
+              bad: { title: "Over-trusting the model", items: ["All tickets and all docs in one vector index", "A refund tool with broad account access", "No approval gate for account changes", "Logs only the final answer, not the sources/tools"] },
+              good: { title: "Defensible AI feature", items: ["Per-user retrieval authorization", "Tools scoped to one account and one action", "Human approval for sensitive actions", "Full audit trail: prompt, sources, tool call, approver"] }
+            },
+            { t: "h", text: "Capstone: threat-model an AI support bot" },
+            {
+              t: "ol", items: [
+                "<strong>Draw trust boundaries</strong>: user chat, model service, retriever, vector store, tools, human approval queue, and audit log.",
+                "<strong>Map LLM-style categories</strong>: prompt injection, sensitive disclosure, insecure plugin design, excessive agency, and supply-chain trust in prompts/tools.",
+                "<strong>Authorize retrieval</strong> before context is assembled, not after the answer is generated.",
+                "<strong>Gate tools</strong> with allow-lists, schemas, dry-run previews, human approval for high impact, and deny-on-error behavior."
+              ]
+            },
+            { t: "h2", text: "Rubric / checklist" },
+            { t: "table", headers: ["Score area", "What a strong answer includes"], rows: [
+              ["Trust-boundary map (25%)", "Named components, data stores, model boundary, retriever boundary, tool boundary, approval queue and audit trail."],
+              ["Threat coverage (25%)", "Prompt injection, unauthorized retrieval, sensitive disclosure, tool misuse, poisoned sources, logging/retention risk and fallback behavior."],
+              ["Controls (30%)", "Per-user retrieval authorization, least-privilege tools, schemas, dry-run previews, human/policy approval for high impact, deny-on-error and source logging."],
+              ["Assessment quality (20%)", "Clear assumptions, residual risks, test cases using synthetic data, monitoring signals and owners for each unresolved risk."]
+            ] },
+            { t: "p", html: "Use the drill below to balance usefulness against least privilege. The safest bot that still solves the task is the design goal." },
+            { t: "widget", id: "aiagent" },
+            { t: "quiz", id: "appsec-ai" }
+          ]
+        },
+        {
+          id: "ai-offense-defense",
+          title: "AI for cyber offense and defense",
+          summary: "AI changes the speed and scale of security work. Learn the attacker advantages, defender advantages, and the guardrails that keep this knowledge safe.",
+          minutes: 8,
+          tags: ["ai", "defense", "threat-modeling"],
+          blocks: [
+            { t: "p", html: "AI is a force multiplier, not a new law of security. It can summarize, classify, translate, search and prioritize; the security question is whether that work is bounded, reviewed and logged." },
+            { t: "h", text: "How attackers can misuse AI" },
+            {
+              t: "table",
+              headers: ["Attacker use", "Defender response"],
+              rows: [
+                ["<strong>Recon summarization</strong>", "Reduce public leakage; monitor exposed assets, job posts, repos and certificate names."],
+                ["<strong>Phishing personalization</strong>", "Use phishing-resistant MFA, user reporting, email authentication and behavior-based detection."],
+                ["<strong>Vulnerability triage at scale</strong>", "Patch by exposure and known exploitation; keep asset inventory current."],
+                ["<strong>Malware or script variation</strong>", "Detect behavior, not only hashes; watch process trees, unusual tool use and egress."],
+                ["<strong>Social-engineering scripts</strong>", "Strengthen helpdesk verification, approval workflows and recovery-event alerts."]
+              ]
+            },
+            { t: "note", variant: "warn", html: "This atlas discusses attacker use at the <strong>conceptual and defensive</strong> level only. Do not use AI to generate phishing, malware, credential theft, bypass instructions or unauthorized testing. Authorization is the line." },
+            { t: "h", text: "How defenders can leverage AI" },
+            {
+              t: "ul", items: [
+                "<strong>Alert triage</strong> \u2014 summarize logs, group related events, and propose first checks for an analyst.",
+                "<strong>Detection engineering</strong> \u2014 draft rule ideas from incident writeups, then validate them against real telemetry and false positives.",
+                "<strong>Threat modeling</strong> \u2014 enumerate assets, trust boundaries, abuse cases and missing controls during design review.",
+                "<strong>Secure-code review</strong> \u2014 highlight risky sinks, missing authorization checks and unsafe deserialization for human review.",
+                "<strong>Incident response</strong> \u2014 turn messy notes into timelines, stakeholder updates and postmortem action items."
+              ]
+            },
+            { t: "h", text: "The safe operating model" },
+            {
+              t: "compare",
+              bad: { title: "Unsafe AI security workflow", items: ["Paste secrets or raw customer data into a model", "Let generated detections block production without review", "Trust AI explanations without evidence", "Let an agent run tools with broad credentials"] },
+              good: { title: "Defensible AI-assisted workflow", items: ["Redact sensitive data and keep audit logs", "Use AI as a draft, not an authority", "Require tests, telemetry and peer review", "Scope tools to read-only first; gate changes with approval"] }
+            },
+            { t: "note", variant: "key", html: "The mental model: <strong>AI drafts; humans and policy decide</strong>. Use AI to compress toil while deterministic systems keep authorization, irreversible actions and risk acceptance under control." },
+            { t: "quiz", id: "appsec-ai" }
+          ]
+        },
+        {
+          id: "ai-red-blue-lab",
+          title: "AI red-team vs blue-team lab",
+          summary: "Test AI systems safely: define abuse cases, run authorized probes, and turn findings into controls.",
+          minutes: 8,
+          tags: ["ai", "red-team", "blue-team"],
+          blocks: [
+            { t: "p", html: "<strong>AI red teaming</strong> tests an AI feature for harmful failure modes under explicit authorization. The output is evidence: which boundary failed, what data or tool was exposed, and which control would have stopped it." },
+            { t: "h", text: "Safe test categories" },
+            {
+              t: "table",
+              headers: ["Red-team question", "Blue-team control"],
+              rows: [
+                ["Can untrusted text override policy?", "Treat retrieved/user text as data; enforce policy in code."],
+                ["Can the model reveal data the user cannot access?", "Authorize retrieval before context assembly; audit source chunks."],
+                ["Can the model call tools beyond the task?", "Tool allow-lists, schemas, dry-runs and approval gates."],
+                ["Can poisoned docs steer answers?", "Trusted ingestion, review queues, source scoring and freshness rules."],
+                ["Can sensitive output leave logs or chat?", "Output filters, data classification and retention controls."]
+              ]
+            },
+            { t: "p", html: "Use this lab to match safe abuse cases to controls. The goal is a repeatable defender test plan, not harmful content." },
+            { t: "widget", id: "airedblue" },
+            { t: "note", variant: "warn", html: "AI red teaming must be scoped like any security test: written authorization, test accounts, synthetic data where possible, no real customer harm, and a clear stop condition." },
+            { t: "quiz", id: "appsec-ai" }
+          ]
+        },
+        {
+          id: "ai-soc-copilot",
+          title: "AI SOC copilot workflow",
+          summary: "Use AI to compress alert toil while keeping evidence, decisions and containment under analyst control.",
+          minutes: 7,
+          tags: ["ai", "soc", "detection"],
+          blocks: [
+            { t: "p", html: "A SOC copilot should reduce analyst toil without replacing judgment. Let it summarize, cluster, enrich and draft timelines; keep the system of record in SIEM, EDR, ticketing and the analyst approval trail." },
+            { t: "ol", items: [
+              "<strong>Collect evidence</strong> from approved sources: alerts, endpoint events, identity logs, network flows and case notes.",
+              "<strong>Summarize</strong> what happened in plain language, preserving links to source event ids.",
+              "<strong>Suggest checks</strong> such as related logins, process ancestry, lateral movement and data egress.",
+              "<strong>Draft actions</strong> as recommendations, not automatic containment, unless deterministic policy approves.",
+              "<strong>Record decisions</strong>: analyst, evidence, action taken, and why the case was closed or escalated."
+            ] },
+            { t: "compare",
+              bad: { title: "Risky copilot", items: ["Closes alerts without review", "Summarizes without source references", "Can isolate hosts or disable users from a prompt alone", "Trains on raw sensitive cases without policy"] },
+              good: { title: "Reliable copilot", items: ["Every summary cites event ids", "Actions require policy or analyst approval", "Sensitive data is minimized/redacted", "Outputs are measured for false confidence and missed context"] }
+            },
+            { t: "note", variant: "key", html: "The SOC rule is simple: <strong>AI can prepare the case; analysts own the decision.</strong> The more destructive the action, the more deterministic the gate must be." }
+          ]
+        },
+        {
+          id: "ai-secure-sdlc",
+          title: "AI in the secure SDLC",
+          summary: "Use AI during design, code review and dependency triage without turning generated output into unreviewed authority.",
+          minutes: 7,
+          tags: ["ai", "sdlc", "secure-by-design"],
+          blocks: [
+            { t: "p", html: "AI can move security review earlier by drafting threat models, finding risky sinks, explaining dependency advisories, proposing tests and summarizing design changes. Each output is a <em>candidate</em> until normal engineering review accepts it." },
+            { t: "table", headers: ["SDLC step", "AI-assisted security use"], rows: [
+              ["Requirements", "Identify abuse cases, sensitive data, roles and trust boundaries."],
+              ["Design", "Draft STRIDE-style threats and control options for reviewers."],
+              ["Code review", "Flag injection sinks, missing authorization, unsafe parsing and secret handling."],
+              ["Dependencies", "Summarize advisories, affected paths and upgrade risk."],
+              ["Testing", "Suggest negative tests for authz, validation, rate limits and logging."],
+              ["Release", "Generate rollback notes, security checklist deltas and residual-risk summaries."]
+            ] },
+            { t: "note", variant: "trap", html: "Generated code and generated security advice can both be wrong. Require tests, human review, source citations where possible, and a clear owner for accepting residual risk." },
+            { t: "note", variant: "tip", html: "The highest-value pattern is <strong>AI-assisted checklists from your own standards</strong>: feed it the change description and ask what local security requirements need review, then verify manually." }
+          ]
+        },
+        {
+          id: "ai-governance",
+          title: "AI security governance",
+          summary: "Model risk, audit logs, data retention and approval boundaries make AI systems operable and accountable.",
+          minutes: 7,
+          tags: ["ai", "governance", "risk"],
+          blocks: [
+            { t: "p", html: "AI governance is the operating system around AI features: who may use them, what data may enter, which models/tools are approved, how outputs are logged, and which actions require review. Without it, every team invents its own risk boundary." },
+            { t: "ul", items: [
+              "<strong>Data policy</strong> \u2014 classify what may be sent to models; redact secrets and regulated data unless explicitly approved.",
+              "<strong>Model and tool registry</strong> \u2014 approved providers, versions, use cases, owners and fallback plans.",
+              "<strong>Auditability</strong> \u2014 log prompts, retrieved sources, tool calls, approvals and final actions with sensitive fields minimized.",
+              "<strong>Retention</strong> \u2014 define how long prompts, outputs and embeddings are stored and how deletion requests are handled.",
+              "<strong>Risk gates</strong> \u2014 human or policy approval for money movement, account changes, external messages and privilege changes.",
+              "<strong>Evaluation</strong> \u2014 test for data leakage, unsafe tool calls, hallucinated authority and degraded behavior after prompt/model changes."
+            ] },
+            { t: "note", variant: "key", html: "Governance should make the safe path easy: approved models, approved data flows, reusable logging, standard approval gates and a clear review process for exceptions." },
+            { t: "quiz", id: "appsec-ai" }
+          ]
+        }
+      ]
+    },
+    /* ============================ HARDENING & SUPPLY CHAIN ============================ */
+    {
+      id: "hardening",
+      name: "Hardening & supply chain",
+      icon: "lock",
+      lessons: [
+        {
           id: "secure-headers",
           title: "Security headers & misconfiguration",
           summary: "A handful of HTTP response headers turn the browser into an ally — and most apps ship without them.",

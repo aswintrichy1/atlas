@@ -4,7 +4,7 @@
    same-origin asset (fonts, etc.) on first fetch. The whole app works
    with no network after the first visit.
    ===================================================================== */
-const CACHE = "citadel-v8";
+const CACHE = "citadel-v17";
 const CORE = [
   "./",
   "./index.html",
@@ -13,7 +13,6 @@ const CORE = [
   "./css/attack-matrix.css",
   "./css/exam.css",
   "./css/pwa.css",
-  "./fonts/fonts.css",
   "./js/widgets.js",
   "./js/widgets-crypto.js",
   "./js/widgets-ext.js",
@@ -30,6 +29,7 @@ const CORE = [
   "./js/curriculum-threats.js",
   "./js/curriculum-domains.js",
   "./js/curriculum-reversing.js",
+  "./js/practice-content.js",
   "./js/exam.js",
   "./js/pwa.js",
   "./js/app.js",

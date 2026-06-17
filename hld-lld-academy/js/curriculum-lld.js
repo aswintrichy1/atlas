@@ -523,7 +523,8 @@ window.TRACKS.lld = {
               "class PricingStrategy:                 # OCP via Strategy\n    def price(self, ticket): ...\nclass HourlyPricing(PricingStrategy):\n    def price(self, ticket):\n        hours = ceil(duration(ticket) / 3600)\n        return hours * RATE[ticket.spot.type]\n\nclass ParkingLotService:\n    def __init__(self, lot, assigner, pricing):\n        self.lot = lot\n        self.assigner = assigner          # DIP: injected strategies\n        self.pricing = pricing\n\n    def park(self, vehicle):\n        spot = self.assigner.find(self.lot, vehicle)   # may raise if full\n        spot.occupy(vehicle)\n        return Ticket(vehicle, spot, now())\n\n    def unpark(self, ticket):\n        fee = self.pricing.price(ticket)\n        ticket.spot.free()\n        return fee"
             },
             { t: "note", variant: "key", html: "Notice how SOLID drove the shape: each class has one job (SRP), the service depends on <em>strategy interfaces</em> not concretes (DIP), and new pricing/assignment rules are new classes (OCP). That's the difference between a design that ages well and one that calcifies." },
-            { t: "note", variant: "trap", html: "Don't forget <strong>concurrency</strong>: two cars must not be assigned the same spot. Mention locking the spot during assignment (or an atomic compare-and-set on spot status). Interviewers love that you remembered the race condition." }
+            { t: "note", variant: "trap", html: "Don't forget <strong>concurrency</strong>: two cars must not be assigned the same spot. Mention locking the spot during assignment (or an atomic compare-and-set on spot status). Interviewers love that you remembered the race condition." },
+            { t: "note", variant: "tip", html: "For a timed class-design drill, open <a class='inline' href='#/interview/parking-lot-classes'>Parking lot classes</a> and grade your answer against the <a class='inline' href='#/cheatsheets/lld-class-design'>LLD checklist</a>." }
           ]
         },
         {
@@ -547,6 +548,168 @@ window.TRACKS.lld = {
             },
             { t: "note", variant: "key", html: "Both operations are O(1): the map gives instant access, and the doubly-linked list lets you splice a node out and re-insert at the front in constant time. Sentinel head/tail nodes remove edge-case branching. Replay the HLD <a class='inline' href='#/hld/caching/eviction'>eviction widget</a> with this structure in mind — that animation <em>is</em> this list reordering itself." },
             { t: "note", variant: "tip", html: "Many languages give you this for free: Python's <code class='tok'>OrderedDict</code> (with <code class='tok'>move_to_end</code>) or Java's <code class='tok'>LinkedHashMap</code> implement exactly this. But knowing how to build it from a hash map + linked list is the point of the exercise — and a frequent interview ask." }
+          ]
+        },
+        {
+          id: "case-sync-operation-queue",
+          title: "Worked example: sync operation queue",
+          summary: "Turn offline-first sync into classes: durable commands, explicit states, retry policy, conflict strategies and migration steps.",
+          minutes: 10,
+          tags: ["practice", "offline-first", "state-machine", "strategy-pattern"],
+          blocks: [
+            { t: "p", html: "At LLD level, offline sync is a small set of collaborators: a durable <strong>operation queue</strong>, explicit operation states, a sync engine that drains safely, and pluggable conflict resolution. The HLD promise is offline edits; this lesson shapes the code that makes retries and recovery testable." },
+            { t: "h", text: "Core classes" },
+            { t: "table", headers: ["Class", "Responsibility"], rows: [
+              ["<code>SyncOperation</code>", "Immutable command: id, entity id, type, payload patch, base version, device id and attempt counters."],
+              ["<code>OperationStore</code>", "Persists pending operations and state transitions atomically with local entity changes."],
+              ["<code>SyncEngine</code>", "Pulls deltas, drains pending operations, handles retries and advances checkpoints."],
+              ["<code>ConflictResolver</code>", "Strategy interface for LWW, field merge, user resolution or domain-specific merge."],
+              ["<code>CheckpointStore</code>", "Stores server cursor, last pushed operation and recovery metadata."],
+              ["<code>MigrationStep</code>", "Small expand/backfill/verify/cutover task with checkpoint and rollback hooks."]
+            ] },
+            { t: "h", text: "Operation state machine" },
+            { t: "code", lang: "text", code:
+              "QUEUED -> SENDING -> ACKED -> COMPACTED\n" +
+              "   |        |          \n" +
+              "   |        v\n" +
+              "   |     RETRY_WAIT -> SENDING\n" +
+              "   |        |\n" +
+              "   v        v\n" +
+              "FAILED   CONFLICT -> RESOLVED -> QUEUED"
+            },
+            { t: "code", lang: "python", code:
+              "from dataclasses import dataclass\n" +
+              "from enum import Enum\n\n" +
+              "class OpState(Enum):\n" +
+              "    QUEUED = 'queued'\n" +
+              "    SENDING = 'sending'\n" +
+              "    ACKED = 'acked'\n" +
+              "    RETRY_WAIT = 'retry_wait'\n" +
+              "    CONFLICT = 'conflict'\n" +
+              "    FAILED = 'failed'\n\n" +
+              "@dataclass(frozen=True)\n" +
+              "class SyncOperation:\n" +
+              "    op_id: str\n" +
+              "    entity_id: str\n" +
+              "    op_type: str              # create, patch, delete, reorder\n" +
+              "    patch: dict\n" +
+              "    base_version: int\n" +
+              "    device_id: str\n\n" +
+              "class ConflictResolver:\n" +
+              "    def resolve(self, local, remote, op):\n" +
+              "        raise NotImplementedError\n\n" +
+              "class FieldMergeResolver(ConflictResolver):\n" +
+              "    def resolve(self, local, remote, op):\n" +
+              "        if touched_fields(op).isdisjoint(remote.changed_fields):\n" +
+              "            return remote.with_patch(op.patch)\n" +
+              "        return Conflict(local=local, remote=remote, operation=op)\n\n" +
+              "class SyncEngine:\n" +
+              "    def __init__(self, store, api, checkpoints, resolver, retry_policy):\n" +
+              "        self.store = store\n" +
+              "        self.api = api\n" +
+              "        self.checkpoints = checkpoints\n" +
+              "        self.resolver = resolver\n" +
+              "        self.retry_policy = retry_policy\n\n" +
+              "    def drain_once(self):\n" +
+              "        op = self.store.next_ready_operation()\n" +
+              "        if not op:\n" +
+              "            return\n" +
+              "        self.store.mark_sending(op.op_id)\n" +
+              "        try:\n" +
+              "            ack = self.api.push_operation(op)       # idempotent by op_id\n" +
+              "            self.store.apply_ack(op.op_id, ack.server_version)\n" +
+              "        except VersionConflict as e:\n" +
+              "            merged = self.resolver.resolve(e.local, e.remote, op)\n" +
+              "            self.store.record_resolution(op.op_id, merged)\n" +
+              "        except RetryableNetworkError:\n" +
+              "            self.store.schedule_retry(op.op_id, self.retry_policy.next_delay(op))"
+            },
+            { t: "note", variant: "key", html: "The queue state is durable, not just an in-memory array. If the app is killed after marking an operation <code class='tok'>SENDING</code>, startup recovery can move stale sending operations back to <code class='tok'>QUEUED</code> because the server dedupes by operation id." },
+            { t: "h", text: "Migration steps as objects" },
+            { t: "p", html: "The same object shape works for server-side migrations. Model each phase as a small step with <code class='tok'>run()</code>, <code class='tok'>verify()</code>, <code class='tok'>checkpoint()</code> and <code class='tok'>rollback()</code>; the runner persists progress so deploys and pauses are normal." },
+            { t: "code", lang: "python", code:
+              "class MigrationStep:\n" +
+              "    def run(self, checkpoint): ...\n" +
+              "    def verify(self): ...\n" +
+              "    def rollback(self): ...\n\n" +
+              "class BackfillUsersStep(MigrationStep):\n" +
+              "    def run(self, checkpoint):\n" +
+              "        batch = users.after(checkpoint.last_id).limit(500)\n" +
+              "        for user in batch:\n" +
+              "            new_profiles.upsert(user.id, transform(user))\n" +
+              "        return Checkpoint(last_id=batch[-1].id if batch else checkpoint.last_id)\n\n" +
+              "class MigrationRunner:\n" +
+              "    def tick(self):\n" +
+              "        step = self.plan.current_step()\n" +
+              "        checkpoint = self.store.load_checkpoint(step)\n" +
+              "        next_checkpoint = step.run(checkpoint)\n" +
+              "        self.store.save_checkpoint(step, next_checkpoint)\n" +
+              "        if step.verify():\n" +
+              "            self.plan.advance()"
+            },
+            { t: "note", variant: "trap", html: "Avoid a god-object <code class='tok'>SyncManager</code> that owns local persistence, HTTP, conflict policy, scheduling and UI events. Split by responsibility, inject the policies, and test crash/retry paths with fake stores and fake clocks." }
+          ]
+        },
+        {
+          id: "case-idempotent-workflow",
+          title: "Worked example: idempotent order workflow",
+          summary: "Design retry-safe order, payment and reservation code with an idempotency key store and explicit state machines.",
+          minutes: 9,
+          tags: ["practice", "workflow", "idempotency", "state-machine"],
+          blocks: [
+            { t: "p", html: "An idempotent workflow makes a scary question boring: <em>the client timed out after checkout; can it retry?</em> The answer should be yes. The same idempotency key returns the same order result, and side effects such as reserving inventory or charging a card happen at most once." },
+            { t: "h", text: "Core objects" },
+            { t: "table", headers: ["Class / table", "Responsibility"], rows: [
+              ["<code>IdempotencyKeyStore</code>", "Atomic create-or-read by key; stores request hash, status, response and expiry"],
+              ["<code>Order</code>", "Owns order state: NEW -> RESERVED -> PAID -> CONFIRMED, or CANCELLED"],
+              ["<code>Reservation</code>", "Owns inventory hold state: HELD -> CONFIRMED, RELEASED or EXPIRED"],
+              ["<code>PaymentAttempt</code>", "Owns payment state: INITIATED -> AUTHORIZED -> CAPTURED or FAILED"],
+              ["<code>WorkflowService</code>", "Orchestrates steps, retries safe operations and persists progress after each transition"]
+            ] },
+            { t: "h", text: "State machine" },
+            { t: "code", lang: "text", code:
+              "Order:       NEW -> RESERVED -> PAID -> CONFIRMED\n" +
+              "                         |         |        |\n" +
+              "                         v         v        v\n" +
+              "                      CANCELLED  PAYMENT_FAILED\n\n" +
+              "Reservation: HELD -> CONFIRMED\n" +
+              "                  -> RELEASED / EXPIRED\n\n" +
+              "Payment:     INITIATED -> AUTHORIZED -> CAPTURED\n" +
+              "                       -> FAILED"
+            },
+            { t: "h", text: "Idempotency key flow" },
+            { t: "code", lang: "python", code:
+              "class CheckoutService:\n" +
+              "    def checkout(self, key, request):\n" +
+              "        # Unique index: (tenant_id, key). request_hash prevents key reuse\n" +
+              "        record = key_store.create_or_get(key, hash(request))\n" +
+              "        if record.completed():\n" +
+              "            return record.response\n" +
+              "        if record.request_hash != hash(request):\n" +
+              "            raise Conflict('same key, different request')\n\n" +
+              "        try:\n" +
+              "            order = orders.get_or_create(record.workflow_id, request)\n" +
+              "            reservation = inventory.reserve_once(order.id, request.sku)\n" +
+              "            payment = payments.authorize_once(order.id, key, request.amount)\n" +
+              "            order.mark_paid(reservation.id, payment.id)\n" +
+              "            tickets.issue_once(order.id)        # dedupe by order id\n" +
+              "            response = order.confirmed_response()\n" +
+              "            key_store.complete(key, response)\n" +
+              "            return response\n" +
+              "        except RetryableError:\n" +
+              "            key_store.mark_in_progress(key)    # retry resumes safely\n" +
+              "            raise"
+            },
+            { t: "h", text: "Make each side effect retry-safe" },
+            { t: "ul", items: [
+              "<strong>Reserve inventory</strong> with a conditional write: create hold only if available stock exists and no hold exists for this order.",
+              "<strong>Authorize payment</strong> with provider idempotency key = checkout key or payment attempt id.",
+              "<strong>Issue ticket / send notification</strong> with an outbox table and a unique event id so a retried worker does not send twice.",
+              "<strong>Persist after every transition</strong> so a crash resumes from the latest durable state instead of starting over.",
+              "<strong>Expire keys</strong> after the business retry window, but never before downstream side effects are safely settled."
+            ] },
+            { t: "note", variant: "key", html: "The key store is not just a cache. It needs atomic insert, a uniqueness constraint, request-hash validation, stored response, status and expiry. For money flows, keep it durable and scoped by tenant." },
+            { t: "note", variant: "trap", html: "Do not put the idempotency key only on the API edge. Every non-idempotent side effect needs its own dedupe boundary: inventory by order id, payment by attempt id, notifications by event id." }
           ]
         },
         {
@@ -619,7 +782,8 @@ window.TRACKS.lld = {
               "        print(f'Dispensed {code}, change {change}')"
             },
             { t: "note", variant: "key", html: "Each state owns its transitions, so adding a new phase (e.g. a 'maintenance' mode) means adding one class \u2014 not editing a giant switch. That's the <strong>Open/Closed Principle</strong> from the SOLID module, made concrete." },
-            { t: "note", variant: "tip", html: "Making change is its own sub-problem: greedily returning the largest coins first is the classic approach, but it's a <em>coin-change</em> question underneath \u2014 mention that you'd guard for the 'exact change only' case when the till runs low on small denominations." }
+            { t: "note", variant: "tip", html: "Making change is its own sub-problem: greedily returning the largest coins first is the classic approach, but it's a <em>coin-change</em> question underneath \u2014 mention that you'd guard for the 'exact change only' case when the till runs low on small denominations." },
+            { t: "note", variant: "key", html: "To practice extensions like maintenance mode, refunds and exact-change-only behavior, use the <a class='inline' href='#/scenarios/lld-elevator-vending-extension'>LLD elevator/vending extension outline</a>." }
           ]
         },
         {
@@ -693,6 +857,7 @@ window.TRACKS.lld = {
             },
             { t: "note", variant: "key", html: "The <strong>Strategy</strong> pattern is the heart of the design: dispatching is a policy that changes (nearest-car, least-busy, energy-saving at night), so it lives behind an interface. Swap the strategy without touching <code class='tok'>ElevatorCar</code> or <code class='tok'>ElevatorSystem</code> \u2014 Open/Closed again." },
             { t: "note", variant: "tip", html: "Mention concurrency: real requests arrive from many threads, so the car's pending-stops set needs a lock or a thread-safe queue. Interviewers love when you note that the data structures are touched concurrently and name how you'd guard them." },
+            { t: "note", variant: "key", html: "For a harder follow-up, work through <a class='inline' href='#/scenarios/lld-elevator-vending-extension'>the elevator/vending extension outline</a> and state the machine invariants before adding classes." },
             { t: "quiz", id: "lld-practice" }
           ]
         }

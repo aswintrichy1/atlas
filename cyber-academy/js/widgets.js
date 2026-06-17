@@ -288,7 +288,10 @@
       let raw = input.value.trim();
       if (!raw) { stage.appendChild(h("p", { class: "phish-empty" }, "Enter a URL to inspect.")); return; }
       let url;
-      try { url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : "http://" + raw); }
+      try {
+        const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : "//" + raw;
+        url = new URL(candidate, "https://citadel-input.example");
+      }
       catch (e) { stage.appendChild(h("p", { class: "phish-empty" }, "That doesn't parse as a URL.")); return; }
 
       const host = url.hostname.toLowerCase();

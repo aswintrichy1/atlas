@@ -627,6 +627,166 @@ table.data td:first-child { font-weight: 600; }
 .practice-page .practice-sizes { margin-top: 16px; }
 @media (max-width: 560px) { .practice-banner .pb-go span { display: none; } .practice-banner { padding: 18px; gap: 14px; } }
 
+/* ---------- Guided learning paths ---------- */
+.path-banner { margin-top: 34px; background: linear-gradient(115deg, color-mix(in srgb, var(--indigo) 18%, var(--surface)), var(--surface)); }
+.path-banner .pb-ico { background: color-mix(in srgb, var(--indigo) 22%, transparent); }
+.path-banner .pb-ico svg, .path-banner .pb-go { stroke: var(--indigo); color: var(--indigo); }
+.path-page { max-width: 1100px; }
+.path-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; align-items: start; }
+.path-card {
+  position: relative; overflow: hidden; padding: 22px; border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border); background: var(--surface);
+}
+.path-card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.13;
+  background: radial-gradient(24rem 16rem at 110% -12%, var(--path), transparent 62%);
+}
+.path-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.path-badge, .path-count {
+  font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--path);
+}
+.path-count { color: var(--text-faint); }
+.path-card h2 { position: relative; font-family: var(--font-display); font-size: 1.45rem; line-height: 1.08; margin-bottom: 8px; }
+.path-card > p { position: relative; color: var(--text-dim); font-size: 0.92rem; margin-bottom: 18px; }
+.path-steps { position: relative; list-style: none; counter-reset: step; padding: 0; margin: 0 0 20px; }
+.path-steps li { counter-increment: step; margin-bottom: 8px; }
+.path-steps a {
+  display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: baseline;
+  padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-solid);
+  transition: 0.16s;
+}
+.path-steps a::before {
+  content: counter(step); width: 20px; height: 20px; display: grid; place-items: center;
+  border-radius: 7px; border: 1px solid color-mix(in srgb, var(--path) 46%, transparent);
+  color: var(--path); font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700;
+}
+.path-steps a:hover { border-color: color-mix(in srgb, var(--path) 55%, transparent); transform: translateX(2px); }
+.path-steps .ps-track {
+  font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--path);
+}
+.path-actions { position: relative; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.path-actions .btn { padding: 10px 15px; font-size: 0.86rem; background: var(--path); }
+.path-actions .copy-path.is-on { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 50%, transparent); }
+@media (max-width: 560px) {
+  .path-grid { grid-template-columns: 1fr; }
+  .path-steps a { grid-template-columns: 1fr; }
+  .path-steps a::before { display: none; }
+}
+
+/* ---------- Static practice library ---------- */
+.practice-library-page { max-width: 1120px; }
+.practice-route-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px; margin: 0 0 28px;
+}
+.practice-route-card {
+  position: relative; overflow: hidden; min-height: 150px; padding: 18px;
+  border: 1px solid var(--glass-border); border-radius: var(--radius);
+  background: var(--surface); transition: 0.2s var(--ease);
+}
+.practice-route-card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.12;
+  background: radial-gradient(18rem 12rem at 112% -18%, var(--violet), transparent 60%);
+}
+.practice-route-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--violet) 50%, transparent);
+}
+.practice-route-card .pr-count {
+  position: relative; font-family: var(--font-mono); font-size: 0.66rem;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--violet);
+}
+.practice-route-card h3 {
+  position: relative; font-family: var(--font-display); font-size: 1.18rem;
+  margin: 10px 0 6px;
+}
+.practice-route-card p { position: relative; color: var(--text-dim); font-size: 0.88rem; }
+.home-practice-grid { margin-top: 0; }
+.practice-subnav { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 34px; }
+.practice-subnav .practice-route-card { min-height: 118px; padding: 15px; }
+
+.scenario-stack { display: grid; gap: 20px; }
+.scenario-card, .prompt-card, .rubric-card, .cheat-card, .glossary-card {
+  border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+  background: var(--surface); padding: 24px; scroll-margin-top: 86px;
+}
+.scenario-kicker {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--violet); margin-bottom: 10px;
+}
+.scenario-card h2, .prompt-card h2, .rubric-card h2, .cheat-card h2, .glossary-card h2 {
+  font-family: var(--font-display); font-size: 1.45rem; line-height: 1.1; margin-bottom: 9px;
+}
+.scenario-prompt, .prompt-ask, .rubric-signal, .cheat-purpose, .glossary-card p {
+  color: var(--text-dim); margin-bottom: 18px;
+}
+.answer-outline { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.answer-part, .cheat-section {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface-solid); padding: 15px;
+}
+.answer-part h3, .prompt-columns h3, .cheat-section h3 {
+  font-family: var(--font-display); font-size: 1rem; margin-bottom: 10px; color: var(--accent);
+}
+.answer-part ul, .prompt-columns ul, .rubric-card ul, .cheat-section ul {
+  list-style: none; padding: 0; margin: 0;
+}
+.answer-part li, .prompt-columns li, .rubric-card li, .cheat-section li {
+  position: relative; padding-left: 20px; margin-bottom: 8px; color: var(--text);
+  font-size: 0.92rem;
+}
+.answer-part li::before, .prompt-columns li::before, .rubric-card li::before, .cheat-section li::before {
+  content: ""; position: absolute; left: 2px; top: 0.72em; width: 7px; height: 7px;
+  border: 1.5px solid var(--accent); border-radius: 2px; transform: translateY(-50%) rotate(45deg);
+}
+.practice-links { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+
+.prompt-grid, .rubric-grid, .cheat-grid, .glossary-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; align-items: start;
+}
+.prompt-columns {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px;
+}
+.prompt-columns > div {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface-solid); padding: 14px;
+}
+.prompt-columns > div:nth-child(2) h3 { color: var(--rose); }
+.prompt-columns > div:nth-child(2) li::before { border-color: var(--rose); }
+
+.rubric-card { border-top: 3px solid var(--violet); }
+.rubric-card:nth-child(2) { border-top-color: var(--cyan); }
+.rubric-card:nth-child(3) { border-top-color: var(--amber); }
+.rubric-coach {
+  margin-top: 14px; padding: 12px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); color: var(--text-dim); background: var(--surface-solid);
+}
+.rubric-coach strong { color: var(--accent); }
+
+.cheat-card { break-inside: avoid; }
+.cheat-section + .cheat-section { margin-top: 12px; }
+.glossary-card { min-height: 190px; }
+.glossary-related {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 16px;
+}
+.glossary-related span {
+  font-family: var(--font-mono); font-size: 0.66rem; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 0.09em; width: 100%;
+}
+.glossary-related a {
+  font-family: var(--font-mono); font-size: 0.72rem; padding: 5px 8px;
+  border: 1px solid var(--line); border-radius: 7px; color: var(--accent);
+  background: var(--surface-solid);
+}
+.glossary-related a:hover { border-color: var(--accent); transform: translateY(-1px); }
+@media (max-width: 560px) {
+  .practice-route-grid, .prompt-grid, .rubric-grid, .cheat-grid, .glossary-grid { grid-template-columns: 1fr; }
+  .scenario-card, .prompt-card, .rubric-card, .cheat-card, .glossary-card { padding: 18px; }
+}
+
 /* ---------- Command palette ---------- */
 .palette { position: fixed; inset: 0; z-index: 300; background: color-mix(in srgb, var(--ink-900) 62%, transparent); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding: 12vh 20px 20px; }
 .palette[hidden] { display: none; }

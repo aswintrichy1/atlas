@@ -197,7 +197,99 @@
     paint();
   };
 
-  /* 4 — Partition pruning */
+  /* 4 — Iceberg maintenance simulator */
+  window.Widgets["de-store-iceberg-maint"] = function (mount) {
+    shell(mount, "simulator", "Iceberg Maintenance Simulator",
+      "Choose table operations and watch files, snapshots, latency and storage cost move.");
+
+    var start = { files: 3200, snapshots: 72, manifests: 460, orphans: 90 };
+    var state = {};
+    var retention = "safe";
+    var stage = h("div", { class: "w-stage" });
+    var readout = h("div", { class: "w-readout" });
+    var log = h("div", { class: "dsa-log", style: "margin-top:12px" });
+
+    function resetState() {
+      state = { files: start.files, snapshots: start.snapshots, manifests: start.manifests, orphans: start.orphans };
+    }
+    function latency() {
+      return Math.round(6 + state.files / 110 + state.manifests / 35);
+    }
+    function cost() {
+      return Math.round(140 + state.files * 0.05 + state.snapshots * 1.1 + state.orphans * 0.7);
+    }
+    function metric(label, value, accent) {
+      return h("div", { class: "grid-cell" + (accent ? " dp-cur" : ""), style: "width:auto;height:auto;padding:10px 6px" },
+        h("div", { style: "font-family:var(--font-mono);font-size:.58rem;color:var(--text-faint);text-transform:uppercase" }, label),
+        h("div", { style: "font-size:1.05rem;font-weight:800;margin-top:3px;color:" + (accent ? "var(--accent)" : "var(--text)") }, value));
+    }
+    function addLog(kind, msg) {
+      log.insertBefore(h("div", { class: kind }, msg), log.firstChild);
+      while (log.children.length > 4) log.removeChild(log.lastChild);
+    }
+    function paint() {
+      stage.innerHTML = "";
+      var board = h("div", { class: "grid-board", style: "grid-template-columns:repeat(4,minmax(70px,1fr));gap:6px" },
+        metric("data files", state.files.toLocaleString(), state.files < 900),
+        metric("snapshots", String(state.snapshots), state.snapshots < 20),
+        metric("query latency", latency() + "s", latency() < 20),
+        metric("storage cost", "$" + cost() + "/mo", cost() < 320));
+      stage.appendChild(board);
+      stage.appendChild(h("p", { style: "font-family:var(--font-mono);font-size:.66rem;color:var(--text-faint);margin:10px 0 0" },
+        "manifests: " + state.manifests + " · orphan candidates: " + state.orphans + " · retention: " + (retention === "safe" ? "7 days" : "1 hour")));
+      readout.innerHTML = "";
+      readout.appendChild(ro("health", latency() < 20 && cost() < 320 ? "steady" : "needs maintenance", true));
+      readout.appendChild(ro("safe cleanup", retention === "safe" ? "allowed" : "blocked"));
+    }
+    function ingest() {
+      state.files += 950;
+      state.snapshots += 9;
+      state.manifests += 95;
+      state.orphans += 18;
+      addLog("no", "Streaming burst wrote many tiny files and fresh snapshots.");
+      paint();
+    }
+    function compact() {
+      state.files = Math.max(420, Math.round(state.files * 0.34));
+      state.manifests = Math.max(80, Math.round(state.manifests * 0.55));
+      state.snapshots += 1;
+      addLog("ok", "Compaction rewrote small files into fewer right-sized files.");
+      paint();
+    }
+    function expireSnapshots() {
+      state.snapshots = Math.max(8, Math.round(state.snapshots * 0.25));
+      state.manifests = Math.max(60, Math.round(state.manifests * 0.72));
+      addLog("ok", "Expired old snapshots; current data stays referenced.");
+      paint();
+    }
+    function removeOrphans() {
+      if (retention !== "safe") {
+        addLog("no", "Cleanup blocked: retention is shorter than in-flight job/query time.");
+        paint();
+        return;
+      }
+      state.orphans = 0;
+      addLog("ok", "Removed unreferenced files after the retention window.");
+      paint();
+    }
+
+    resetState();
+    mount.appendChild(h("div", { class: "widget-controls" },
+      seg([{ v: "safe", label: "7d retention" }, { v: "unsafe", label: "1h unsafe" }],
+        function () { return retention; }, function (v) { retention = v; paint(); }),
+      h("button", { class: "w-btn", onclick: ingest }, "Ingest burst"),
+      h("button", { class: "w-btn primary", onclick: compact }, "Compact"),
+      h("button", { class: "w-btn", onclick: expireSnapshots }, "Expire snapshots"),
+      h("button", { class: "w-btn", onclick: removeOrphans }, "Remove orphans"),
+      h("button", { class: "w-btn ghost", onclick: function () { resetState(); log.innerHTML = ""; paint(); } }, "Reset")
+    ));
+    mount.appendChild(stage);
+    mount.appendChild(readout);
+    mount.appendChild(log);
+    paint();
+  };
+
+  /* 5 — Partition pruning */
   window.Widgets["de-store-partition"] = function (mount) {
     shell(mount, "lab", "Partition Pruning Lab",
       "A table partitioned by (dt, region). A matching WHERE clause lets the engine skip whole partitions.");
@@ -238,6 +330,139 @@
       ], function () { return pred; }, function (v) { pred = v; paint(); })
     ));
     mount.appendChild(h("div", { class: "w-stage" }, board));
+    mount.appendChild(readout);
+    paint();
+  };
+
+  /* 6 — Lakehouse evolution drill */
+  window.Widgets["de-store-lakehouse-evolution"] = function (mount) {
+    shell(mount, "drill", "Lakehouse Evolution Drill",
+      "Choose which layer or table-format feature solves each lakehouse change.");
+    var cases = [
+      {
+        prompt: "A BI tool needs to find the table, its owner, schema, current snapshot and location without knowing object-storage paths.",
+        options: ["Catalog", "Parquet footer only", "Equality delete", "Compaction job"],
+        answer: 0,
+        reason: "The catalog maps a table name to table metadata and policies. The table format then interprets snapshots, manifests and files."
+      },
+      {
+        prompt: "A producer adds nullable column loyalty_tier to future rows. Old files do not contain it.",
+        options: ["Schema evolution", "Position delete", "Snapshot tag", "Random repartition"],
+        answer: 0,
+        reason: "Table formats track column identity and schema versions, so readers can project old files with null/default values for newly added columns."
+      },
+      {
+        prompt: "The team needs to delete all rows where customer_id = 42 without rewriting every matching data file immediately.",
+        options: ["Equality delete", "Sort-order evolution", "Catalog rename", "Checkpoint"],
+        answer: 0,
+        reason: "Equality deletes describe rows by key predicates. Position deletes identify exact file positions and are usually produced by engines that already know the row locations."
+      },
+      {
+        prompt: "A data science experiment should be reproducible even after new commits land on the main table.",
+        options: ["Snapshot branch or tag", "Drop old manifests", "Change compression", "Disable ACID"],
+        answer: 0,
+        reason: "Branches and tags pin named references to snapshots, letting experiments or audits keep a stable view while main evolves."
+      },
+      {
+        prompt: "Two writers both plan from snapshot 100. One rewrites files the other also read.",
+        options: ["Concurrent write conflict", "Watermark delay", "CDC tombstone", "Column projection"],
+        answer: 0,
+        reason: "Optimistic concurrency validates that files read or rewritten by a commit are still current. Conflicting writers retry from the latest snapshot."
+      }
+    ];
+    var cur = 0, picked = -1;
+    var stage = h("div", { class: "w-stage" });
+    var readout = h("div", { class: "w-readout" });
+    function paint() {
+      var c = cases[cur];
+      stage.innerHTML = "";
+      stage.appendChild(h("p", { style: "margin:0 0 12px;color:var(--text);font-weight:700" }, c.prompt));
+      var board = h("div", { class: "grid-board", style: "grid-template-columns:repeat(2,minmax(120px,1fr));gap:6px" });
+      c.options.forEach(function (o, i) {
+        var cls = "grid-cell";
+        if (picked === i) cls += i === c.answer ? " dp-cur" : " dp-fill";
+        var b = h("button", { class: cls, style: "width:auto;height:auto;padding:10px;text-align:left" }, o);
+        b.addEventListener("click", function () { picked = i; paint(); });
+        board.appendChild(b);
+      });
+      stage.appendChild(board);
+      if (picked >= 0) {
+        stage.appendChild(h("div", { class: "note " + (picked === c.answer ? "key" : "trap"), style: "margin-top:12px" },
+          h("div", { class: "note-body" }, h("strong", {}, picked === c.answer ? "Correct. " : "Review. "), c.reason)));
+      }
+      readout.innerHTML = "";
+      readout.appendChild(ro("scenario", (cur + 1) + " / " + cases.length, true));
+      readout.appendChild(ro("focus", ["catalog", "schema", "deletes", "refs", "conflicts"][cur]));
+    }
+    mount.appendChild(h("div", { class: "widget-controls" },
+      h("button", { class: "w-btn", onclick: function () { cur = Math.max(0, cur - 1); picked = -1; paint(); } }, "Prev"),
+      h("button", { class: "w-btn primary", onclick: function () { cur = Math.min(cases.length - 1, cur + 1); picked = -1; paint(); } }, "Next"),
+      h("button", { class: "w-btn ghost", onclick: function () { cur = 0; picked = -1; paint(); } }, "Reset")
+    ));
+    mount.appendChild(stage);
+    mount.appendChild(readout);
+    paint();
+  };
+
+  /* 7 — CDC to lakehouse apply log */
+  window.Widgets["de-store-cdc-lakehouse"] = function (mount) {
+    shell(mount, "simulator", "CDC to Lakehouse Apply Log",
+      "Apply Debezium-style events and watch an upsert table handle inserts, updates, deletes and tombstones.");
+    var events = [
+      { op: "snapshot", id: 1, after: { name: "Ava", plan: "free" }, note: "Initial snapshot row" },
+      { op: "c", id: 2, after: { name: "Bo", plan: "free" }, note: "Insert from log" },
+      { op: "u", id: 1, after: { name: "Ava", plan: "pro" }, note: "Update becomes an upsert" },
+      { op: "d", id: 2, before: { name: "Bo", plan: "free" }, note: "Delete becomes a tombstone/delete file" },
+      { op: "u", id: 1, after: { name: "Ava", plan: "pro", region: "EU" }, note: "Schema drift adds nullable region" }
+    ];
+    var pos = 0, schema = ["id", "name", "plan"], rows = {}, deletes = 0, files = 2;
+    var stage = h("div", { class: "w-stage" });
+    var readout = h("div", { class: "w-readout" });
+    function reset() { pos = 0; schema = ["id", "name", "plan"]; rows = {}; deletes = 0; files = 2; }
+    function apply(ev) {
+      if (ev.after && ev.after.region && schema.indexOf("region") === -1) schema.push("region");
+      if (ev.op === "d") { delete rows[ev.id]; deletes++; files++; return; }
+      rows[ev.id] = ev.after;
+      files++;
+    }
+    function replay(n) {
+      reset();
+      for (var i = 0; i < n; i++) apply(events[i]);
+      pos = n;
+    }
+    function paint() {
+      stage.innerHTML = "";
+      var ev = events[Math.min(pos, events.length - 1)];
+      var env = h("div", { class: "code-card", style: "margin-bottom:12px" },
+        h("pre", {}, h("code", {},
+          "{ op: \"" + ev.op + "\", id: " + ev.id + ", before: " + JSON.stringify(ev.before || null) +
+          ", after: " + JSON.stringify(ev.after || null) + " }")));
+      stage.appendChild(env);
+      var ids = Object.keys(rows).sort();
+      var cols = schema.slice();
+      var board = h("div", { class: "grid-board", style: "grid-template-columns:repeat(" + cols.length + ",minmax(54px,1fr));gap:4px" });
+      cols.forEach(function (c) { board.appendChild(h("div", { class: "grid-cell", style: "width:auto;font-family:var(--font-mono);font-size:.62rem;color:var(--accent)" }, c)); });
+      ids.forEach(function (id) {
+        cols.forEach(function (c) {
+          var val = c === "id" ? id : (rows[id][c] == null ? "null" : rows[id][c]);
+          board.appendChild(h("div", { class: "grid-cell dp-fill", style: "width:auto;font-size:.72rem" }, String(val)));
+        });
+      });
+      if (!ids.length) board.appendChild(h("div", { class: "grid-cell", style: "width:auto;grid-column:1/-1;color:var(--text-faint)" }, "No visible rows yet"));
+      stage.appendChild(board);
+      stage.appendChild(h("p", { style: "font-family:var(--font-mono);font-size:.66rem;color:var(--text-faint);margin:10px 0 0" }, ev.note));
+      readout.innerHTML = "";
+      readout.appendChild(ro("applied events", pos + " / " + events.length, true));
+      readout.appendChild(ro("delete markers", String(deletes)));
+      readout.appendChild(ro("files before compaction", String(files)));
+    }
+    mount.appendChild(h("div", { class: "widget-controls" },
+      h("button", { class: "w-btn primary", onclick: function () { if (pos < events.length) { apply(events[pos]); pos++; paint(); } } }, "Apply next"),
+      h("button", { class: "w-btn", onclick: function () { replay(events.length); paint(); } }, "Apply all"),
+      h("button", { class: "w-btn", onclick: function () { files = Math.max(1, Math.ceil(files / 2)); paint(); } }, "Compact files"),
+      h("button", { class: "w-btn ghost", onclick: function () { reset(); paint(); } }, "Reset")
+    ));
+    mount.appendChild(stage);
     mount.appendChild(readout);
     paint();
   };
@@ -325,6 +550,66 @@
         }
       ]
     },
+    "de-storage-lakehouse-evolution": {
+      title: "Lakehouse evolution checkpoint",
+      sub: "Catalogs, evolution, deletes, branches and conflicts.",
+      questions: [
+        {
+          q: "In a lakehouse, the catalog primarily answers\u2026",
+          options: ["Which table name points to which metadata, schema, owner and current snapshot", "Which bytes inside a Parquet page are compressed", "How many CPU cores a worker has", "Which Kafka consumer owns a partition"],
+          answer: 0,
+          explain: "The catalog is the naming and discovery layer. The table format metadata then defines snapshots, files, schemas, partition specs and row-level changes."
+        },
+        {
+          q: "Why do table formats track column identity instead of relying only on column position?",
+          options: ["To make CSV faster", "So schema evolution such as rename, add and reorder stays safe across old files", "To disable predicate pushdown", "So every write rewrites all files"],
+          answer: 1,
+          explain: "Stable column ids let readers understand old and new files even after names, ordering or nullable fields evolve."
+        },
+        {
+          q: "An equality delete differs from a position delete because it\u2026",
+          options: ["Deletes rows matching key values rather than exact file row positions", "Can only delete complete partitions", "Changes the catalog owner", "Is the same as compaction"],
+          answer: 0,
+          explain: "Equality deletes describe rows by values such as id = 42; position deletes identify exact file path and row position pairs."
+        },
+        {
+          q: "Snapshot branches and tags are useful because they\u2026",
+          options: ["Pin named references to snapshots for experiments, audits or controlled promotion", "Remove the need for object storage", "Force all writers to serialize through one process", "Convert Parquet to JSON"],
+          answer: 0,
+          explain: "Named snapshot references let teams isolate experiments or keep audit points while the main branch continues to receive commits."
+        },
+        {
+          q: "Open table formats usually handle concurrent writers with\u2026",
+          options: ["Optimistic commits plus validation and retry on conflicting file changes", "No validation at all", "One global database lock forever", "A watermark"],
+          answer: 0,
+          explain: "Writers plan from a snapshot, attempt an atomic metadata commit, and validate that the files they depend on have not changed. Conflicts retry from a fresh snapshot."
+        }
+      ]
+    },
+    "de-storage-lakehouse-ops": {
+      title: "Lakehouse ops checkpoint",
+      sub: "Iceberg maintenance, retention and cleanup.",
+      questions: [
+        {
+          q: "What does Iceberg compaction mainly do?",
+          options: ["Deletes all old snapshots", "Rewrites many small data files into fewer right-sized files", "Changes Parquet into CSV", "Turns off ACID commits"],
+          answer: 1,
+          explain: "Compaction creates a new committed snapshot that references fewer, larger data files. It improves scan throughput without changing the logical rows."
+        },
+        {
+          q: "Why must orphan-file cleanup use a conservative retention window?",
+          options: ["To make files smaller", "To avoid deleting files still being written or read by in-flight jobs", "To keep dashboards colorful", "To force a full table scan"],
+          answer: 1,
+          explain: "An orphan file is safe to delete only after you are sure no active writer, compaction job or long query can still reference it. Retention should exceed maximum job and query duration."
+        },
+        {
+          q: "Snapshot expiration is different from data-file deletion because it\u2026",
+          options: ["Only removes current table rows", "Drops old metadata first; data files are removable only when no retained snapshot references them", "Always deletes every old Parquet file immediately", "Disables time travel forever"],
+          answer: 1,
+          explain: "Expiring snapshots trims the metadata timeline. A data file can be physically deleted only after it is not referenced by any retained snapshot, so current table data remains safe."
+        }
+      ]
+    },
     "de-storage-ingestion": {
       title: "Ingestion checkpoint",
       sub: "Batch vs streaming, CDC and idempotency.",
@@ -348,6 +633,42 @@
           explain: "The high-watermark (e.g. a max updated_at or LSN) records how far you\u2019ve consumed, so the next run reads only records newer than it \u2014 the heart of incremental ingestion."
         }
       ]
+    },
+    "de-storage-cdc-lakehouse": {
+      title: "CDC lakehouse serving checkpoint",
+      sub: "Snapshots, log boundaries, upserts and tombstones.",
+      questions: [
+        {
+          q: "A reliable CDC bootstrap uses an initial snapshot plus a log boundary so that\u2026",
+          options: ["Rows changed during the snapshot are still captured exactly once from the log", "The source database can stop writing", "Deletes are ignored", "The sink can use plain append forever"],
+          answer: 0,
+          explain: "The connector records the log position associated with the snapshot, then streams changes after that boundary so the target is complete and continuous."
+        },
+        {
+          q: "In a Debezium-style event envelope, the most important fields for lakehouse apply are usually\u2026",
+          options: ["op, key, before/after row images and source log position", "Only the HTTP status code", "The browser theme", "The Parquet row-group size"],
+          answer: 0,
+          explain: "The operation, primary key, before/after payloads and source position let the sink order and apply inserts, updates, deletes and retries deterministically."
+        },
+        {
+          q: "A delete in CDC should generally be represented downstream as\u2026",
+          options: ["A tombstone or delete marker keyed by the primary key", "A duplicate insert", "A schema rename", "A checkpoint timeout"],
+          answer: 0,
+          explain: "Deletes are data changes, not missing rows. Lakehouse sinks apply them as delete files, tombstones or merges keyed by the source primary key."
+        },
+        {
+          q: "Why do CDC-to-lakehouse pipelines need compaction?",
+          options: ["Streaming writes create many small data and delete files", "Compaction captures the source transaction log", "Compaction replaces the catalog", "It guarantees every source update is valid"],
+          answer: 0,
+          explain: "Frequent micro-batch or streaming commits produce small files and delete files. Compaction rewrites them into efficient files while preserving table semantics."
+        },
+        {
+          q: "Schema drift in CDC is safest when\u2026",
+          options: ["The pipeline validates allowed changes and evolves the table schema deliberately", "Every new field is silently dropped", "All old files are deleted first", "The consumer guesses types from one record"],
+          answer: 0,
+          explain: "CDC streams can carry DDL-like changes. A production pipeline treats schema changes as contracts: validate, evolve compatible changes, and fail loudly on breaking ones."
+        }
+      ]
     }
   });
 
@@ -360,7 +681,7 @@
   window.TRACKS.storage = {
     id: "storage", name: "Storage & File Formats", short: "STORE",
     tagline: "Where bytes live and why it matters", color: "#38bdf8",
-    blurb: "How data is physically stored and read: OLTP vs OLAP, row vs columnar, Parquet/ORC/Avro, compression, the lake\u2013warehouse\u2013lakehouse trio, open table formats, partitioning, and ingestion patterns including CDC and idempotent loads.",
+    blurb: "How data is stored and read: OLTP vs OLAP, row vs columnar files, Parquet/ORC/Avro, compression, lakehouse table formats, catalogs, row-level change handling, CDC serving patterns and derived products.",
     modules: [
       {
         id: "foundations", name: "Foundations", icon: "compass",
@@ -548,7 +869,7 @@
             summary: "Open table formats add ACID, time-travel and schema evolution on top of files.",
             minutes: 7, tags: ["iceberg", "delta", "lakehouse"],
             blocks: [
-              { t: "p", html: "A <strong>lakehouse</strong> puts warehouse-grade guarantees on lake-grade storage. <strong>Apache Iceberg</strong>, <strong>Delta Lake</strong> and <strong>Apache Hudi</strong> are <em>open table formats</em>: a metadata layer over Parquet files that tracks which files make up the table at each <strong>snapshot</strong>." },
+              { t: "p", html: "A <strong>lakehouse</strong> adds table-level guarantees to object storage. <strong>Apache Iceberg</strong>, <strong>Delta Lake</strong> and <strong>Apache Hudi</strong> do not replace Parquet; they track snapshots, schemas and file lists so readers see one committed table state." },
               { t: "ul", items: [
                 "<strong>ACID</strong> \u2014 atomic commits; readers never see a half-written table.",
                 "<strong>Time-travel</strong> \u2014 query the table as of an old snapshot or version.",
@@ -556,12 +877,59 @@
                 "<strong>Hidden partitioning</strong> \u2014 (Iceberg) partition without leaking it into queries."
               ] },
               { t: "widget", id: "de-store-timetravel" },
-              { t: "note", variant: "key", html: "The trick is indirection: data files are <em>immutable</em>, and each commit writes new metadata pointing at the current set of files. Time-travel is just reading an older pointer; ACID is just swapping the pointer atomically." },
+              { t: "note", variant: "key", html: "The useful mental model is indirection: immutable data files stay put, while each commit publishes new metadata that points to the current files. Time travel reads an older pointer; atomic commit swaps the pointer." },
               { t: "code", lang: "sql", code:
                 "-- Read the table as it looked at an earlier snapshot\n" +
                 "SELECT * FROM sales VERSION AS OF 42;\n\n" +
                 "-- ...or as of a timestamp\n" +
                 "SELECT * FROM sales TIMESTAMP AS OF '2024-01-02 00:00:00';" }
+            ]
+          },
+          {
+            id: "catalogs-evolution-row-changes", title: "Catalogs, evolution & row-level changes",
+            summary: "Separate the naming catalog from the table format, then evolve schemas, partitions, deletes and branches safely.",
+            minutes: 9, tags: ["catalog", "evolution", "deletes"],
+            blocks: [
+              { t: "p", html: "A lakehouse has two cooperating layers. The <strong>catalog</strong> resolves a table name such as " + tok("prod.sales.orders") + " to ownership, policy and the current metadata pointer. The <strong>table format</strong> interprets that pointer: snapshots, schemas, partition specs, manifests and data/delete files." },
+              { t: "table", headers: ["Layer / feature", "What it controls", "Common mistake"], rows: [
+                ["Catalog", "Name, location, current metadata pointer, ownership and policies", "Treating object-storage folders as the source of truth"],
+                ["Table format", "ACID commits, snapshots, schema ids, partition specs and row-level deletes", "Thinking it replaces Parquet rather than organizing Parquet/ORC files"],
+                ["Schema evolution", "Add, drop, rename and reorder columns by identity", "Relying on column position and breaking old files"],
+                ["Partition/sort evolution", "Change future layout without rewriting all history", "Expecting old files to be physically rearranged"],
+                ["Branches/tags", "Named snapshot references for experiments, audits and promotion", "Letting every experiment write directly to main"]
+              ] },
+              { t: "widget", id: "de-store-lakehouse-evolution" },
+              { t: "p", html: "Row-level changes are represented as metadata plus new files, not in-place edits. An <strong>equality delete</strong> marks rows by key/value; a <strong>position delete</strong> marks exact file positions. Reads merge data and delete files until compaction rewrites a cleaner layout." },
+              { t: "p", html: "Concurrent writers use optimistic commits. Each writer plans from a snapshot, writes new files, then attempts an atomic metadata commit. If another writer changed files this commit depends on, validation fails and the writer retries from the newest snapshot instead of corrupting the table." },
+              { t: "note", variant: "key", html: "Think in layers: the <strong>catalog finds the table</strong>; the <strong>table format defines table history and correctness</strong>; Parquet/ORC hold the bytes. Mixing those layers leads to brittle lakes." },
+              { t: "note", variant: "trap", html: "Schema evolution does not make every change safe. Adding a nullable field is easy; changing business meaning, deleting a required field, or narrowing a type still needs contract review." },
+              { t: "quiz", id: "de-storage-lakehouse-evolution" }
+            ]
+          },
+          {
+            id: "iceberg-ops", title: "Iceberg table operations",
+            summary: "Keep lakehouse tables fast and safe: compact files, expire snapshots and clean orphans with retention discipline.",
+            minutes: 8, tags: ["iceberg", "maintenance", "runbook"],
+            blocks: [
+              { t: "p", html: "Iceberg keeps correctness through metadata commits; performance still needs care. Streaming and incremental writes create snapshots, manifests and small files. Maintenance keeps planning cheap and scans efficient without changing the logical rows." },
+              { t: "table", headers: ["Operation", "What it changes", "Why you run it"], rows: [
+                ["Compaction", "Rewrites many small data files into fewer right-sized files", "Cuts file-open overhead and improves scan throughput"],
+                ["Snapshot expiration", "Removes old metadata entries outside the retention window", "Limits time-travel history and metadata planning cost"],
+                ["Manifest rewrite", "Re-groups manifest metadata for cleaner planning", "Reduces metadata scans before queries read data"],
+                ["Orphan cleanup", "Deletes unreferenced files after a safety window", "Recovers storage from failed writes and expired snapshots"]
+              ] },
+              { t: "widget", id: "de-store-iceberg-maint" },
+              { t: "h", text: "Safe maintenance runbook" },
+              { t: "ol", items: [
+                "<strong>Measure first</strong> \u2014 file count, average size, snapshot count, manifest count, planning time and storage growth.",
+                "<strong>Compact hot partitions</strong> \u2014 rewrite tiny files into target-sized files, then validate counts and freshness.",
+                "<strong>Expire snapshots conservatively</strong> \u2014 preserve rollback, audit and expected time-travel windows.",
+                "<strong>Clean orphans last</strong> \u2014 keep retention longer than the slowest writer, compaction and query.",
+                "<strong>Document the policy</strong> \u2014 state retained history, maintenance cadence and ownership."
+              ] },
+              { t: "note", variant: "trap", html: "Never treat snapshot expiration as \u201cdelete old data files now.\u201d Expiration trims old metadata; physical files are removable only when no retained snapshot references them and the retention window has passed." },
+              { t: "note", variant: "key", html: "The safe order is <strong>compact, validate, expire snapshots, then remove orphans</strong>. Cleanup should be boring, scheduled and observable, not a panic command during an incident." },
+              { t: "quiz", id: "de-storage-lakehouse-ops" }
             ]
           },
           {
@@ -610,6 +978,55 @@
               },
               { t: "p", html: "A CDC pipeline usually does an initial <strong>snapshot</strong> of the table, then switches to streaming ongoing changes from the log offset where the snapshot ended \u2014 so you get a complete, continuous mirror." },
               { t: "note", variant: "key", html: "CDC is the standard way to feed OLTP data into the lake/warehouse without hammering production: read the log once, fan it out to everyone. It pairs naturally with the streaming track and with idempotent merges (next)." }
+            ]
+          },
+          {
+            id: "cdc-to-lakehouse", title: "CDC to lakehouse serving",
+            summary: "Turn a database snapshot plus change log into an upsertable lakehouse table that can serve analytics and features.",
+            minutes: 9, tags: ["cdc", "lakehouse", "upsert"],
+            blocks: [
+              { t: "p", html: "A robust CDC-to-lakehouse pipeline has a sharp <strong>snapshot + log boundary</strong>. First it copies a consistent snapshot of the source table. While that snapshot runs, the connector records the source log position. Then it streams every change after that position, so rows changed during the snapshot are not missed or double-applied." },
+              { t: "code", lang: "json", code:
+                "{\n" +
+                "  \"op\": \"u\",\n" +
+                "  \"key\": { \"customer_id\": 42 },\n" +
+                "  \"before\": { \"plan\": \"free\", \"updated_at\": \"10:00\" },\n" +
+                "  \"after\":  { \"plan\": \"pro\",  \"updated_at\": \"10:05\" },\n" +
+                "  \"source\": { \"lsn\": 81422, \"snapshot\": false }\n" +
+                "}" },
+              { t: "p", html: "A Debezium-style envelope carries the operation (" + tok("c") + ", " + tok("u") + ", " + tok("d") + "), the primary key, before/after images and a source log position. The lakehouse writer uses those fields to apply <strong>upserts</strong>, <strong>tombstones</strong> and retries deterministically." },
+              { t: "widget", id: "de-store-cdc-lakehouse" },
+              { t: "table", headers: ["CDC event", "Lakehouse action", "Serving concern"], rows: [
+                ["Snapshot row", "Insert or upsert by primary key", "Must align with the log boundary"],
+                ["Insert", "Add a row in the next committed snapshot", "Avoid tiny files from one-row commits"],
+                ["Update", "Upsert or write equality/position deletes plus new row", "Keep the latest source position per key"],
+                ["Delete", "Write a tombstone/delete marker", "Consumers must not treat missing after-image as data loss"],
+                ["Schema drift", "Validate and evolve compatible schema changes", "Breaking changes should fail loudly"]
+              ] },
+              { t: "note", variant: "key", html: "CDC lakehouse serving is a stateful apply problem: order by source position, merge by primary key, preserve deletes, and commit atomically into the table format." },
+              { t: "note", variant: "tip", html: "Plan maintenance from day one. Streaming writes create small data files and delete files; compaction and snapshot expiration keep the table fast without changing logical results." },
+              { t: "quiz", id: "de-storage-cdc-lakehouse" }
+            ]
+          },
+          {
+            id: "ai-oriented-derived-products", title: "Semi-structured & AI-oriented products",
+            summary: "Treat documents, graphs, embeddings, vector indexes and feature tables as derived products with lineage and refresh rules.",
+            minutes: 7, tags: ["documents", "embeddings", "features"],
+            blocks: [
+              { t: "p", html: "Not every useful dataset is a tidy fact table. Modern platforms also serve <strong>documents</strong>, <strong>graphs</strong>, <strong>embeddings</strong>, <strong>vector indexes</strong> and <strong>feature tables</strong>. The important shift is to treat each one as a derived data product, not a side file created by a notebook." },
+              { t: "table", headers: ["Product", "Built from", "Needs"], rows: [
+                ["Document chunks", "PDFs, tickets, wiki pages, transcripts", "Parsing version, chunking strategy, source pointers"],
+                ["Knowledge graph", "Entities and relationships extracted from events/docs", "Entity resolution, edge provenance, update rules"],
+                ["Embeddings", "Text, images or structured features", "Model/version, vector dimension, refresh cadence"],
+                ["Vector index", "Embedding table plus ANN index files", "Rebuild/merge policy, recall tests, tombstone handling"],
+                ["Feature table", "Cleaned facts aggregated by entity/time", "Point-in-time correctness, backfill and freshness SLOs"]
+              ] },
+              { t: "p", html: "The same lakehouse ideas still apply: keep raw inputs, store derived outputs with metadata, version the transformation, and make refreshes idempotent. A vector index should be traceable back to the exact document chunks and embedding model that produced it." },
+              { t: "compare",
+                bad: { title: "Ad hoc AI data", items: ["Chunks without source ids", "Embeddings with unknown model version", "Index rebuilds that drop deletes", "Features computed with future data leakage"] },
+                good: { title: "Data product mindset", items: ["Stable ids and lineage", "Model and schema version recorded", "Upserts/tombstones propagated", "Point-in-time tests for features"] }
+              },
+              { t: "note", variant: "key", html: "AI-oriented pipelines are still data engineering pipelines. Their outputs are vectors and indexes instead of only tables, but they need the same contracts: lineage, quality checks, idempotent refresh and governed serving." }
             ]
           },
           {

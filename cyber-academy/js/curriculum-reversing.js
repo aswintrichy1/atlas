@@ -260,6 +260,19 @@ window.TRACKS.reversing = {
             },
             { t: "code", lang: "c", code: "// UNSAFE: copies until a NUL byte, with no bound on the destination\nvoid greet(const char *name) {\n    char buf[64];\n    strcpy(buf, name);              // overflows buf when name is too long\n    printf(\"Hi, %s\\n\", buf);\n}\n\n// SAFER: bound every write to the size of the destination\nvoid greet_safe(const char *name) {\n    char buf[64];\n    snprintf(buf, sizeof(buf), \"Hi, %s\", name);  // never writes past buf\n    fputs(buf, stdout);\n}" },
             { t: "note", variant: "key", html: "The durable fix is <strong>memory safety</strong>. Managed and safe languages \u2014 Rust, Go, Java, C#, Python \u2014 check bounds and manage lifetimes for you, eliminating whole classes of these bugs. When you must use C/C++, treat every buffer size as sacred." },
+            { t: "h", text: "A practical memory-safety roadmap" },
+            {
+              t: "table",
+              headers: ["Step", "What changes"],
+              rows: [
+                ["Inventory", "Find internet-facing parsers, protocol handlers, file readers, and privileged native code first"],
+                ["Harden", "Turn on compiler mitigations, sanitizers in testing, fuzzing, and safer library calls"],
+                ["Contain", "Sandbox risky components and narrow privileges so a memory bug has less reach"],
+                ["Migrate", "Rewrite small, high-risk modules in memory-safe languages when interfaces are stable"],
+                ["Prevent", "Require new code to justify unsafe blocks and pass bounds/lifetime review"]
+              ]
+            },
+            { t: "note", variant: "tip", html: "Secure by Design does not mean \u201crewrite everything tomorrow.\u201d It means stop adding new memory-unsafe surface, isolate the old sharp edges, and migrate the highest-risk parts on a planned roadmap." },
             { t: "note", variant: "tip", html: "Find these before anyone else does: <strong>fuzzing</strong> throws malformed inputs at the program, and sanitizers like <strong>AddressSanitizer</strong> turn silent corruption into a loud, immediate crash during testing." },
             { t: "note", variant: "warn", html: "Study these bug classes only in authorized labs or CTFs against targets built for it. Never probe software or systems you do not own or have written permission to test." }
           ]

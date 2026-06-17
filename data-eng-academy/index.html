@@ -9,8 +9,6 @@
   <link rel="apple-touch-icon" href="icon.svg" />
   <title>Cascade · The Data Engineering Atlas</title>
 
-  <!-- Fonts are self-hosted in /fonts — no external requests -->
-  <link rel="stylesheet" href="fonts/fonts.css" />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/exam.css" />
   <link rel="stylesheet" href="css/pwa.css" />
@@ -66,6 +64,10 @@
     <aside class="sidebar" id="sidebar" aria-label="Curriculum navigation">
       <nav id="nav" class="nav"></nav>
       <div class="sidebar-foot">
+        <a href="#/paths" class="foot-link" id="pathsLink">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/></svg>
+          Learning paths
+        </a>
         <a href="#/review" class="foot-link" id="studyListLink">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
           Study list
@@ -77,6 +79,26 @@
         <a href="#/flashcards" class="foot-link" id="flashcardsLink">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
           Flashcards
+        </a>
+        <a href="#/scenarios" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h11l3 3v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM8 9h8M8 13h8M8 17h5"/></svg>
+          Scenarios
+        </a>
+        <a href="#/interview" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+          Interview prep
+        </a>
+        <a href="#/rubrics" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Rubrics
+        </a>
+        <a href="#/cheatsheets" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+          Cheat sheets
+        </a>
+        <a href="#/glossary" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10a4 4 0 0 1 4 4v8H8a4 4 0 0 0-4 4V6zM18 10h2a2 2 0 0 1 2 2v8h-4"/></svg>
+          Glossary
         </a>
         <div class="foot-backup">
           <button id="exportData" class="ghost-btn ghost-sm" title="Download a backup of your progress">Export</button>
@@ -105,6 +127,7 @@
   <script src="js/track-orchestration.js" defer></script>
   <script src="js/track-sql.js" defer></script>
   <script src="js/track-sparksql.js" defer></script>
+  <script src="js/practice-content.js" defer></script>
   <script src="js/exam.js" defer></script>
   <script src="js/pwa.js" defer></script>
   <script src="js/app.js" defer></script>

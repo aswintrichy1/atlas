@@ -180,6 +180,79 @@
     paint();
   };
 
+  /* 4 — Semantic metric YAML validation drill */
+  window.Widgets["de-batch-semantic-yaml"] = function (mount) {
+    shell(mount, "drill", "Metric Contract Validator",
+      "Pick a contract check and see the exact semantic-layer issue it is meant to catch before a metric reaches BI.");
+    var checks = [
+      {
+        id: "grain",
+        label: "Entity + grain",
+        snippet:
+          "semantic_models:\n" +
+          "  - name: orders\n" +
+          "    model: ref('fct_orders')\n" +
+          "    defaults:\n" +
+          "      agg_time_dimension: ordered_at\n" +
+          "    entities:\n" +
+          "      - name: order_id\n" +
+          "        type: primary\n" +
+          "    measures:\n" +
+          "      - name: order_total\n" +
+          "        agg: sum",
+        result: "valid",
+        fix: "The metric has a primary entity and a declared time grain, so downstream tools know the row identity and safe aggregation path."
+      },
+      {
+        id: "ratio",
+        label: "Ratio inputs",
+        snippet:
+          "metrics:\n" +
+          "  - name: refund_rate\n" +
+          "    type: ratio\n" +
+          "    type_params:\n" +
+          "      numerator: refunds\n" +
+          "      denominator: orders",
+        result: "review filters",
+        fix: "Ratio metrics should define compatible numerator and denominator measures with the same grain and filters, or the percentage will drift by dimension."
+      },
+      {
+        id: "conversion",
+        label: "Conversion window",
+        snippet:
+          "metrics:\n" +
+          "  - name: trial_to_paid\n" +
+          "    type: conversion\n" +
+          "    type_params:\n" +
+          "      base_measure: trials\n" +
+          "      conversion_measure: paid_signups\n" +
+          "      window: 14 days",
+        result: "valid",
+        fix: "A conversion metric must name the starting event, conversion event and time window, so late conversions are counted consistently."
+      }
+    ];
+    var cur = checks[0];
+    var code = h("code", { style: "font-size:.72rem;white-space:pre-wrap" }, "");
+    var readout = h("div", { class: "w-readout" });
+    var fix = h("p", { style: "font-size:.84rem;color:var(--text-dim);margin-top:8px" }, "");
+    function paint() {
+      code.textContent = cur.snippet;
+      readout.innerHTML = "";
+      readout.appendChild(ro("check", cur.label, true));
+      readout.appendChild(ro("result", cur.result));
+      fix.textContent = cur.fix;
+    }
+    mount.appendChild(h("div", { class: "widget-controls" },
+      seg(checks.map(function (c) { return { v: c.id, label: c.label }; }),
+        function () { return cur.id; },
+        function (v) { cur = checks.filter(function (c) { return c.id === v; })[0]; paint(); })
+    ));
+    mount.appendChild(h("div", { class: "code-card" }, h("pre", {}, code)));
+    mount.appendChild(readout);
+    mount.appendChild(fix);
+    paint();
+  };
+
   /* =====================================================================
      QUIZZES
      ===================================================================== */
@@ -257,6 +330,42 @@
         }
       ]
     },
+    "de-batch-dbt-prod": {
+      title: "dbt production & semantic layer checkpoint",
+      sub: "Project layers, slim CI, contracts and metric types.",
+      questions: [
+        {
+          q: "A common production dbt layer stack is\u2026",
+          options: ["raw snapshots only", "sources \u2192 staging \u2192 intermediate \u2192 marts \u2192 semantic metrics", "dashboards \u2192 raw tables \u2192 staging", "one model per dashboard with no shared refs"],
+          answer: 1,
+          explain: "Sources define external inputs; staging cleans one source at a time; intermediate models compose reusable logic; marts expose business-ready facts/dimensions; semantic metrics sit on top of stable marts."
+        },
+        {
+          q: "In dbt CI, state selection is useful because it lets you\u2026",
+          options: ["ignore changed models", "build only modified nodes and their impacted children from the prior production manifest", "skip tests on pull requests", "hardcode production table names"],
+          answer: 1,
+          explain: "Slim CI compares the branch manifest with the production manifest and runs selectors like state:modified+ so the pull request validates only changed resources and downstream dependents."
+        },
+        {
+          q: "Which materialization is usually best for a large fact that receives daily changes?",
+          options: ["ephemeral", "incremental with a reliable unique key and lookback window", "view over raw JSON forever", "seed"],
+          answer: 1,
+          explain: "Incremental models merge or append only new/changed rows. Large mutable facts need a unique key, late-arrival lookback and periodic full-refresh/backfill path to stay correct."
+        },
+        {
+          q: "A ratio metric such as refund rate should be modeled as\u2026",
+          options: ["SUM(refund_rate)", "a numerator metric divided by a denominator metric at a compatible grain", "a string dimension", "a cumulative count only"],
+          answer: 1,
+          explain: "Ratios are non-additive. Define the numerator and denominator separately, then divide after aggregation so slicing by date, region or product remains mathematically valid."
+        },
+        {
+          q: "An exposure in dbt documents\u2026",
+          options: ["a downstream consumer such as a dashboard, notebook, ML job or report", "a private temp table only", "warehouse CPU usage", "a source password"],
+          answer: 0,
+          explain: "Exposures make downstream dependencies visible in lineage. If a mart changes, owners can see which dashboards, notebooks or jobs depend on it before they break consumers."
+        }
+      ]
+    },
     "de-batch-perf": {
       title: "Performance & tuning checkpoint",
       sub: "Files, caching and AQE.",
@@ -292,7 +401,7 @@
   window.TRACKS.batch = {
     id: "batch", name: "Batch Processing & Spark", short: "BATCH",
     tagline: "Crunch big data, partition by partition", color: "#f5a623",
-    blurb: "Distributed batch compute from MapReduce to Spark: the DAG and lazy evaluation, partitions and the shuffle, data skew and join strategies, ETL vs ELT with dbt, incremental models and backfills, idempotency, and the tuning that makes jobs fast.",
+    blurb: "Distributed batch compute from MapReduce to Spark: lazy DAGs, partitions, shuffles, skew and joins, ELT with production dbt, semantic metrics, incremental backfills, idempotency and practical tuning.",
     modules: [
       {
         id: "compute", name: "Distributed Compute", icon: "blocks",
@@ -436,7 +545,110 @@
                 "FROM {{ ref('stg_orders') }} o\n" +
                 "JOIN {{ ref('stg_customers') }} c USING (customer_id)\n" +
                 "GROUP BY 1, 2" },
-              { t: "note", variant: "key", html: "Because " + tok("ref()") + " builds the DAG, dbt always runs models in dependency order and can rebuild just what changed. The DAG is the project." }
+              { t: "table", headers: ["Layer", "Purpose", "Typical materialization"], rows: [
+                ["sources", "External tables and freshness checks", "source definitions"],
+                ["staging", "One clean, renamed model per source object", "view"],
+                ["intermediate", "Reusable joins and business logic", "view / ephemeral"],
+                ["marts", "Consumer-ready facts, dimensions and wide tables", "table / incremental"],
+                ["semantic", "Metrics, dimensions and entities exposed to tools", "YAML objects"]
+              ] },
+              { t: "note", variant: "key", html: "Because " + tok("ref()") + " builds the DAG, dbt always runs models in dependency order and can rebuild just what changed. The DAG is the project, and the layer names make ownership and review possible." }
+            ]
+          },
+          {
+            id: "dbt-production", title: "dbt in production",
+            summary: "Ship transformations with tests, docs, exposures, slim CI and state-aware deploys.",
+            minutes: 8, tags: ["dbt", "ci", "data-quality"],
+            blocks: [
+              { t: "p", html: "A production dbt project is SQL plus operating rules: model layers, materialization choices, tests, docs, exposures and state-aware deploys. A pull request should prove the changed graph still builds, satisfies assumptions and protects downstream consumers." },
+              { t: "compare",
+                bad: { title: "Notebook-style dbt", items: ["Models named after dashboards", "No source freshness or uniqueness tests", "Full project rebuild on every PR", "Dashboards depend on private staging tables"] },
+                good: { title: "Production dbt", items: ["Layered model folders with owners", "Generic and singular tests block bad data", "Slim CI builds modified nodes and children", "Exposures document dashboards, notebooks and ML jobs"] }
+              },
+              { t: "code", lang: "yaml", code:
+                "# models/marts/schema.yml\n" +
+                "models:\n" +
+                "  - name: fct_orders\n" +
+                "    description: One row per settled order.\n" +
+                "    config:\n" +
+                "      materialized: incremental\n" +
+                "      unique_key: order_id\n" +
+                "    columns:\n" +
+                "      - name: order_id\n" +
+                "        tests: [not_null, unique]\n" +
+                "      - name: customer_id\n" +
+                "        tests:\n" +
+                "          - relationships:\n" +
+                "              to: ref('dim_customer')\n" +
+                "              field: customer_id\n" +
+                "exposures:\n" +
+                "  - name: executive_revenue_dashboard\n" +
+                "    type: dashboard\n" +
+                "    depends_on: [ref('fct_orders')]\n" +
+                "    owner:\n" +
+                "      name: Revenue Analytics" },
+              { t: "code", lang: "bash", code:
+                "# PR validation using the previous production manifest as state\n" +
+                "dbt deps\n" +
+                "dbt build --select state:modified+ --defer --state artifacts/prod_manifest\n" +
+                "\n" +
+                "# Nightly confidence run for high-value marts\n" +
+                "dbt source freshness\n" +
+                "dbt build --select tag:gold+" },
+              { t: "note", variant: "key", html: "<strong>Slim CI</strong> compares the branch to the last production manifest, builds modified nodes and their children, and defers unchanged parents to production objects. Fast feedback, realistic dependencies." },
+              { t: "note", variant: "trap", html: "Materialization is a contract. Views are cheap and fresh but can push cost to every reader; tables are fast but need rebuilds; incremental models are economical but require a unique key, late-arrival lookback and full-refresh plan." }
+            ]
+          },
+          {
+            id: "dbt-semantic-layer", title: "Semantic models & metric types",
+            summary: "Define entities, dimensions, measures and metrics once so every consumer gets the same number.",
+            minutes: 8, tags: ["dbt", "semantic-layer", "metrics"],
+            blocks: [
+              { t: "p", html: "The semantic layer turns marts into reusable business vocabulary. A <strong>semantic model</strong> names the model, entities, dimensions and measures; <strong>metrics</strong> compose those measures into governed definitions." },
+              { t: "widget", id: "de-batch-semantic-yaml" },
+              { t: "table", headers: ["Metric type", "Use it for", "Example"], rows: [
+                ["simple", "One aggregated measure", "gross revenue = sum(order_amount)"],
+                ["ratio", "Numerator divided by denominator", "refund rate = refunds / orders"],
+                ["cumulative", "Running total over time", "lifetime revenue to date"],
+                ["derived", "Formula combining metrics", "net revenue = gross revenue - refunds"],
+                ["conversion", "Start event to end event within a window", "trial to paid within 14 days"]
+              ] },
+              { t: "code", lang: "yaml", code:
+                "semantic_models:\n" +
+                "  - name: orders\n" +
+                "    model: ref('fct_orders')\n" +
+                "    defaults:\n" +
+                "      agg_time_dimension: ordered_at\n" +
+                "    entities:\n" +
+                "      - name: order_id\n" +
+                "        type: primary\n" +
+                "      - name: customer_id\n" +
+                "        type: foreign\n" +
+                "    dimensions:\n" +
+                "      - name: ordered_at\n" +
+                "        type: time\n" +
+                "        type_params:\n" +
+                "          time_granularity: day\n" +
+                "      - name: channel\n" +
+                "        type: categorical\n" +
+                "    measures:\n" +
+                "      - name: gross_revenue\n" +
+                "        agg: sum\n" +
+                "        expr: gross_amount\n" +
+                "\n" +
+                "metrics:\n" +
+                "  - name: gross_revenue\n" +
+                "    type: simple\n" +
+                "    type_params:\n" +
+                "      measure: gross_revenue\n" +
+                "  - name: refund_rate\n" +
+                "    type: ratio\n" +
+                "    type_params:\n" +
+                "      numerator: refunds\n" +
+                "      denominator: orders" },
+              { t: "note", variant: "trap", html: "Never sum a precomputed percentage. Ratio and conversion metrics must aggregate their components first, then divide at the requested grain. Otherwise a store with 10 orders and a store with 10,000 orders get equal weight." },
+              { t: "note", variant: "key", html: "Semantic YAML is the executable part of a metric contract: meaning, valid dimensions, time grain, tests and owner are visible to every consumer." },
+              { t: "quiz", id: "de-batch-dbt-prod" }
             ]
           },
           {

@@ -404,6 +404,54 @@
           options: ["Store raw files", "Define metrics once so every tool computes them consistently", "Replace the warehouse", "Encrypt data"],
           answer: 1,
           explain: "A semantic/metrics layer centralizes metric definitions (e.g. 'active user') so dashboards and queries don\u2019t drift into conflicting numbers."
+        },
+        {
+          q: "In a data product, an output port is best described as\u2026",
+          options: ["A stable consumer-facing interface such as a table, stream, API or metric", "A warehouse compute cluster", "A raw staging folder", "A private notebook"],
+          answer: 0,
+          explain: "Output ports are the contract-backed interfaces consumers depend on. They expose the product without coupling consumers to every internal table or pipeline detail."
+        },
+        {
+          q: "A metric contract should define the metric\u2019s\u2026",
+          options: ["Color palette", "Formula, grain, allowed dimensions, owner and quality/freshness checks", "File compression codec only", "Dashboard layout"],
+          answer: 1,
+          explain: "A useful metric contract pins down how the number is computed, where it can be grouped, who owns it and which tests prove it is still trustworthy."
+        }
+      ]
+    },
+    "de-modeling-governance": {
+      title: "Data product, mesh & correctness checkpoint",
+      sub: "Contracts, ownership, reconciliation and temporal joins.",
+      questions: [
+        {
+          q: "A data product output port should be treated like\u2026",
+          options: ["a private staging table", "a stable, versioned interface with owner, schema, SLOs and quality checks", "a screenshot of a dashboard", "a one-off notebook cell"],
+          answer: 1,
+          explain: "Consumers need an explicit contract: schema, grain, freshness, quality checks, access rules, change policy and owner. Private implementation tables can change freely behind that interface."
+        },
+        {
+          q: "The data mesh operating model relies on\u2026",
+          options: ["one central team owning every dataset", "domain ownership, federated governance and self-service platform capabilities", "no standards at all", "every dashboard defining its own metrics"],
+          answer: 1,
+          explain: "Mesh decentralizes ownership to domains while keeping interoperability through federated standards and a platform that makes good behavior easy."
+        },
+        {
+          q: "A source-target reconciliation check commonly compares\u2026",
+          options: ["font sizes", "row counts, key coverage, sums and checksums between source and modeled target", "dashboard colors", "browser cache state"],
+          answer: 1,
+          explain: "Reconciliation proves the pipeline did not lose, duplicate or mutate records unexpectedly. Counts catch bulk issues; EXCEPT/key checks find missing rows; sums and checksums catch value drift."
+        },
+        {
+          q: "For a Type 2 dimension, a point-in-time join should use\u2026",
+          options: ["the latest dimension row for every fact", "fact event time between the dimension version's valid_from and valid_to", "a random surrogate key", "the dashboard refresh time"],
+          answer: 1,
+          explain: "Historical facts must join to the dimension version that was true when the event happened. Joining everything to the latest row rewrites history."
+        },
+        {
+          q: "Why are ratios and percentages non-additive?",
+          options: ["They are stored as text", "A sum or average of precomputed ratios can weight groups incorrectly", "They never use dimensions", "They require no denominator"],
+          answer: 1,
+          explain: "Ratios must aggregate numerator and denominator first, then divide. Averaging store-level refund rates gives small stores the same weight as large stores."
         }
       ]
     }
@@ -418,7 +466,7 @@
   window.TRACKS.modeling = {
     id: "modeling", name: "Data Modeling & Warehousing", short: "MODEL",
     tagline: "Shape data so questions are easy", color: "#a78bfa",
-    blurb: "From normalization to the star schema: facts and dimensions, grain, slowly changing dimensions, surrogate keys, and the great methodology debate \u2014 Kimball vs Inmon vs Data Vault \u2014 plus wide tables and the semantic layer of the modern stack.",
+    blurb: "From normalization to star schemas: facts, dimensions, grain, SCD history, surrogate keys, Kimball/Inmon/Data Vault trade-offs, data products, data mesh, temporal correctness and governed metric meaning.",
     modules: [
       {
         id: "relational", name: "Relational Foundations", icon: "blocks",
@@ -577,6 +625,43 @@
               { t: "note", variant: "trap", html: "Inferred members are easy to create and easy to forget \u2014 monitor for dimension rows that never got enriched, or your reports will quietly attribute sales to \u201cUnknown.\u201d" },
               { t: "quiz", id: "de-modeling-scd" }
             ]
+          },
+          {
+            id: "reconciliation-temporal-correctness", title: "Reconciliation & temporal correctness",
+            summary: "Prove source and target match, then join every fact to the version that was true at event time.",
+            minutes: 8, tags: ["reconciliation", "time-zones", "point-in-time"],
+            blocks: [
+              { t: "p", html: "A model can look clean and still be wrong. <strong>Reconciliation</strong> proves that a target table agrees with its source, while <strong>temporal correctness</strong> proves each row is interpreted at the right point in time. Warehouses fail quietly when either side is skipped." },
+              { t: "table", headers: ["Check", "What it catches", "Typical signal"], rows: [
+                ["Row count", "Bulk loss or duplication", "source_count = target_count"],
+                ["Key coverage", "Missing or extra business keys", "source EXCEPT target and target EXCEPT source"],
+                ["Aggregate tie-out", "Measure drift after joins or filters", "SUM(amount), COUNT(DISTINCT id)"],
+                ["Checksum", "Value changes across many columns", "hash of stable, normalized fields"],
+                ["Freshness / lateness", "Stale loads and late facts", "max(event_ts), max(loaded_at)"]
+              ] },
+              { t: "code", lang: "sql", code:
+                "-- key coverage: rows in source not represented in the modeled target\n" +
+                "SELECT order_id FROM src_orders\n" +
+                "EXCEPT\n" +
+                "SELECT order_id FROM fct_orders;\n" +
+                "\n" +
+                "-- aggregate tie-out: count and amount should agree after accepted filters\n" +
+                "SELECT 'source' AS side, COUNT(*) AS rows, SUM(amount) AS amount FROM src_orders\n" +
+                "UNION ALL\n" +
+                "SELECT 'target' AS side, COUNT(*) AS rows, SUM(gross_amount) AS amount FROM fct_orders;" },
+              { t: "p", html: "Temporal bugs usually come from mixing <strong>event time</strong>, <strong>load time</strong> and <strong>reporting time</strong>. Store timestamps in a canonical zone, keep the original source offset when it matters, and decide how late facts are repaired: lookback windows, partition rewrites, or a scheduled full-refresh/backfill." },
+              { t: "code", lang: "sql", code:
+                "-- point-in-time join against an SCD-2 dimension\n" +
+                "SELECT f.order_id, f.order_ts, d.customer_segment, f.amount\n" +
+                "FROM fct_orders f\n" +
+                "JOIN dim_customer d\n" +
+                "  ON f.customer_id = d.customer_id\n" +
+                " AND f.order_ts >= d.valid_from\n" +
+                " AND f.order_ts < COALESCE(d.valid_to, TIMESTAMP '9999-12-31');" },
+              { t: "note", variant: "trap", html: "The easiest historical bug is joining every fact to " + tok("is_current = true") + ". That silently restates last year using today\u2019s customer segment, region or product category." },
+              { t: "note", variant: "key", html: "Additive measures can be summed freely. Semi-additive measures, such as balance or inventory, need careful time handling. Non-additive metrics, such as rates and percentages, must aggregate components first and divide last." },
+              { t: "quiz", id: "de-modeling-governance" }
+            ]
           }
         ]
       },
@@ -625,19 +710,103 @@
             ]
           },
           {
-            id: "semantic-layer", title: "Metrics & the semantic layer",
-            summary: "Define each metric once so every dashboard computes the same number.",
-            minutes: 6, tags: ["semantic-layer", "metrics"],
+            id: "data-products-output-ports", title: "Data product interfaces & output ports",
+            summary: "Treat curated data like a product with stable interfaces, ownership and consumer promises.",
+            minutes: 6, tags: ["data-product", "output-port"],
             blocks: [
-              { t: "p", html: "A <strong>semantic layer</strong> (or metrics layer) centralizes the definition of business metrics \u2014 \u201cactive user,\u201d \u201cnet revenue\u201d \u2014 as governed objects, so every tool computes them identically. It sits between the warehouse and BI, often as <em>headless BI</em>." },
-              { t: "note", variant: "trap", html: "Without it, every dashboard re-implements \u201crevenue\u201d slightly differently and the numbers drift \u2014 the dreaded \u201cwhy do these two reports disagree?\u201d meeting. One definition, queried everywhere, is the cure." },
+              { t: "p", html: "A <strong>data product</strong> is a governed dataset or metric set that a team owns as a reusable product: it has a clear purpose, documented meaning, quality checks, access rules and SLOs. Consumers should not need to reverse-engineer private staging tables to use it." },
+              { t: "p", html: "The product exposes one or more <strong>output ports</strong>: stable interfaces such as a curated table, event stream, API endpoint, feature view or metric endpoint. Each port is versioned and contract-backed, just like an application API." },
+              { t: "table", headers: ["Output port", "Consumers see", "Contract should state"], rows: [
+                ["Gold table", "Modeled rows for SQL and BI", "Schema, grain, freshness, keys, owner"],
+                ["Event stream", "Business events for apps and ML", "Schema version, ordering, retention, delivery semantics"],
+                ["Metric endpoint", "Governed measures and dimensions", "Formula, filters, dimensions, quality checks"],
+                ["Feature view", "ML-ready features", "Entity key, point-in-time rules, backfill range"]
+              ] },
+              { t: "compare",
+                bad: { title: "Leaky internal tables", items: ["Consumers join staging layers directly", "Schema changes break unknown users", "No owner for meaning or freshness", "Backfills surprise dashboards"] },
+                good: { title: "Product interface", items: ["Consumers use documented ports", "Breaking changes are versioned", "Owner and SLO are explicit", "Quality gates protect publication"] }
+              },
+              { t: "table", headers: ["Lifecycle step", "Producer obligation", "Consumer promise"], rows: [
+                ["Design", "Declare purpose, grain, owner, access class and expected consumers", "Consumers know whether the port fits their use case before adopting it"],
+                ["Publish", "Expose only the contract-backed table, stream, API or metric", "Private staging internals can change without breaking users"],
+                ["Operate", "Run freshness, volume, schema and reconciliation checks", "Consumers can alert on an SLO instead of discovering stale data in a meeting"],
+                ["Evolve", "Version breaking changes and publish migration windows", "Consumers get time to move from v1 to v2"],
+                ["Retire", "Announce deprecation and prove no active dependencies remain", "Dead ports do not live forever as mystery tables"]
+              ] },
+              { t: "code", lang: "yaml", code:
+                "output_port:\n" +
+                "  name: revenue_orders_v1\n" +
+                "  type: table\n" +
+                "  owner: revenue_domain\n" +
+                "  grain: one row per settled order\n" +
+                "  schema_contract: strict\n" +
+                "  freshness_slo: loaded by 07:00 business local time\n" +
+                "  quality_checks:\n" +
+                "    - order_id is not null and unique\n" +
+                "    - gross_amount is non_negative\n" +
+                "    - source_target_count_delta <= 0.1%\n" +
+                "  change_policy:\n" +
+                "    breaking_changes_require: new_major_version\n" +
+                "    deprecation_notice: 60 days" },
+              { t: "note", variant: "key", html: "A data product is not \u201ca table with a nice name.\u201d It is an owned interface with promises: meaning, freshness, quality, access and change management." },
+              { t: "note", variant: "trap", html: "Output ports are intentionally boring. If every consumer needs special instructions, hidden joins or an owner on chat to interpret the data, the port is not product-ready." }
+            ]
+          },
+          {
+            id: "data-mesh-operating-model", title: "Data mesh operating model",
+            summary: "Decentralize ownership without fragmenting meaning: domains own products, governance federates standards, and the platform makes publishing easy.",
+            minutes: 7, tags: ["data-mesh", "governance", "platform"],
+            blocks: [
+              { t: "p", html: "<strong>Data mesh</strong> is an operating model, not a new storage engine. It says that domain teams closest to the business meaning should own high-value data products, while a central platform and federated governance group make those products interoperable, secure and discoverable." },
+              { t: "table", headers: ["Pillar", "What it means in practice"], rows: [
+                ["Domain ownership", "Sales owns revenue definitions, support owns case data, finance owns close-ready measures"],
+                ["Data as a product", "Each product has a purpose, owner, output ports, SLOs, docs and quality checks"],
+                ["Self-service platform", "Templates, orchestration, catalogs, access workflows and observability are paved roads"],
+                ["Federated governance", "Shared standards for naming, privacy, contracts, metrics and interoperability"]
+              ] },
+              { t: "compare",
+                bad: { title: "Mesh anti-patterns", items: ["Every domain invents its own metric grammar", "Central platform becomes a ticket queue", "Raw dumps are relabeled as products", "Governance reviews happen only after launch"] },
+                good: { title: "Healthy mesh", items: ["Domains own meaning and incidents", "Platform provides reusable publishing paths", "Governance is policy-as-code where possible", "Products expose versioned, observable ports"] }
+              },
+              { t: "ol", items: [
+                "Pick a domain-owned business outcome, not a random table.",
+                "Define the output port contract: grain, schema, metrics, freshness, access and change policy.",
+                "Publish through the platform template so lineage, tests, docs and observability arrive by default.",
+                "Review standards through federated governance: privacy, naming, metric reuse and lifecycle.",
+                "Operate it like a service: measure SLOs, triage incidents, version breaking changes."
+              ] },
+              { t: "note", variant: "key", html: "The balance matters: centralize the platform and standards, decentralize business meaning and ownership. Too much centralization becomes a warehouse bottleneck; too little becomes metric chaos." },
+              { t: "note", variant: "trap", html: "A mesh fails when it is used as permission to avoid integration. Federated governance is the part that keeps domain autonomy from turning into seven incompatible definitions of customer." }
+            ]
+          },
+          {
+            id: "semantic-layer", title: "Metrics & the semantic layer",
+            summary: "Define each metric once, with a contract that keeps every consumer honest.",
+            minutes: 7, tags: ["semantic-layer", "metrics", "contracts"],
+            blocks: [
+              { t: "p", html: "A <strong>semantic layer</strong> centralizes business metrics such as \u201cactive user\u201d and \u201cnet revenue\u201d as governed objects, so BI tools, notebooks and APIs ask for the same definition instead of re-implementing it." },
+              { t: "p", html: "A <strong>metric contract</strong> is the modeling promise behind that object: formula, grain, allowed dimensions, filters, owner, freshness target and tests. If the promise changes, consumers get a versioned change instead of silent number drift." },
+              { t: "table", headers: ["Contract field", "Question it answers"], rows: [
+                ["Formula", "How is the number calculated?"],
+                ["Grain", "At what level is it valid to aggregate?"],
+                ["Dimensions", "Which cuts are approved?"],
+                ["Filters", "What records are included or excluded?"],
+                ["Owner + SLO", "Who fixes it, and by when must it be fresh?"],
+                ["Tests", "What proves the metric is still trustworthy?"]
+              ] },
+              { t: "note", variant: "trap", html: "Without a contract, every dashboard re-implements \u201crevenue\u201d slightly differently and the numbers drift \u2014 the dreaded \u201cwhy do these two reports disagree?\u201d meeting. One tested definition, queried everywhere, is the cure." },
               { t: "code", lang: "yaml", code:
                 "# A metric defined once, reused everywhere\n" +
                 "metric:\n" +
                 "  name: net_revenue\n" +
-                "  expression: SUM(amount) - SUM(refunds)\n" +
-                "  dimensions: [date, region, product_category]" },
-              { t: "note", variant: "key", html: "The semantic layer is where data modeling meets governance: it turns your facts and dimensions into a trustworthy, shared vocabulary of metrics." },
+                "  owner: finance_analytics\n" +
+                "  grain: order_line\n" +
+                "  expression: SUM(gross_amount) - SUM(refund_amount) - SUM(discount_amount)\n" +
+                "  dimensions: [date, region, product_category]\n" +
+                "  filters: [status = 'settled']\n" +
+                "  freshness_slo: 07:00 local time\n" +
+                "  tests: [not_null(order_id), non_negative(net_revenue)]" },
+              { t: "note", variant: "key", html: "The semantic layer is where modeling becomes shared language: facts and dimensions remain the structure, while metric contracts define the numbers everyone is allowed to trust." },
               { t: "quiz", id: "de-modeling-methodology" }
             ]
           }

@@ -29,6 +29,7 @@
   const TRACKS = [window.TRACKS.core, window.TRACKS.crypto, window.TRACKS.appsec, window.TRACKS.defense, window.TRACKS.offensive, window.TRACKS.threats, window.TRACKS.domains, window.TRACKS.reversing].filter(Boolean);
   const QUIZZES = window.QUIZZES || {};
   const Widgets = window.Widgets || {};
+  const PracticeContent = window.CitadelPractice || { routes: [], scenarios: [], interviewPrompts: [], rubricBands: [], rubricDimensions: [], cheatsheets: [], glossary: [] };
 
   // attach a stable id to every quiz question (for weak-spot tracking)
   Object.keys(QUIZZES).forEach((qzid) => {
@@ -49,6 +50,90 @@
     });
   });
   const byKey = Object.fromEntries(FLAT.map((f) => [f.key, f]));
+  const ROUTE_ALIASES = {
+    "appsec/building/ai-app-security": "appsec/ai-security/ai-app-security",
+    "appsec/building/ai-offense-defense": "appsec/ai-security/ai-offense-defense",
+    "appsec/building/ai-red-blue-lab": "appsec/ai-security/ai-red-blue-lab",
+    "appsec/building/ai-soc-copilot": "appsec/ai-security/ai-soc-copilot",
+    "appsec/building/ai-secure-sdlc": "appsec/ai-security/ai-secure-sdlc",
+    "appsec/building/ai-governance": "appsec/ai-security/ai-governance",
+    "appsec/building/secure-headers": "appsec/hardening/secure-headers",
+    "appsec/building/secrets-supply-chain": "appsec/hardening/secrets-supply-chain"
+  };
+  const GUIDED_PATHS = [
+    {
+      id: "beginner",
+      title: "Beginner Defender",
+      badge: "Start here",
+      color: "#2dd4bf",
+      summary: "Build the core mental models first, then connect them to identity, basic AppSec and incident response.",
+      lessons: [
+        "core/foundations/cia-triad",
+        "core/foundations/threats-vulns-risk",
+        "core/foundations/defense-in-depth",
+        "core/threat-modeling/stride",
+        "core/access/authn-authz",
+        "appsec/web-attacks/owasp-top-10",
+        "defense/respond/incident-response",
+        "domains/path/homelab"
+      ]
+    },
+    {
+      id: "appsec",
+      title: "AppSec Builder",
+      badge: "Ship safer",
+      color: "#f5a623",
+      summary: "Follow the web risk chain from trust boundaries to authorization, APIs, secure coding and headers.",
+      lessons: [
+        "core/threat-modeling/trust-boundaries",
+        "appsec/web-attacks/owasp-top-10",
+        "appsec/web-attacks/injection",
+        "appsec/web-attacks/xss",
+        "appsec/sessions/access-control",
+        "appsec/building/api-security-deep-dive",
+        "appsec/building/secure-coding-by-stack",
+        "appsec/hardening/secure-headers",
+        "threats/case-studies/detection-engineering"
+      ]
+    },
+    {
+      id: "blue-team",
+      title: "Blue Team Operations",
+      badge: "Detect and recover",
+      color: "#fb7185",
+      summary: "Move from network containment to telemetry, detection engineering, DFIR and resilience planning.",
+      lessons: [
+        "defense/network/network-security",
+        "defense/network/zero-trust",
+        "defense/detect/logging-siem",
+        "defense/detect/ids-ips",
+        "defense/respond/incident-response",
+        "defense/respond/cyber-resilience-recovery",
+        "threats/intel/threat-hunting",
+        "threats/case-studies/detection-engineering",
+        "threats/forensics/dfir",
+        "threats/case-studies/breach-capstone"
+      ]
+    },
+    {
+      id: "ai-security",
+      title: "AI Security",
+      badge: "LLM guardrails",
+      color: "#818cf8",
+      summary: "Treat prompts, retrieval, tools and approvals as new trust boundaries with old security invariants.",
+      lessons: [
+        "core/threat-modeling/trust-boundaries",
+        "appsec/building/api-security-deep-dive",
+        "appsec/ai-security/ai-app-security",
+        "appsec/ai-security/ai-offense-defense",
+        "appsec/ai-security/ai-red-blue-lab",
+        "appsec/ai-security/ai-soc-copilot",
+        "appsec/ai-security/ai-secure-sdlc",
+        "appsec/ai-security/ai-governance",
+        "threats/case-studies/security-architecture-capstone"
+      ]
+    }
+  ];
   const TOTAL = FLAT.length;
 
   /* ---------------- progress (localStorage) ---------------- */
@@ -307,6 +392,7 @@
             : '<a class="btn btn-primary" href="#/core/foundations/cia-triad">Start with the basics' + ARR + "</a>" +
               '<a class="btn btn-ghost" href="#/crypto/primitives/encoding-vs-encryption">Jump into crypto' + ARR + "</a>") +
           '<a class="btn btn-ghost" href="#/appsec/web-attacks/owasp-top-10">The OWASP Top 10' + ARR + "</a>" +
+          '<a class="btn btn-ghost" href="#/paths">Guided paths' + ARR + "</a>" +
         "</div>" +
         '<div class="hero-stats reveal reveal-5">' +
           '<div class="hero-stat"><div class="num">' + TOTAL + '</div><div class="lbl">lessons</div></div>' +
@@ -316,12 +402,20 @@
         "</div>" +
       "</section>" +
       homeProgressHtml() +
+      '<a class="practice-banner path-banner" href="#/paths">' +
+        '<div class="pb-ico"><svg viewBox="0 0 24 24"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/></svg></div>' +
+        '<div class="pb-text"><h3>Follow a guided learning path</h3><p>Pick Beginner, AppSec, Blue Team or AI Security and copy the ordered plan as Markdown study notes.</p></div>' +
+        '<span class="pb-go">Open <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
+      "</a>" +
       '<div class="track-cards">' + TRACKS.map(trackCard).join("") + "</div>" +
       '<a class="practice-banner" href="#/practice">' +
         '<div class="pb-ico"><svg viewBox="0 0 24 24"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.4-1.1 1-1.1 1.7v.5M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></div>' +
         '<div class="pb-text"><h3>Test yourself in Practice mode</h3><p>A shuffled mix of every checkpoint quiz across all ' + TRACKS.length + ' tracks \u2014 ' + qTotal + ' questions for spaced-repetition review.</p></div>' +
         '<span class="pb-go">Start <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
       "</a>" +
+      '<h2 class="home-section-title">Practice library</h2>' +
+      '<p class="home-section-sub">Offline scenario drills, interview prompts, rubrics, cheat sheets and glossary cards for capstone-quality answers.</p>' +
+      practiceRouteCards("home-practice-grid") +
       '<h2 class="home-section-title">Why this works</h2>' +
       '<p class="home-section-sub">Concepts stick when you can poke them. Every abstract idea here has something you can click.</p>' +
       '<div class="feature-grid">' + feat.map(([ic, t, d]) =>
@@ -341,6 +435,178 @@
       '<ul class="tc-modlist">' + track.modules.map((m) => "<li>" + escapeHtml(m.name) + "</li>").join("") + "</ul>" +
       '<span class="tc-go">Enter the ' + track.short + " track <svg viewBox=\"0 0 24 24\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></span>" +
       "</a>";
+  }
+
+  /* ---------------- static practice library ---------------- */
+  const PRACTICE_ACCENT = "var(--violet)";
+  const safeRoute = (route) => /^#\/[A-Za-z0-9/_-]+$/.test(route || "") ? route : "#/";
+  const practiceMeta = (id) => (PracticeContent.routes || []).find((r) => r.id === id) || { id, title: "Practice", summary: "", count: "" };
+
+  function practiceRouteCards(extraClass) {
+    const routes = PracticeContent.routes || [];
+    return '<div class="practice-route-grid ' + escapeHtml(extraClass || "") + '">' + routes.map((r) =>
+      '<a class="practice-route-card" href="' + safeRoute(r.route) + '">' +
+        '<span class="pr-count">' + escapeHtml(r.count || "") + "</span>" +
+        "<h3>" + escapeHtml(r.title) + "</h3>" +
+        "<p>" + escapeHtml(r.summary) + "</p>" +
+      "</a>"
+    ).join("") + "</div>";
+  }
+
+  function practiceLinksHtml(links) {
+    if (!links || !links.length) return "";
+    return '<div class="practice-links">' + links.map((link) =>
+      '<a class="icon-pill" href="' + safeRoute(link.route) + '">' + escapeHtml(link.label) + "</a>"
+    ).join("") + "</div>";
+  }
+
+  function renderPracticeShell(id, body, targetId) {
+    const meta = practiceMeta(id);
+    document.title = meta.title + " · Citadel";
+    main.innerHTML =
+      '<article class="lesson practice-library-page" style="--accent:' + PRACTICE_ACCENT + '">' +
+        '<nav class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span>Practice library</span><span class="sep">/</span><span>' + escapeHtml(meta.title) + "</span></nav>" +
+        '<header class="lesson-head reveal in">' +
+          "<h1>" + escapeHtml(meta.title) + "</h1>" +
+          '<p class="summary">' + escapeHtml(meta.summary) + "</p>" +
+          '<div class="tags"><span class="read">' + escapeHtml(meta.count || "offline") + '</span><span class="tag">static</span><span class="tag">offline</span></div>' +
+        "</header>" +
+        practiceRouteCards("practice-subnav") +
+        body +
+      "</article>";
+    const target = targetId && document.getElementById(targetId);
+    if (target) target.scrollIntoView();
+    else { main.scrollTop = 0; window.scrollTo(0, 0); }
+  }
+
+  function renderScenarioPacks(targetId) {
+    const body = '<div class="scenario-stack">' + (PracticeContent.scenarios || []).map((scenario) =>
+      '<section class="scenario-card" id="' + escapeHtml(scenario.id) + '">' +
+        '<div class="scenario-kicker"><span>' + escapeHtml(scenario.role) + '</span><span>' + escapeHtml(scenario.timebox) + "</span></div>" +
+        "<h2>" + escapeHtml(scenario.title) + "</h2>" +
+        '<p class="scenario-prompt">' + escapeHtml(scenario.prompt) + "</p>" +
+        '<div class="answer-outline">' + (scenario.modelAnswer || []).map((part) =>
+          '<div class="answer-part"><h3>' + escapeHtml(part.heading) + "</h3>" +
+            "<ul>" + (part.points || []).map((point) => "<li>" + escapeHtml(point) + "</li>").join("") + "</ul>" +
+          "</div>"
+        ).join("") + "</div>" +
+        practiceLinksHtml(scenario.links) +
+      "</section>"
+    ).join("") + "</div>";
+    renderPracticeShell("scenarios", body, targetId);
+  }
+
+  function renderInterviewPrompts(targetId) {
+    const body = '<div class="prompt-grid">' + (PracticeContent.interviewPrompts || []).map((prompt) =>
+      '<section class="prompt-card" id="' + escapeHtml(prompt.id) + '">' +
+        "<h2>" + escapeHtml(prompt.title) + "</h2>" +
+        '<p class="prompt-ask">' + escapeHtml(prompt.ask) + "</p>" +
+        '<div class="prompt-columns">' +
+          '<div><h3>Strong signals</h3><ul>' + (prompt.strongSignals || []).map((item) => "<li>" + escapeHtml(item) + "</li>").join("") + "</ul></div>" +
+          '<div><h3>Pitfalls</h3><ul>' + (prompt.pitfalls || []).map((item) => "<li>" + escapeHtml(item) + "</li>").join("") + "</ul></div>" +
+        "</div>" +
+        practiceLinksHtml(prompt.links) +
+      "</section>"
+    ).join("") + "</div>";
+    renderPracticeShell("interview", body, targetId);
+  }
+
+  function renderRubrics() {
+    const bands = '<div class="rubric-grid">' + (PracticeContent.rubricBands || []).map((band) =>
+      '<section class="rubric-card">' +
+        "<h2>" + escapeHtml(band.band) + "</h2>" +
+        '<p class="rubric-signal">' + escapeHtml(band.signal) + "</p>" +
+        "<ul>" + (band.evidence || []).map((item) => "<li>" + escapeHtml(item) + "</li>").join("") + "</ul>" +
+        '<div class="rubric-coach"><strong>Coach:</strong> ' + escapeHtml(band.coaching) + "</div>" +
+      "</section>"
+    ).join("") + "</div>";
+    const dimensions = '<h2 class="block-h">Evaluation dimensions</h2><div class="table-wrap"><table class="data"><thead><tr><th>Dimension</th><th>Look for</th></tr></thead><tbody>' +
+      (PracticeContent.rubricDimensions || []).map((row) => "<tr><td>" + escapeHtml(row[0]) + "</td><td>" + escapeHtml(row[1]) + "</td></tr>").join("") +
+      "</tbody></table></div>";
+    renderPracticeShell("rubrics", bands + dimensions, null);
+  }
+
+  function renderCheatsheets(targetId) {
+    const body = '<div class="cheat-grid">' + (PracticeContent.cheatsheets || []).map((sheet) =>
+      '<section class="cheat-card" id="' + escapeHtml(sheet.id) + '">' +
+        "<h2>" + escapeHtml(sheet.title) + "</h2>" +
+        '<p class="cheat-purpose">' + escapeHtml(sheet.purpose) + "</p>" +
+        (sheet.sections || []).map((section) =>
+          '<div class="cheat-section"><h3>' + escapeHtml(section.heading) + "</h3>" +
+            "<ul>" + (section.items || []).map((item) => "<li>" + escapeHtml(item) + "</li>").join("") + "</ul>" +
+          "</div>"
+        ).join("") +
+      "</section>"
+    ).join("") + "</div>";
+    renderPracticeShell("cheatsheets", body, targetId);
+  }
+
+  function renderGlossary(targetId) {
+    const terms = PracticeContent.glossary || [];
+    const bySlugGloss = Object.fromEntries(terms.map((term) => [term.slug, term]));
+    const relatedHtml = (related) => (related || []).filter((slug) => bySlugGloss[slug]).map((slug) =>
+      '<a href="#/glossary/' + escapeHtml(slug) + '">' + escapeHtml(bySlugGloss[slug].term) + "</a>"
+    ).join("");
+    const body = '<div class="glossary-grid">' + terms.map((term) =>
+      '<section class="glossary-card" id="' + escapeHtml(term.slug) + '">' +
+        "<h2>" + escapeHtml(term.term) + "</h2>" +
+        "<p>" + escapeHtml(term.definition) + "</p>" +
+        '<div class="glossary-related"><span>Related</span>' + relatedHtml(term.related) + "</div>" +
+      "</section>"
+    ).join("") + "</div>";
+    renderPracticeShell("glossary", body, targetId);
+  }
+
+  /* ---------------- guided paths ---------------- */
+  function resolvePathLessons(path) {
+    return path.lessons.map((key) => byKey[key]).filter(Boolean);
+  }
+
+  function renderPaths() {
+    document.title = "Learning paths · Citadel";
+    const totalSteps = GUIDED_PATHS.reduce((sum, path) => sum + resolvePathLessons(path).length, 0);
+    main.innerHTML =
+      '<article class="lesson path-page" style="--accent:var(--indigo)">' +
+        '<nav class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span>Learning paths</span></nav>' +
+        '<header class="lesson-head reveal in">' +
+          "<h1>Guided learning paths</h1>" +
+          '<p class="summary">Curated routes through existing Citadel lessons. Choose the path that matches your goal, follow the lessons in order, and copy the plan as Markdown for your notes.</p>' +
+          '<div class="tags"><span class="read">' + GUIDED_PATHS.length + ' paths</span><span class="tag">' + totalSteps + " linked lessons</span></div>" +
+        "</header>" +
+        '<div class="path-grid">' + GUIDED_PATHS.map(pathCardHtml).join("") + "</div>" +
+      "</article>";
+
+    $$(".copy-path", main).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const path = GUIDED_PATHS.find((p) => p.id === btn.getAttribute("data-path"));
+        if (!path) return;
+        copyText(pathToMd(path), () => {
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          btn.classList.add("is-on");
+          setTimeout(() => { btn.textContent = old; btn.classList.remove("is-on"); }, 1400);
+        });
+      });
+    });
+    main.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+
+  function pathCardHtml(path) {
+    const steps = resolvePathLessons(path);
+    const first = steps[0];
+    return '<section class="path-card" style="--path:' + path.color + '">' +
+      '<div class="path-top"><span class="path-badge">' + escapeHtml(path.badge) + '</span><span class="path-count">' + steps.length + " lessons</span></div>" +
+      "<h2>" + escapeHtml(path.title) + "</h2>" +
+      "<p>" + escapeHtml(path.summary) + "</p>" +
+      '<ol class="path-steps">' + steps.map((f) =>
+        '<li><a href="' + f.route + '"><span class="ps-track">' + escapeHtml(f.track.short) + "</span><span>" + escapeHtml(f.lesson.title) + "</span></a></li>"
+      ).join("") + "</ol>" +
+      '<div class="path-actions">' +
+        (first ? '<a class="btn btn-primary" href="' + first.route + '">Start path</a>' : "") +
+        '<button class="icon-pill copy-path" type="button" data-path="' + escapeHtml(path.id) + '">Copy path as Markdown</button>' +
+      "</div>" +
+    "</section>";
   }
 
   /* ---------------- practice mode ---------------- */
@@ -653,6 +919,21 @@
     });
     return out.trim() + "\n";
   }
+  function pathToMd(path) {
+    const steps = resolvePathLessons(path);
+    let out = "# Citadel Learning Path: " + path.title + "\n\n";
+    out += "> " + path.summary + "\n\n";
+    out += "## Ordered lessons\n\n";
+    steps.forEach((f, i) => {
+      out += (i + 1) + ". [" + f.lesson.title + "](" + f.route + ") - " + f.track.name + " / " + f.mod.name + "\n";
+      out += "   - " + f.lesson.summary + "\n";
+    });
+    out += "\n## Study checklist\n\n";
+    out += "- Read each lesson in order and mark it complete in Citadel.\n";
+    out += "- Copy any lesson notes you want to keep using the lesson Copy MD button.\n";
+    out += "- Finish with the path's capstone or practice drill where included.\n";
+    return out.trim() + "\n";
+  }
 
   function mountQuiz(slot, quiz) {
     let i = 0, score = 0, answered = false;
@@ -904,8 +1185,26 @@
     const h = location.hash.replace(/^#\//, "");
     const parts = h.split("/").filter(Boolean);
     closeMobileNav();
-    if (parts.length >= 3 && byKey[parts[0] + "/" + parts[1] + "/" + parts[2]]) {
-      renderLesson(byKey[parts[0] + "/" + parts[1] + "/" + parts[2]]);
+    const rawKey = parts.length >= 3 ? parts[0] + "/" + parts[1] + "/" + parts[2] : "";
+    const lessonKey = ROUTE_ALIASES[rawKey] || rawKey;
+    if (rawKey && ROUTE_ALIASES[rawKey]) {
+      location.replace("#/" + lessonKey + (parts[3] ? "/" + parts[3] : ""));
+      return;
+    }
+    if (lessonKey && byKey[lessonKey]) {
+      renderLesson(byKey[lessonKey]);
+    } else if (parts[0] === "scenarios") {
+      renderScenarioPacks(parts[1]);
+    } else if (parts[0] === "interview") {
+      renderInterviewPrompts(parts[1]);
+    } else if (parts[0] === "rubrics") {
+      renderRubrics();
+    } else if (parts[0] === "cheatsheets") {
+      renderCheatsheets(parts[1]);
+    } else if (parts[0] === "glossary") {
+      renderGlossary(parts[1]);
+    } else if (parts[0] === "paths") {
+      renderPaths();
     } else if (parts[0] === "practice") {
       renderPractice({ mode: parts[1] === "weak" ? "weak" : "all" });
     } else if (parts[0] === "review") {
@@ -976,6 +1275,7 @@
   function paletteCommands() {
     const cmds = [
       { label: "Practice mode", sub: "Shuffled quiz \u00b7 all tracks", icon: "quiz", run: () => { location.hash = "#/practice"; } },
+      { label: "Learning paths", sub: "Beginner, AppSec, Blue Team, AI Security", icon: "path", run: () => { location.hash = "#/paths"; } },
       { label: "Exam mode", sub: "Timed, scored, per-track breakdown", icon: "quiz", run: () => { location.hash = "#/exam"; } },
       { label: "Flashcards", sub: "Flip through key terms", icon: "lesson", run: () => { location.hash = "#/flashcards"; } },
       { label: "Drill weak spots", sub: weakQuestions().length + " missed question(s)", icon: "warn", run: () => { location.hash = "#/practice/weak"; } },
@@ -988,6 +1288,12 @@
       { label: "Reset progress", sub: "Clear completed lessons", icon: "reset", run: () => $("#resetProgress").click() },
       { label: "Go home", sub: "The atlas overview", icon: "home", run: () => { location.hash = "#/"; } }
     ];
+    (PracticeContent.routes || []).forEach((r) => cmds.push({
+      label: r.title,
+      sub: r.summary,
+      icon: r.id === "scenarios" ? "path" : r.id === "rubrics" ? "md" : "lesson",
+      run: () => { location.hash = safeRoute(r.route); }
+    }));
     TRACKS.forEach((tr) => cmds.push({
       label: "Copy " + tr.short + " cheat sheet", sub: "Markdown \u00b7 " + tr.name, icon: "md",
       run: () => copyText(trackToMd(tr), () => toast(tr.short + " cheat sheet copied"))
@@ -995,6 +1301,10 @@
     TRACKS.forEach((tr) => cmds.push({
       label: "Print " + tr.short + " cheat sheet", sub: "Printable page \u00b7 " + tr.name, icon: "print",
       run: () => { location.hash = "#/print/" + tr.id; }
+    }));
+    GUIDED_PATHS.forEach((path) => cmds.push({
+      label: "Copy " + path.title + " path", sub: "Markdown \u00b7 learning path", icon: "path",
+      run: () => copyText(pathToMd(path), () => toast(path.title + " path copied"))
     }));
     return cmds;
   }
@@ -1010,7 +1320,8 @@
     star: '<path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/>',
     keyboard: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12"/>',
     download: '<path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
-    upload: '<path d="M12 21V9m0 0l-4 4m4-4l4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/>'
+    upload: '<path d="M12 21V9m0 0l-4 4m4-4l4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/>',
+    path: '<path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/>'
   };
 
   function paletteData(q) {

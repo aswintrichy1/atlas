@@ -271,6 +271,19 @@ window.TRACKS.core = {
               ]
             },
             { t: "note", variant: "key", html: "<strong>MFA = two or more <em>different</em> factors.</strong> A password plus a security question is still one factor (both \u201cknow\u201d). Phishing-resistant MFA (FIDO2/passkeys) beats SMS codes, which can be intercepted or SIM-swapped." },
+            { t: "h", text: "Passkeys, token theft, and MFA bypass" },
+            { t: "p", html: "<strong>Passkeys</strong> use WebAuthn/FIDO2 cryptography: the private key stays on the user's device, and the browser binds the login to the real site origin. There is no shared password for a fake login page to collect." },
+            {
+              t: "table",
+              headers: ["Attack path", "Defensive control"],
+              rows: [
+                ["Phishing a password", "Prefer passkeys or hardware security keys for high-risk accounts"],
+                ["Stealing a session token", "HttpOnly/Secure cookies, short lifetimes, rotation, and device/session review"],
+                ["MFA push fatigue", "Number matching, rate limits, risk-based prompts, and user reporting"],
+                ["Adversary-in-the-middle login proxy", "Origin-bound WebAuthn/passkeys; do not rely on OTP alone for admins"]
+              ]
+            },
+            { t: "note", variant: "trap", html: "MFA is not magic if the attacker steals the post-login token. Treat sessions and refresh tokens as crown jewels: keep them out of JavaScript, rotate on risk, revoke on logout, and alert on impossible reuse." },
             { t: "h", text: "Tokens, sessions and SSO in one breath" },
             {
               t: "ul", items: [
@@ -282,6 +295,46 @@ window.TRACKS.core = {
               ]
             },
             { t: "note", variant: "trap", html: "OAuth 2.0 is for <em>authorization</em>, not authentication. Apps that used raw OAuth to \u201clog you in\u201d have shipped account-takeover bugs. Use OIDC when you need identity." }
+          ]
+        },
+        {
+          id: "federated-identity-saas",
+          title: "Federated identity & SaaS security",
+          summary: "SSO shifts trust to signed assertions and tokens. Secure the claims, audience, sessions, and recovery paths.",
+          minutes: 8,
+          tags: ["identity", "sso", "saas"],
+          blocks: [
+            { t: "p", html: "<strong>Federated identity</strong> lets one identity provider sign a statement that another application trusts. Instead of each SaaS app storing passwords, the user authenticates with the IdP, and the app receives a token or assertion saying who the user is and what context came with the login." },
+            { t: "h", text: "The three names you will meet" },
+            {
+              t: "table",
+              headers: ["Protocol", "What it is for", "Common mistake"],
+              rows: [
+                ["<strong>OAuth 2.0</strong>", "Delegated authorization: a client gets permission to call an API for a user or service.", "Using an access token as proof of login identity."],
+                ["<strong>OpenID Connect (OIDC)</strong>", "Authentication layer on OAuth: the IdP issues an ID token about the signed-in user.", "Confusing ID tokens with API access tokens."],
+                ["<strong>SAML</strong>", "Enterprise SSO using signed XML assertions between an IdP and a service provider.", "Trusting an assertion without strict audience, issuer, time and signature checks."]
+              ]
+            },
+            { t: "note", variant: "key", html: "<strong>ID token vs access token:</strong> an ID token is meant for the client to learn who authenticated. An access token is meant for an API to decide whether a caller may access a resource. Do not swap their jobs." },
+            { t: "h", text: "Assertion trust is precise" },
+            {
+              t: "ul", items: [
+                "Validate the <strong>issuer</strong>: was this token or assertion signed by the IdP you configured?",
+                "Validate the <strong>audience</strong>: was it issued for this exact app or API, not a different one?",
+                "Validate time bounds: <code>not before</code>, expiry, clock skew and replay identifiers.",
+                "Map claims conservatively: groups, roles and email addresses are inputs to authorization, not authorization by themselves.",
+                "Keep signing keys rotated and retrieved through trusted metadata, with alerting when keys or IdP settings change."
+              ]
+            },
+            { t: "h", text: "Refresh tokens and SaaS sessions" },
+            { t: "p", html: "A refresh token can silently mint new access tokens, so it is closer to a long-lived credential than a temporary login artifact. Store it where scripts cannot read it, rotate it on use when possible, bind it to client context, and revoke it on logout, password reset, device loss, or suspicious reuse." },
+            {
+              t: "compare",
+              bad: { title: "Fragile SaaS identity", items: ["Long-lived refresh tokens with no rotation", "Logout clears only the browser but leaves server sessions alive", "SAML assertions accepted for the wrong audience", "Helpdesk can reset MFA from a caller's story alone"] },
+              good: { title: "Defensible federation", items: ["Short lifetimes plus refresh-token rotation", "Central session and token revocation", "Strict issuer, audience, signature and time validation", "Step-up verification and logging for MFA reset workflows"] }
+            },
+            { t: "note", variant: "warn", html: "<strong>Helpdesk and MFA reset flows are identity controls.</strong> Attackers often bypass strong login by socially engineering recovery. Require verified channels, supervisor approval for high-risk accounts, cooldowns, alerts to the user, and audit logs that record who approved the reset." },
+            { t: "quiz", id: "core-federated-identity" }
           ]
         },
         {

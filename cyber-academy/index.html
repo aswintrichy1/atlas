@@ -9,8 +9,6 @@
   <link rel="apple-touch-icon" href="icon.svg" />
   <title>Citadel · The Cybersecurity Atlas</title>
 
-  <!-- Fonts are self-hosted in /fonts — no external requests -->
-  <link rel="stylesheet" href="fonts/fonts.css" />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/track-reversing.css" />
   <link rel="stylesheet" href="css/attack-matrix.css" />
@@ -70,6 +68,30 @@
     <aside class="sidebar" id="sidebar" aria-label="Curriculum navigation">
       <nav id="nav" class="nav"></nav>
       <div class="sidebar-foot">
+        <a href="#/paths" class="foot-link" id="pathsLink">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/></svg>
+          Learning paths
+        </a>
+        <a href="#/scenarios" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+          Scenarios
+        </a>
+        <a href="#/interview" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+          Interview prompts
+        </a>
+        <a href="#/rubrics" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>
+          Rubrics
+        </a>
+        <a href="#/cheatsheets" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/></svg>
+          Cheat sheets
+        </a>
+        <a href="#/glossary" class="foot-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5zM8 6h8"/></svg>
+          Glossary
+        </a>
         <a href="#/review" class="foot-link" id="studyListLink">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
           Study list
@@ -117,6 +139,7 @@
   <script src="js/curriculum-threats.js" defer></script>
   <script src="js/curriculum-domains.js" defer></script>
   <script src="js/curriculum-reversing.js" defer></script>
+  <script src="js/practice-content.js" defer></script>
   <script src="js/exam.js" defer></script>
   <script src="js/pwa.js" defer></script>
   <script src="js/app.js" defer></script>

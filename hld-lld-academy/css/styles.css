@@ -621,6 +621,103 @@ table.data td:first-child { font-weight: 600; }
 .practice-page .practice-sizes { margin-top: 16px; }
 @media (max-width: 560px) { .practice-banner .pb-go span { display: none; } .practice-banner { padding: 18px; gap: 14px; } }
 
+/* ---------- Learning paths ---------- */
+.path-banner {
+  display: flex; align-items: center; gap: 18px; margin: 28px 0 6px; padding: 22px 24px;
+  border-radius: var(--radius-lg); border: 1px solid var(--glass-border);
+  background: linear-gradient(115deg, color-mix(in srgb, var(--cyan) 14%, var(--surface)), var(--surface));
+  transition: 0.2s var(--ease);
+}
+.path-banner:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--cyan) 45%, transparent); }
+.path-banner .pb-ico { flex-shrink: 0; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--cyan) 18%, transparent); }
+.path-banner .pb-ico svg { width: 26px; height: 26px; fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.path-banner .pb-text { flex: 1; min-width: 0; }
+.path-banner .pb-text h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; margin-bottom: 3px; }
+.path-banner .pb-text p { color: var(--text-dim); font-size: 0.9rem; }
+.path-banner .pb-go { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: var(--cyan); }
+.path-banner .pb-go svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.paths-page { max-width: 1040px; }
+.paths-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 18px; }
+.path-card {
+  position: relative; overflow: hidden; padding: 24px; border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg); background: var(--surface);
+}
+.path-card::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(22rem 16rem at 100% -20%, var(--tc), transparent 62%); opacity: 0.13; }
+.path-card > * { position: relative; }
+.path-kicker { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tc); margin-bottom: 10px; }
+.path-card h2 { font-family: var(--font-display); font-size: 1.55rem; letter-spacing: -0.02em; margin-bottom: 8px; }
+.path-card p { color: var(--text-dim); font-size: 0.93rem; margin-bottom: 16px; }
+.path-route-list { list-style: none; padding: 0; margin: 0 0 18px; counter-reset: pathstep; display: flex; flex-direction: column; gap: 8px; }
+.path-route-list li { counter-increment: pathstep; }
+.path-route-list li a {
+  display: grid; grid-template-columns: 24px 1fr; gap: 9px; padding: 10px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); background: color-mix(in srgb, var(--surface-solid) 70%, transparent); transition: 0.16s;
+}
+.path-route-list li a::before {
+  content: counter(pathstep); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px;
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; color: var(--tc); border: 1px solid color-mix(in srgb, var(--tc) 45%, transparent);
+}
+.path-route-list li a:hover { border-color: color-mix(in srgb, var(--tc) 55%, transparent); transform: translateX(2px); }
+.path-route-list li a span { font-weight: 600; line-height: 1.25; }
+.path-route-list li a em { display: block; color: var(--text-faint); font-family: var(--font-mono); font-size: 0.66rem; font-style: normal; margin-top: 2px; }
+.path-card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; }
+@media (max-width: 560px) {
+  .path-banner { padding: 18px; gap: 14px; }
+  .path-banner .pb-go { display: none; }
+  .paths-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Practice reference library ---------- */
+.practice-ref-home { margin: 30px 0 26px; }
+.prh-head { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
+.prh-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; }
+.prh-head p { color: var(--text-dim); font-size: 0.92rem; max-width: 650px; }
+.practice-ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.practice-ref-card {
+  position: relative; overflow: hidden; min-height: 168px; padding: 18px; border-radius: var(--radius);
+  border: 1px solid var(--glass-border); background: var(--surface); transition: 0.18s var(--ease);
+}
+.practice-ref-card::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(16rem 11rem at 100% -25%, var(--tc), transparent 62%); opacity: 0.13; }
+.practice-ref-card > * { position: relative; }
+.practice-ref-card h3 { font-family: var(--font-display); font-size: 1.15rem; margin: 8px 0 7px; }
+.practice-ref-card p { color: var(--text-dim); font-size: 0.86rem; line-height: 1.45; }
+.practice-ref-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--tc) 45%, transparent); box-shadow: var(--shadow); }
+.practice-ref-card .tc-go { display: inline-flex; align-items: center; gap: 7px; margin-top: 16px; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--tc); }
+.practice-ref-card .tc-go svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.practice-ref-page { max-width: 1080px; }
+.practice-ref-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: -4px 0 24px; }
+.practice-ref-tabs a {
+  font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--text-dim);
+  border: 1px solid var(--glass-border); border-radius: 999px; padding: 7px 12px; transition: 0.16s;
+}
+.practice-ref-tabs a:hover, .practice-ref-tabs a.active {
+  color: var(--tc, var(--accent)); border-color: color-mix(in srgb, var(--tc, var(--accent)) 50%, transparent);
+  background: color-mix(in srgb, var(--tc, var(--accent)) 12%, transparent);
+}
+.practice-ref-list { align-items: start; }
+.practice-ref-detail { scroll-margin-top: calc(var(--topbar-h) + 18px); }
+.practice-ref-detail .practice-prompt {
+  color: var(--text); border-left: 3px solid color-mix(in srgb, var(--tc, var(--accent)) 55%, transparent);
+  padding-left: 13px; margin-bottom: 14px;
+}
+.practice-links { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+.practice-links a {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; color: var(--tc, var(--accent));
+  border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 42%, transparent); border-radius: 999px; padding: 5px 10px;
+}
+.practice-outline { display: grid; gap: 14px; margin-top: 16px; }
+.practice-outline.two-col { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.practice-outline-sec { padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--surface-solid) 62%, transparent); }
+.practice-outline-sec h3 { font-family: var(--font-display); font-size: 1rem; margin-bottom: 9px; }
+.practice-outline-sec ul, .practice-check-list, .rubric-dimensions ul { padding-left: 18px; color: var(--text-dim); display: flex; flex-direction: column; gap: 7px; font-size: 0.9rem; }
+.practice-outline-sec li, .practice-check-list li, .rubric-dimensions li { line-height: 1.5; }
+.practice-use { color: var(--text-dim); font-size: 0.92rem; margin-top: -4px; }
+.glossary-term h2 { font-size: 1.35rem; }
+@media (max-width: 560px) {
+  .practice-ref-grid, .practice-outline.two-col { grid-template-columns: 1fr; }
+  .practice-ref-card { min-height: 0; }
+}
+
 /* ---------- Command palette ---------- */
 .palette { position: fixed; inset: 0; z-index: 300; background: color-mix(in srgb, var(--ink-900) 62%, transparent); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding: 12vh 20px 20px; }
 .palette[hidden] { display: none; }

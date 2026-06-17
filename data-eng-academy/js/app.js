@@ -50,6 +50,84 @@
   });
   const byKey = Object.fromEntries(FLAT.map((f) => [f.key, f]));
   const TOTAL = FLAT.length;
+  const LEARNING_PATHS = [
+    {
+      id: "sql-foundations",
+      title: "SQL Foundations",
+      level: "Start here",
+      blurb: "Build the query habits every data engineer needs: joins, grouping, CTEs, set diffs, windows, and how engines actually execute SQL.",
+      color: "#bef264",
+      routes: [
+        "sql/sql-core/joins-sql",
+        "sql/sql-core/aggregation",
+        "sql/sql-core/subqueries-ctes",
+        "sql/sql-core/set-ops",
+        "sql/analytics/window-functions",
+        "sql/engines/execution"
+      ]
+    },
+    {
+      id: "batch-dbt",
+      title: "Batch & dbt",
+      level: "Build reliable marts",
+      blurb: "Move from batch compute to production ELT: Spark mental models, dbt DAGs, slim CI, semantic metrics, and safe backfills.",
+      color: "#f5a623",
+      routes: [
+        "storage/ingestion/incremental-idempotent",
+        "batch/compute/spark-model",
+        "batch/elt/etl-vs-elt",
+        "batch/elt/dbt",
+        "batch/elt/dbt-production",
+        "batch/elt/dbt-semantic-layer",
+        "batch/elt/incremental-backfill",
+        "orchestration/quality/testing"
+      ]
+    },
+    {
+      id: "streaming-platform",
+      title: "Streaming Platform",
+      level: "Real-time systems",
+      blurb: "Understand logs, CDC, Kafka, windows, state, checkpoints, and the operating rules that make streams recoverable.",
+      color: "#fb7185",
+      routes: [
+        "storage/ingestion/cdc",
+        "storage/ingestion/cdc-to-lakehouse",
+        "streaming/fundamentals/the-log",
+        "streaming/fundamentals/delivery-semantics",
+        "streaming/kafka/kafka-arch",
+        "streaming/kafka/consumer-groups",
+        "streaming/processing/windowing",
+        "streaming/processing/flink-stateful-ops",
+        "streaming/architecture/streaming-etl-cdc"
+      ]
+    },
+    {
+      id: "dataops-governance",
+      title: "DataOps & Governance",
+      level: "Operate the product",
+      blurb: "Turn pipelines into owned products with orchestration, contracts, lineage, metadata, privacy workflow, SLOs, and incident runbooks.",
+      color: "#5eead4",
+      routes: [
+        "orchestration/orchestration/dags",
+        "orchestration/orchestration/asset-orchestration",
+        "orchestration/quality/contracts",
+        "orchestration/observability/lineage",
+        "orchestration/governance/active-metadata",
+        "orchestration/governance/privacy-deletion-retention",
+        "orchestration/production/pipeline-slos",
+        "orchestration/production/platform-artifact-capstone"
+      ]
+    }
+  ];
+  const pathById = Object.fromEntries(LEARNING_PATHS.map((p) => [p.id, p]));
+  const Practice = window.CascadePractice || { routes: [], scenarios: [], interview: [], rubrics: [], rubricDimensions: [], cheatSheets: [], glossary: [] };
+  const PRACTICE_LINKS = [
+    { route: "#/scenarios", title: "Scenarios", sub: "War-room model answers", icon: "map", accent: "var(--cyan)" },
+    { route: "#/interview", title: "Interview", sub: "Design/debug prompts", icon: "lesson", accent: "var(--violet)" },
+    { route: "#/rubrics", title: "Rubrics", sub: "Beginner to senior bands", icon: "star", accent: "var(--amber)" },
+    { route: "#/cheatsheets", title: "Cheat sheets", sub: "Compact production checklists", icon: "md", accent: "var(--lime)" },
+    { route: "#/glossary", title: "Glossary", sub: "Terms and cross-links", icon: "keyboard", accent: "var(--rose)" }
+  ];
 
   /* ---------------- progress (localStorage) ---------------- */
   const PKEY = "cs_progress_v1";
@@ -313,6 +391,7 @@
               '<a class="btn btn-ghost" href="#/sql/sql-core/joins-sql">SQL deep dive' + ARR + "</a>") +
           '<a class="btn btn-ghost" href="#/streaming/fundamentals/batch-vs-stream">Stream processing' + ARR + "</a>" +
           '<a class="btn btn-ghost" href="#/sparksql/foundations/intro-spark">Spark SQL \u00b7 interview prep' + ARR + "</a>" +
+          '<a class="btn btn-ghost" href="#/paths">Guided paths' + ARR + "</a>" +
         "</div>" +
         '<div class="hero-stats reveal reveal-5">' +
           '<div class="hero-stat"><div class="num">' + TOTAL + '</div><div class="lbl">lessons</div></div>' +
@@ -328,6 +407,16 @@
         '<div class="pb-text"><h3>Test yourself in Practice mode</h3><p>A shuffled mix of every checkpoint quiz across all seven tracks \u2014 ' + qTotal + ' questions for spaced-repetition review.</p></div>' +
         '<span class="pb-go">Start <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
       "</a>" +
+      '<a class="paths-banner" href="#/paths">' +
+        '<div class="pb-ico"><svg viewBox="0 0 24 24"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/></svg></div>' +
+        '<div class="pb-text"><h3>Prefer a guided route?</h3><p>Follow curated paths for SQL foundations, batch & dbt, streaming platforms, and DataOps/governance.</p></div>' +
+        '<span class="pb-go">View paths <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
+      "</a>" +
+      '<section class="practice-library-home">' +
+        '<h2 class="home-section-title">Practice library</h2>' +
+        '<p class="home-section-sub">Final review material for capstones, interviews and production-quality answers. Everything is static and offline.</p>' +
+        practiceHomeCardsHtml() +
+      "</section>" +
       '<h2 class="home-section-title">Why this works</h2>' +
       '<p class="home-section-sub">Concepts stick when you can poke them. Every abstract idea here has something you can click.</p>' +
       '<div class="feature-grid">' + feat.map(([ic, t, d]) =>
@@ -492,6 +581,193 @@
     }
     main.scrollTop = 0;
     window.scrollTo(0, 0);
+  }
+
+  /* ---------------- guided learning paths ---------------- */
+  function renderPaths() {
+    document.title = "Guided learning paths · Cascade";
+    const cards = LEARNING_PATHS.map((path) => {
+      const lessons = path.routes.map((k) => byKey[k]).filter(Boolean);
+      const completed = lessons.filter((f) => done.has(f.key)).length;
+      const pct = lessons.length ? Math.round((completed / lessons.length) * 100) : 0;
+      const items = lessons.map((f, i) =>
+        '<li><a href="' + f.route + '">' +
+          '<span class="path-step-num">' + String(i + 1).padStart(2, "0") + "</span>" +
+          '<span class="path-step-main"><strong>' + escapeHtml(f.lesson.title) + "</strong>" +
+          '<em>' + escapeHtml(f.track.short + " · " + f.mod.name) + "</em></span>" +
+        "</a></li>"
+      ).join("");
+      return '<section class="path-card" style="--tc:' + path.color + '">' +
+        '<div class="path-card-head">' +
+          '<span class="path-level">' + escapeHtml(path.level) + "</span>" +
+          '<span class="path-count">' + completed + " / " + lessons.length + " done</span>" +
+        "</div>" +
+        "<h2>" + escapeHtml(path.title) + "</h2>" +
+        "<p>" + escapeHtml(path.blurb) + "</p>" +
+        '<div class="path-progress" aria-label="' + pct + '% complete"><i style="width:' + pct + '%"></i></div>' +
+        '<ol class="path-steps">' + items + "</ol>" +
+        '<button class="btn btn-ghost path-copy" type="button" data-path="' + escapeHtml(path.id) + '">Copy path as Markdown</button>' +
+      "</section>";
+    }).join("");
+
+    main.innerHTML =
+      '<article class="lesson paths-page" style="--accent:var(--cyan)">' +
+        '<nav class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span>Learning paths</span></nav>' +
+        '<header class="lesson-head reveal in">' +
+          "<h1>Guided learning paths</h1>" +
+          '<p class="summary">Curated routes through existing lessons. Pick the path that matches your goal, then copy it as Markdown for an offline study plan.</p>' +
+        "</header>" +
+        '<div class="paths-grid">' + cards + "</div>" +
+      "</article>";
+
+    $$(".path-copy", main).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const path = pathById[btn.getAttribute("data-path")];
+        if (!path) return;
+        copyText(pathToMd(path), () => {
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => { btn.textContent = old; }, 1400);
+        });
+      });
+    });
+    main.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------------- practice/content-quality pages ---------------- */
+  function practiceNavHtml(activeRoute) {
+    return '<div class="practice-tabs">' + PRACTICE_LINKS.map((link) =>
+      '<a class="' + (link.route === activeRoute ? "active" : "") + '" href="' + link.route + '" style="--pc:' + link.accent + '">' +
+        '<strong>' + escapeHtml(link.title) + "</strong><span>" + escapeHtml(link.sub) + "</span>" +
+      "</a>"
+    ).join("") + "</div>";
+  }
+
+  function practiceHomeCardsHtml() {
+    return '<div class="practice-link-grid">' + PRACTICE_LINKS.map((link) =>
+      '<a class="practice-link-card" href="' + link.route + '" style="--pc:' + link.accent + '">' +
+        '<span class="plc-kicker">Practice</span>' +
+        "<h3>" + escapeHtml(link.title) + "</h3>" +
+        "<p>" + escapeHtml(link.sub) + "</p>" +
+        '<em>Open <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></em>' +
+      "</a>"
+    ).join("") + "</div>";
+  }
+
+  function practiceShell(activeRoute, title, summary, bodyHtml, accent) {
+    document.title = title + " · Cascade";
+    main.innerHTML =
+      '<article class="lesson practice-content-page" style="--accent:' + accent + '">' +
+        '<nav class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span>Practice library</span></nav>' +
+        '<header class="lesson-head reveal in">' +
+          "<h1>" + escapeHtml(title) + "</h1>" +
+          '<p class="summary">' + escapeHtml(summary) + "</p>" +
+        "</header>" +
+        practiceNavHtml(activeRoute) +
+        bodyHtml +
+      "</article>";
+    main.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+
+  function scrollPracticeTarget(target) {
+    if (!target) return;
+    requestAnimationFrame(() => {
+      const node = document.getElementById(target);
+      if (node) node.scrollIntoView({ block: "start" });
+    });
+  }
+
+  function refsHtml(refs) {
+    refs = refs || {};
+    const parts = [];
+    if (refs.cheatsheets && refs.cheatsheets.length) {
+      parts.push("Cheat sheets: " + refs.cheatsheets.map((id) => '<a href="#/cheatsheets/' + escapeHtml(id) + '">' + escapeHtml(titleById(Practice.cheatSheets, id)) + "</a>").join(", "));
+    }
+    if (refs.glossary && refs.glossary.length) {
+      parts.push("Glossary: " + refs.glossary.map((id) => '<a href="#/glossary/' + escapeHtml(id) + '">' + escapeHtml(termById(id)) + "</a>").join(", "));
+    }
+    return parts.length ? '<div class="practice-refs">' + parts.join(" · ") + "</div>" : "";
+  }
+
+  function titleById(items, id) {
+    const hit = (items || []).find((x) => x.id === id);
+    return hit ? hit.title : id;
+  }
+
+  function termById(id) {
+    const hit = (Practice.glossary || []).find((x) => x.id === id);
+    return hit ? hit.term : id;
+  }
+
+  function renderScenarios(target) {
+    const cards = (Practice.scenarios || []).map((s) =>
+      '<section class="practice-card" id="' + escapeHtml(s.id) + '">' +
+        '<div class="practice-card-head"><span>Scenario pack</span><a href="#/scenarios/' + escapeHtml(s.id) + '">#</a></div>' +
+        "<h2>" + escapeHtml(s.title) + "</h2>" +
+        "<p>" + escapeHtml(s.brief) + "</p>" +
+        '<h3>Prompts</h3><ul>' + (s.prompts || []).map((p) => "<li>" + escapeHtml(p) + "</li>").join("") + "</ul>" +
+        '<h3>Model-answer outline</h3><ol>' + (s.model || []).map((m) => "<li>" + escapeHtml(m) + "</li>").join("") + "</ol>" +
+        refsHtml(s.refs) +
+      "</section>"
+    ).join("");
+    practiceShell("#/scenarios", "Scenario packs", "Offline war-room drills for CDC drift, tiny files, cost spikes and privacy deletion. Use the model outlines to check scope, safety and communication.", cards, "var(--cyan)");
+    scrollPracticeTarget(target);
+  }
+
+  function renderInterview(target) {
+    const cards = (Practice.interview || []).map((q) =>
+      '<section class="practice-card" id="' + escapeHtml(q.id) + '">' +
+        '<div class="practice-card-head"><span>Interview prompt</span><a href="#/interview/' + escapeHtml(q.id) + '">#</a></div>' +
+        "<h2>" + escapeHtml(q.title) + "</h2>" +
+        '<p class="prompt">' + escapeHtml(q.prompt) + "</p>" +
+        '<h3>Strong-answer outline</h3><ol>' + (q.outline || []).map((m) => "<li>" + escapeHtml(m) + "</li>").join("") + "</ol>" +
+      "</section>"
+    ).join("");
+    practiceShell("#/interview", "Interview prompts", "Tool-neutral prompts for design, delivery semantics, debugging, contract rollout and lakehouse trade-off practice.", cards, "var(--violet)");
+    scrollPracticeTarget(target);
+  }
+
+  function renderRubrics(target) {
+    const bands = (Practice.rubrics || []).map((r) =>
+      '<section class="practice-card rubric-band" id="' + escapeHtml(r.id) + '">' +
+        '<div class="practice-card-head"><span>Band</span><a href="#/rubrics/' + escapeHtml(r.id) + '">#</a></div>' +
+        "<h2>" + escapeHtml(r.band) + "</h2>" +
+        "<p>" + escapeHtml(r.signal) + "</p>" +
+        "<ul>" + (r.evidence || []).map((e) => "<li>" + escapeHtml(e) + "</li>").join("") + "</ul>" +
+      "</section>"
+    ).join("");
+    const dims = '<section class="practice-card wide"><h2>Score dimensions</h2><div class="table-wrap"><table class="data"><thead><tr><th>Dimension</th><th>Look for</th></tr></thead><tbody>' +
+      (Practice.rubricDimensions || []).map((r) => "<tr><td>" + escapeHtml(r[0]) + "</td><td>" + escapeHtml(r[1]) + "</td></tr>").join("") +
+      "</tbody></table></div></section>";
+    practiceShell("#/rubrics", "Rubrics", "Use these bands to grade scenario and interview answers without requiring a specific tool or vendor.", dims + '<div class="practice-grid">' + bands + "</div>", "var(--amber)");
+    scrollPracticeTarget(target);
+  }
+
+  function renderCheatsheets(target) {
+    const cards = (Practice.cheatSheets || []).map((sheet) =>
+      '<section class="practice-card" id="' + escapeHtml(sheet.id) + '">' +
+        '<div class="practice-card-head"><span>Cheat sheet</span><a href="#/cheatsheets/' + escapeHtml(sheet.id) + '">#</a></div>' +
+        "<h2>" + escapeHtml(sheet.title) + "</h2>" +
+        "<ul>" + (sheet.items || []).map((i) => "<li>" + escapeHtml(i) + "</li>").join("") + "</ul>" +
+      "</section>"
+    ).join("");
+    practiceShell("#/cheatsheets", "Cheat sheets", "Compact, offline checklists for CDC, contracts, quality, backfills, lakehouse maintenance and warehouse cost controls.", '<div class="practice-grid">' + cards + "</div>", "var(--lime)");
+    scrollPracticeTarget(target);
+  }
+
+  function renderGlossary(target) {
+    const cards = (Practice.glossary || []).map((term) =>
+      '<section class="practice-card glossary-card" id="' + escapeHtml(term.id) + '">' +
+        '<div class="practice-card-head"><span>Glossary</span><a href="#/glossary/' + escapeHtml(term.id) + '">#</a></div>' +
+        "<h2>" + escapeHtml(term.term) + "</h2>" +
+        "<p>" + escapeHtml(term.definition) + "</p>" +
+        '<div class="practice-refs">Related: ' + (term.related || []).map((id) => '<a href="#/glossary/' + escapeHtml(id) + '">' + escapeHtml(termById(id)) + "</a>").join(", ") + "</div>" +
+      "</section>"
+    ).join("");
+    practiceShell("#/glossary", "Glossary", "Short definitions for the vocabulary used across scenarios, rubrics and capstones.", '<div class="practice-grid">' + cards + "</div>", "var(--rose)");
+    scrollPracticeTarget(target);
   }
 
   /* ---------------- exam mode + flashcards (js/exam.js) ---------------- */
@@ -724,6 +1000,18 @@
     });
     return out.trim() + "\n";
   }
+  function pathToMd(path) {
+    const lessons = path.routes.map((k) => byKey[k]).filter(Boolean);
+    let out = "# " + path.title + "\n\n";
+    out += "> " + path.blurb + "\n\n";
+    out += "**Level:** " + path.level + "\n";
+    out += "**Lessons:** " + lessons.length + "\n\n";
+    lessons.forEach((f, i) => {
+      out += (i + 1) + ". [" + f.lesson.title + "](" + f.route + ") — " + f.track.short + " / " + f.mod.name + "\n";
+      out += "   - " + f.lesson.summary + "\n";
+    });
+    return out.trim() + "\n";
+  }
 
   function mountQuiz(slot, quiz) {
     let i = 0, score = 0, answered = false;
@@ -930,6 +1218,18 @@
       renderLesson(byKey[parts[0] + "/" + parts[1] + "/" + parts[2]]);
     } else if (parts[0] === "practice") {
       renderPractice({ mode: parts[1] === "weak" ? "weak" : "all" });
+    } else if (parts[0] === "paths") {
+      renderPaths();
+    } else if (parts[0] === "scenarios") {
+      renderScenarios(parts[1]);
+    } else if (parts[0] === "interview") {
+      renderInterview(parts[1]);
+    } else if (parts[0] === "rubrics") {
+      renderRubrics(parts[1]);
+    } else if (parts[0] === "cheatsheets") {
+      renderCheatsheets(parts[1]);
+    } else if (parts[0] === "glossary") {
+      renderGlossary(parts[1]);
     } else if (parts[0] === "review") {
       renderReview();
     } else if (parts[0] === "exam") {
@@ -1002,6 +1302,12 @@
       { label: "Study list", sub: review.size + " starred \u00b7 " + weakQuestions().length + " weak", icon: "star", run: () => { location.hash = "#/review"; } },
       { label: "Exam mode", sub: "Timed, mixed checkpoint", icon: "quiz", run: () => { location.hash = "#/exam"; } },
       { label: "Flashcards", sub: "Flip & self-grade key terms", icon: "lesson", run: () => { location.hash = "#/flashcards"; } },
+      { label: "Guided learning paths", sub: LEARNING_PATHS.length + " curated routes", icon: "map", run: () => { location.hash = "#/paths"; } },
+      { label: "Scenario packs", sub: "Model-answer drills", icon: "map", run: () => { location.hash = "#/scenarios"; } },
+      { label: "Interview prompts", sub: "Design and debugging practice", icon: "lesson", run: () => { location.hash = "#/interview"; } },
+      { label: "Rubrics", sub: "Beginner / competent / senior", icon: "star", run: () => { location.hash = "#/rubrics"; } },
+      { label: "Cheat sheets", sub: "CDC, contracts, backfills and cost", icon: "md", run: () => { location.hash = "#/cheatsheets"; } },
+      { label: "Glossary", sub: "Data engineering terms", icon: "keyboard", run: () => { location.hash = "#/glossary"; } },
       { label: "Print this lesson", sub: "Open the print dialog", icon: "print", run: () => window.print() },
       { label: "Toggle theme", sub: "Dark / light", icon: "theme", run: () => $("#themeToggle").click() },
       { label: "Keyboard shortcuts", sub: "Press ? anytime", icon: "keyboard", run: () => openHelp() },
@@ -1018,6 +1324,10 @@
       label: "Print " + tr.short + " cheat sheet", sub: "Printable page \u00b7 " + tr.name, icon: "print",
       run: () => { location.hash = "#/print/" + tr.id; }
     }));
+    LEARNING_PATHS.forEach((path) => cmds.push({
+      label: "Copy " + path.title + " path", sub: "Markdown \u00b7 " + path.routes.length + " lessons", icon: "map",
+      run: () => copyText(pathToMd(path), () => toast(path.title + " path copied"))
+    }));
     return cmds;
   }
   const PAL_ICON = {
@@ -1032,7 +1342,8 @@
     star: '<path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/>',
     keyboard: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12"/>',
     download: '<path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
-    upload: '<path d="M12 21V9m0 0l-4 4m4-4l4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/>'
+    upload: '<path d="M12 21V9m0 0l-4 4m4-4l4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/>',
+    map: '<path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/>'
   };
 
   function paletteData(q) {

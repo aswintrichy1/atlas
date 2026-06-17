@@ -4,14 +4,13 @@
    same-origin asset (fonts, etc.) on first fetch. The whole app works
    with no network after the first visit.
    ===================================================================== */
-const CACHE = "cascade-v5";
+const CACHE = "cascade-v12";
 const CORE = [
   "./",
   "./index.html",
   "./css/styles.css",
   "./css/exam.css",
   "./css/pwa.css",
-  "./fonts/fonts.css",
   "./js/widget-kit.js",
   "./js/track-storage.js",
   "./js/track-modeling.js",
@@ -20,6 +19,7 @@ const CORE = [
   "./js/track-orchestration.js",
   "./js/track-sql.js",
   "./js/track-sparksql.js",
+  "./js/practice-content.js",
   "./js/exam.js",
   "./js/pwa.js",
   "./js/app.js",
