@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Pulse Streaming Systems Atlas icon">
+  <rect width="100" height="100" rx="22" fill="#0a0d12"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+    <path d="M10 54 H30 L38 32 L50 76 L60 42 L67 54 H90" stroke="#22d3ee"/>
+  </g>
+  <circle cx="90" cy="54" r="5" fill="#a78bfa"/>
+</svg>

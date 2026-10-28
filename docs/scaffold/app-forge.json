@@ -1,0 +1,109 @@
+{
+  "dir": "devsecops-academy",
+  "name": "Forge",
+  "subtitle": "The DevSecOps Atlas",
+  "tracks": [
+    { "id": "found", "short": "FOUND", "name": "Foundations & Secure SDLC" },
+    { "id": "pipe", "short": "PIPE", "name": "Pipeline Engineering" },
+    { "id": "scan", "short": "SCAN", "name": "Security Testing Gates" },
+    { "id": "wiz", "short": "WIZ", "name": "Wiz Cloud Security" },
+    { "id": "ops", "short": "OPS", "name": "Operate & Capstone" }
+  ],
+  "heroTag": "Interactive DevSecOps atlas",
+  "heroH1": "Ship code<br>that is <span class=\"grad\">fast</span> &amp; prove<br>it is <span class=\"grad\">safe</span>.",
+  "heroLede": "Start from what a software lifecycle is and finish with a production pipeline you can defend line by line \\u2014 Git hygiene, Jenkins, SonarQube, Snyk, signed artifacts, GitOps delivery, and a deep track on Wiz from code scanning to runtime dashboards. Then run it all in a live pipeline simulator.",
+  "ctaPrimary": { "route": "#/found/sdlc/sdlc-models", "label": "Start from zero" },
+  "ctaSecondary": { "route": "#/wiz/platform/cnapp", "label": "Jump to Wiz" },
+  "featLabs": "Price a defect by the phase it escapes to, model STRIDE threats, tune a SonarQube gate, rank CVEs by real risk, escalate a Wiz toxic combination, pick a rollout strategy, and run the full pipeline simulator with injected failures.",
+  "pathBanner": "Pick Beginner Foundations, Pipeline Builder, Security Gates, Wiz Deep Dive, or Capstone and copy the path as Markdown study notes.",
+  "paths": [
+    {
+      "id": "forge-beginner",
+      "title": "Beginner Foundations",
+      "label": "Foundations",
+      "color": "#f97316",
+      "desc": "From lifecycle models to DevOps to DevSecOps, then where security lands in every phase of a secure SDLC.",
+      "routes": [
+        "#/found/sdlc/sdlc-models",
+        "#/found/sdlc/iterative-agile",
+        "#/found/sdlc/devops",
+        "#/found/sdlc/devsecops",
+        "#/found/ssdlc/ssdlc-phases",
+        "#/found/ssdlc/threat-modeling",
+        "#/found/ssdlc/secure-design-coding",
+        "#/pipe/git/git-basics"
+      ]
+    },
+    {
+      "id": "forge-pipeline",
+      "title": "Pipeline Builder",
+      "label": "Pipeline",
+      "color": "#38bdf8",
+      "desc": "Git workflows, Jenkins declarative pipelines, credentials, artifacts, and the delivery side: containers, GitOps and rollout strategies.",
+      "routes": [
+        "#/pipe/git/branching",
+        "#/pipe/git/pr-protection",
+        "#/pipe/git/hooks-secrets",
+        "#/pipe/ci/jenkins-basics",
+        "#/pipe/ci/jenkinsfile",
+        "#/pipe/ci/shared-libs-creds",
+        "#/pipe/build/artifact-repos",
+        "#/pipe/build/versioning-promotion",
+        "#/pipe/deploy/gitops",
+        "#/pipe/deploy/strategies"
+      ]
+    },
+    {
+      "id": "forge-gates",
+      "title": "Security Gates",
+      "label": "Gates",
+      "color": "#34d399",
+      "desc": "SAST with SonarQube, SCA and container scanning with Snyk, then DAST, IaC scanning, policy as code and secrets management.",
+      "routes": [
+        "#/scan/sast/sast-basics",
+        "#/scan/sast/sonarqube",
+        "#/scan/sast/sonar-jenkins",
+        "#/scan/sca/sca-basics",
+        "#/scan/sca/snyk",
+        "#/scan/runtime/dast",
+        "#/scan/runtime/iac-security",
+        "#/scan/runtime/policy-as-code",
+        "#/scan/runtime/secrets-mgmt"
+      ]
+    },
+    {
+      "id": "forge-wiz",
+      "title": "Wiz Deep Dive",
+      "label": "Wiz",
+      "color": "#818cf8",
+      "desc": "CNAPP and the Security Graph, posture and workload protection, Wiz Code and wizcli in Jenkins, admission control, integrations and leadership dashboards.",
+      "routes": [
+        "#/wiz/platform/cnapp",
+        "#/wiz/platform/security-graph",
+        "#/wiz/platform/posture",
+        "#/wiz/platform/workloads",
+        "#/wiz/shiftleft/wiz-code",
+        "#/wiz/shiftleft/wizcli",
+        "#/wiz/shiftleft/wiz-jenkins",
+        "#/wiz/shiftleft/admission",
+        "#/wiz/operate/integrations",
+        "#/wiz/operate/dashboards",
+        "#/wiz/operate/end-to-end"
+      ]
+    },
+    {
+      "id": "forge-capstone",
+      "title": "Capstone",
+      "label": "Capstone",
+      "color": "#f472b6",
+      "desc": "Close the loop with observability and metrics, then assemble the full reference pipeline and the plan for rolling it out.",
+      "routes": [
+        "#/ops/feedback/observability",
+        "#/ops/feedback/metrics",
+        "#/ops/capstone/reference-pipeline",
+        "#/ops/capstone/full-jenkinsfile",
+        "#/ops/capstone/rollout-playbook"
+      ]
+    }
+  ]
+}

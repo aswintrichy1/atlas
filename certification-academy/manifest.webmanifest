@@ -1,0 +1,16 @@
+{
+  "name": "Summit \u00b7 Certification Prep",
+  "short_name": "Summit",
+  "description": "Unofficial, original certification prep: cloud architect associate concepts, data platform core, Kubernetes administration, defensive security fundamentals and exam strategy \u2014 with an offline exam simulator, flashcards, study plans and a readiness dashboard.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

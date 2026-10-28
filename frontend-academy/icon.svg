@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Pixel Frontend Engineering Atlas icon">
+  <rect width="100" height="100" rx="22" fill="#0a0d12"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+    <path d="M36 30 L16 50 L36 70" stroke="#ec4899"/>
+    <path d="M64 30 L84 50 L64 70" stroke="#ec4899"/>
+    <path d="M56 24 L44 76" stroke="#5eead4"/>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+{
+  "name": "Nimbus \u00b7 The Cloud Platforms Atlas",
+  "short_name": "Nimbus",
+  "description": "Offline cloud platforms course, AWS first with Azure and Google Cloud equivalents: landing zones, IAM and workload identity, networking, compute, storage and managed data, Terraform and IaC, Well-Architected and observability \u2014 with interactive labs, checkpoint quizzes, exam mode and flashcards.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

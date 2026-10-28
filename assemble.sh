@@ -2,10 +2,13 @@
 # =====================================================================
 # assemble.sh — build the self-contained "Atlas Collection" for GitHub Pages.
 #
-# GitHub Pages does NOT follow symbolic links, so the five academy apps
-# must live inside this folder as REAL files. This script rebuilds each
-# app's clean distributable (via that app's own build.sh, which already
-# strips dev artifacts and symlinks) and copies it in beside the hub.
+# GitHub Pages does NOT follow symbolic links, so every academy app must
+# live inside this folder as REAL files. This script rebuilds the five
+# apps that are authored outside this repo (via each app's own build.sh,
+# which already strips dev artifacts and symlinks) and copies them in
+# beside the hub. The other sixteen academies are authored directly in
+# this repo and are deliberately NOT listed: this script replaces each
+# listed folder wholesale.
 #
 # It reads the source apps from the PARENT directory of this folder
 # (e.g. ~/Documents/<app>). That only works on the machine where those

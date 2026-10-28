@@ -1,7 +1,7 @@
 {
   "name": "Compass · The Behavioral Interview Atlas",
   "short_name": "Compass",
-  "description": "An interactive, fully-offline atlas for behavioral and leadership interviews: a story framework, a reusable story bank, the standard question categories, seniority signals, and hiring-manager rubrics.",
+  "description": "An interactive, fully-offline atlas for behavioral and leadership interviews: a story framework, a reusable story bank, the standard question categories, seniority signals, staff and principal loops, unofficial company guides, and hiring-manager rubrics.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

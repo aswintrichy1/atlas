@@ -19,6 +19,8 @@
  *      on GitHub Pages, so a collision silently mixes progress between apps
  *   5. every academy links back to ../index.html and that target exists
  *   6. no external URLs (independent re-assert, not trusting lint_static.mjs)
+ *   7. cross-academy links  ../<other>-academy/index.html#/...  point at an
+ *      academy that exists and at a route that academy's router really serves
  *
  * Valid routes are derived from each app's own window.TRACKS and its own
  * router source, so content added later is covered with no edit here.
@@ -267,6 +269,35 @@ function warnOnce(app, msg) {
   warn(app, msg);
 }
 
+/* ---- gate 7: links into sibling academies ---- */
+const ALL_APPS = new Map(discoverApps().map((a) => [a.dir, a]));
+function modelFor(dir) {
+  if (models.has(dir)) return models.get(dir).model;
+  const a = ALL_APPS.get(dir);
+  if (!a || !a.hasShell) return null;
+  const content = loadContent(a);
+  const model = buildRouteModel(a, content && content.sandbox, read(a.appJs));
+  models.set(dir, { app: a, content, model });
+  return model;
+}
+function checkCrossApp(appName, files) {
+  let bad = 0, n = 0;
+  for (const p of files) {
+    const src = readFileSync(p, "utf8");
+    for (const m of src.matchAll(/\.\.\/([a-z0-9-]+-academy)\/index\.html(#\/[A-Za-z0-9\-_/]*)?/g)) {
+      n++;
+      const [, dir, hash] = m;
+      const where = `${rel(p)}:${lineAt(src, m.index)}`;
+      const target = modelFor(dir);
+      if (!target) { fail(appName, `${where}: links to ${dir}, which is not an academy on disk`); bad++; continue; }
+      if (!hash) continue;
+      const v = target.classify(hash);
+      if (!v.ok) { fail(appName, `${where}: dangling cross-academy link ${dir}${hash} — ${v.why}`); bad++; }
+    }
+  }
+  if (!bad) pass(appName, `${n} cross-academy link(s) all resolve`);
+}
+
 /* ---- gate 5: hub backlink ---- */
 function checkBacklink(appName, htmlPath) {
   const src = read(htmlPath);
@@ -382,6 +413,7 @@ for (const app of apps) {
   checkHtml(app.name, app.indexHtml, model, soft);
   checkJsRoutes(app.name, [...jsFiles, app.indexHtml], model, soft);
   checkBacklink(app.name, app.indexHtml);
+  checkCrossApp(app.name, [...jsFiles, app.indexHtml]);
   checkExternal(app.name, [app.indexHtml, join(app.path, "sw.js"), ...jsFiles].filter(existsSync));
 
   /* gate 4: localStorage prefix ownership */

@@ -1,7 +1,7 @@
 {
   "name": "The Atlas Collection",
   "short_name": "Atlas",
-  "description": "A local launcher for five interactive, fully-offline learning atlases: Blueprint, Codex, Citadel, Cascade, and TechLead for techno managerial interview prep.",
+  "description": "A local launcher for twenty-one interactive, fully-offline learning atlases in seven tracks — interview and certification prep, design and architecture, AI and ML, data engineering, infrastructure and operations, security and delivery, and engineering craft and stacks.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

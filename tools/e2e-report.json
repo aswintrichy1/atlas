@@ -1,6 +1,6 @@
 {
   "base": "http://127.0.0.1:8780",
-  "startedAt": "2026-08-29T18:03:30.498Z",
+  "startedAt": "2026-10-28T15:36:50.664Z",
   "apps": [
     {
       "name": "Blueprint",
@@ -10,8 +10,8 @@
         {
           "id": "hld",
           "name": "High-Level Design",
-          "lessons": 70,
-          "modules": 14
+          "lessons": 65,
+          "modules": 15
         },
         {
           "id": "lld",
@@ -34,20 +34,14 @@
         {
           "id": "breakdowns",
           "name": "Problem Breakdowns",
-          "lessons": 36,
-          "modules": 4
+          "lessons": 39,
+          "modules": 5
         }
       ],
-      "routes": 174,
-      "checked": 174,
+      "routes": 172,
+      "checked": 172,
       "failures": [],
-      "warnings": [
-        {
-          "route": "#/hld/scaling/load-balancing",
-          "symptom": "widget \"loadbalancer\" needed a second navigation before its mount existed",
-          "detail": "rendering race in the crawl, not a content defect"
-        }
-      ],
+      "warnings": [],
       "widgetIds": [
         "loadbalancer",
         "lru",
@@ -58,11 +52,13 @@
         "cachewrite",
         "cellrouter",
         "capacitycalc",
+        "orderingLab",
         "deepBloomLab",
         "sdpatFanout",
         "bdCapacityLab",
         "bdRateLab",
         "bdWindowLab",
+        "bdCdcLagLab",
         "lldContentionLab"
       ],
       "quizIds": [
@@ -80,13 +76,13 @@
         "hld-fault-isolation",
         "hld-architecture",
         "hld-production-readiness",
-        "hld-rag-llmops",
         "hld-ai",
         "hld-protocols",
         "hld-data-migrations",
         "hld-offline-sync",
         "lld-principles",
         "lld-practice",
+        "hld-clocks",
         "deepdives-stores",
         "deepdives-streams",
         "deepdives-specialized",
@@ -96,16 +92,17 @@
         "breakdowns-foundations",
         "breakdowns-scale",
         "breakdowns-hard",
+        "breakdowns-data",
         "lld-concurrency-deep",
         "lld-lldcases",
         "breakdowns-wild"
       ],
-      "quizzesPlayed": 33,
-      "widgetsPoked": 15,
+      "quizzesPlayed": 34,
+      "widgetsPoked": 17,
       "examOk": true,
       "flashOk": true,
       "skipped": null,
-      "lessonRoutes": 158
+      "lessonRoutes": 156
     },
     {
       "name": "Codex",
@@ -125,6 +122,18 @@
           "modules": 7
         },
         {
+          "id": "sql",
+          "name": "SQL Coding Rounds",
+          "lessons": 14,
+          "modules": 4
+        },
+        {
+          "id": "concurrency",
+          "name": "Concurrency Coding Problems",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
           "id": "cpat",
           "name": "Advanced Coding Patterns",
           "lessons": 16,
@@ -137,8 +146,8 @@
           "modules": 5
         }
       ],
-      "routes": 96,
-      "checked": 96,
+      "routes": 122,
+      "checked": 122,
       "failures": [],
       "warnings": [],
       "widgetIds": [
@@ -161,6 +170,9 @@
         "matrixtraversal",
         "dptable",
         "bitwise",
+        "sqlwindow",
+        "concurrencyqueue",
+        "concurrencytimeline",
         "cpatBudget",
         "cpatSieveLab",
         "cpatPathLab",
@@ -185,6 +197,13 @@
         "pat-recursiondp",
         "dsa-interview",
         "pat-mastery",
+        "sql-relational",
+        "sql-analytics",
+        "sql-warehouse",
+        "sql-performance",
+        "con-coordination",
+        "con-primitives",
+        "con-async",
         "cpat-craft",
         "cpat-arrays",
         "cpat-graphs",
@@ -195,12 +214,12 @@
         "aiec-aibreakdowns",
         "aiec-aiecreview"
       ],
-      "quizzesPlayed": 23,
-      "widgetsPoked": 27,
+      "quizzesPlayed": 30,
+      "widgetsPoked": 30,
       "examOk": true,
       "flashOk": true,
       "skipped": null,
-      "lessonRoutes": 81
+      "lessonRoutes": 105
     },
     {
       "name": "Citadel",
@@ -210,7 +229,7 @@
         {
           "id": "core",
           "name": "Security Foundations",
-          "lessons": 10,
+          "lessons": 12,
           "modules": 3
         },
         {
@@ -228,8 +247,8 @@
         {
           "id": "defense",
           "name": "Network Defense & Ops",
-          "lessons": 11,
-          "modules": 3
+          "lessons": 17,
+          "modules": 4
         },
         {
           "id": "offensive",
@@ -240,13 +259,13 @@
         {
           "id": "threats",
           "name": "Threats, Malware & Forensics",
-          "lessons": 23,
-          "modules": 4
+          "lessons": 22,
+          "modules": 5
         },
         {
           "id": "domains",
           "name": "Domains & Practice",
-          "lessons": 14,
+          "lessons": 15,
           "modules": 3
         },
         {
@@ -256,8 +275,8 @@
           "modules": 3
         }
       ],
-      "routes": 122,
-      "checked": 122,
+      "routes": 130,
+      "checked": 130,
       "failures": [],
       "warnings": [
         {
@@ -296,6 +315,9 @@
         "airedblue",
         "detectioncard",
         "securecode",
+        "ruleplanner",
+        "addefense",
+        "cloudpath",
         "memorylayout",
         "endianness",
         "mitigations",
@@ -335,16 +357,20 @@
         "domains-ot-product",
         "domains-grc",
         "defense-resilience",
+        "core-federation-defense",
+        "defense-ad",
+        "defense-rule-engineering",
+        "domains-cloud-iam",
         "reversing-internals",
         "reversing-re",
         "reversing-pwn"
       ],
-      "quizzesPlayed": 36,
-      "widgetsPoked": 28,
+      "quizzesPlayed": 40,
+      "widgetsPoked": 31,
       "examOk": true,
       "flashOk": true,
       "skipped": null,
-      "lessonRoutes": 102
+      "lessonRoutes": 110
     },
     {
       "name": "Cascade",
@@ -366,8 +392,8 @@
         {
           "id": "batch",
           "name": "Batch Processing & Spark",
-          "lessons": 16,
-          "modules": 4
+          "lessons": 19,
+          "modules": 5
         },
         {
           "id": "streaming",
@@ -377,9 +403,15 @@
         },
         {
           "id": "orchestration",
-          "name": "Orchestration & DataOps",
-          "lessons": 30,
-          "modules": 5
+          "name": "Orchestration & Quality",
+          "lessons": 13,
+          "modules": 3
+        },
+        {
+          "id": "dataops",
+          "name": "DataOps in Production & Governance",
+          "lessons": 14,
+          "modules": 4
         },
         {
           "id": "sql",
@@ -388,14 +420,20 @@
           "modules": 4
         },
         {
-          "id": "sparksql",
-          "name": "Spark SQL",
-          "lessons": 15,
-          "modules": 6
+          "id": "databricks",
+          "name": "Databricks & Delta Lake",
+          "lessons": 13,
+          "modules": 4
+        },
+        {
+          "id": "python",
+          "name": "Python for Data Engineering",
+          "lessons": 11,
+          "modules": 3
         }
       ],
-      "routes": 143,
-      "checked": 143,
+      "routes": 154,
+      "checked": 154,
       "failures": [],
       "warnings": [],
       "widgetIds": [
@@ -414,6 +452,9 @@
         "de-batch-exchange",
         "de-batch-dbt-dag",
         "de-batch-semantic-yaml",
+        "de-spark-api",
+        "de-spark-join",
+        "de-spark-tuning",
         "de-stream-log",
         "de-stream-consumers",
         "de-stream-window",
@@ -428,9 +469,10 @@
         "de-sql-joins",
         "de-sql-window",
         "de-sql-plan",
-        "de-spark-api",
-        "de-spark-join",
-        "de-spark-tuning"
+        "de-dbx-txlog",
+        "de-dbx-skipping",
+        "de-py-lazy",
+        "de-py-property"
       ],
       "quizIds": [
         "de-storage-foundations",
@@ -450,6 +492,9 @@
         "de-batch-elt",
         "de-batch-dbt-prod",
         "de-batch-perf",
+        "de-batch-data",
+        "de-batch-project",
+        "de-batch-interview",
         "de-streaming-fundamentals",
         "de-streaming-kafka",
         "de-streaming-processing",
@@ -458,28 +503,32 @@
         "de-ops-orchestration",
         "de-ops-assets",
         "de-ops-quality",
-        "de-ops-metadata",
-        "de-ops-privacy-delete",
-        "de-ops-capstone",
         "de-ops-observability",
-        "de-ops-governance",
+        "de-dataops-metadata",
+        "de-dataops-privacy",
+        "de-dataops-governance",
+        "de-dataops-capstone",
+        "de-dataops-reliability",
+        "de-dataops-cost",
         "de-sql-core",
         "de-sql-analytics",
         "de-sql-engines",
         "de-sql-performance",
-        "sparksql-foundations",
-        "sparksql-operations",
-        "sparksql-data",
-        "sparksql-performance",
-        "sparksql-etl",
-        "sparksql-interview"
+        "de-databricks-delta",
+        "de-databricks-layout",
+        "de-databricks-platform",
+        "de-databricks-streaming",
+        "de-databricks-compare",
+        "de-python-frames",
+        "de-python-testing",
+        "de-python-engineering"
       ],
-      "quizzesPlayed": 40,
-      "widgetsPoked": 32,
+      "quizzesPlayed": 47,
+      "widgetsPoked": 36,
       "examOk": true,
       "flashOk": true,
       "skipped": null,
-      "lessonRoutes": 125
+      "lessonRoutes": 134
     },
     {
       "name": "TechLead",
@@ -489,24 +538,36 @@
         {
           "id": "hld",
           "name": "HLD Leadership",
-          "lessons": 10,
+          "lessons": 13,
           "modules": 3
         },
         {
           "id": "lld",
           "name": "LLD Leadership",
-          "lessons": 10,
+          "lessons": 12,
           "modules": 3
         },
         {
           "id": "data",
           "name": "Data Engineering Leadership",
-          "lessons": 10,
+          "lessons": 13,
           "modules": 3
+        },
+        {
+          "id": "people",
+          "name": "People and Org Leadership",
+          "lessons": 14,
+          "modules": 4
+        },
+        {
+          "id": "strategy",
+          "name": "Strategy and Execution",
+          "lessons": 14,
+          "modules": 4
         }
       ],
-      "routes": 44,
-      "checked": 44,
+      "routes": 82,
+      "checked": 82,
       "failures": [],
       "warnings": [],
       "widgetIds": [
@@ -515,8 +576,14 @@
         "tm-adr-builder",
         "tm-blast-radius",
         "tm-severity-triage",
+        "tm-region-picker",
         "tm-retry-safety",
-        "tm-reconciliation"
+        "tm-reconciliation",
+        "tm-feedback-sim",
+        "tm-team-health",
+        "tm-prioritiser",
+        "tm-debt-portfolio",
+        "tm-roadmap-builder"
       ],
       "quizIds": [
         "hld-framing",
@@ -527,14 +594,22 @@
         "lld-leadership",
         "data-trust",
         "data-platform",
-        "data-governance"
+        "data-governance",
+        "people-hiring",
+        "people-coaching",
+        "people-performance",
+        "people-org",
+        "strategy-direction",
+        "strategy-invest",
+        "strategy-planning",
+        "strategy-execution"
       ],
-      "quizzesPlayed": 9,
-      "widgetsPoked": 7,
+      "quizzesPlayed": 17,
+      "widgetsPoked": 13,
       "examOk": true,
       "flashOk": true,
       "skipped": null,
-      "lessonRoutes": 30
+      "lessonRoutes": 66
     },
     {
       "name": "Synapse",
@@ -542,41 +617,106 @@
       "url": "http://127.0.0.1:8780/ml-ai-academy/index.html",
       "tracks": [
         {
+          "id": "found",
+          "name": "ML Foundations",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
           "id": "mlsd",
           "name": "ML System Design",
           "lessons": 19,
           "modules": 3
         },
         {
-          "id": "mlcase",
-          "name": "ML Problem Breakdowns",
+          "id": "data",
+          "name": "Data & Features",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "train",
+          "name": "Training at Scale",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "ops",
+          "name": "MLOps",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "rank",
+          "name": "Search, Ranking & Recs",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "resp",
+          "name": "Responsible ML",
           "lessons": 7,
           "modules": 3
+        },
+        {
+          "id": "mlcase",
+          "name": "ML Problem Breakdowns",
+          "lessons": 13,
+          "modules": 4
         }
       ],
-      "routes": 39,
-      "checked": 39,
+      "routes": 103,
+      "checked": 103,
       "failures": [],
       "warnings": [],
       "widgetIds": [
+        "foundThreshold",
+        "foundCurves",
+        "foundSampleSize",
         "mlsdBudget",
         "mlsdFeatureLab",
+        "dataLeakSpotter",
+        "trainParallel",
+        "trainCost",
+        "opsDrift",
+        "rankFunnel",
+        "rankBandit",
+        "respFairness",
         "mlcaseThreshold"
       ],
       "quizIds": [
+        "found-framing",
+        "found-metrics",
+        "found-experiments",
         "mlsd-framework",
         "mlsd-concepts",
         "mlsd-serving",
+        "data-labels",
+        "data-correctness",
+        "data-features",
+        "train-parallel",
+        "train-experiments",
+        "train-compute",
+        "ops-delivery",
+        "ops-inference",
+        "ops-monitoring",
+        "rank-retrieval",
+        "rank-ranking",
+        "rank-dynamics",
+        "resp-fairness",
+        "resp-explain",
+        "resp-governance",
         "mlcase-recsys",
         "mlcase-trust",
-        "mlcase-retrieval"
+        "mlcase-retrieval",
+        "mlcase-forecast"
       ],
-      "quizzesPlayed": 6,
-      "widgetsPoked": 3,
+      "quizzesPlayed": 25,
+      "widgetsPoked": 13,
       "examOk": true,
       "flashOk": true,
       "skipped": null,
-      "lessonRoutes": 26
+      "lessonRoutes": 84
     },
     {
       "name": "Compass",
@@ -592,14 +732,20 @@
         {
           "id": "story",
           "name": "Story Bank & Playbooks",
-          "lessons": 11,
+          "lessons": 12,
           "modules": 2
         },
         {
           "id": "loops",
           "name": "Company & Level Playbooks",
-          "lessons": 18,
-          "modules": 4
+          "lessons": 22,
+          "modules": 5
+        },
+        {
+          "id": "staff",
+          "name": "Staff & Principal Loops",
+          "lessons": 6,
+          "modules": 2
         },
         {
           "id": "offer",
@@ -608,8 +754,8 @@
           "modules": 3
         }
       ],
-      "routes": 61,
-      "checked": 61,
+      "routes": 73,
+      "checked": 73,
       "failures": [],
       "warnings": [],
       "widgetIds": [
@@ -631,24 +777,1762 @@
         "loops-amazon",
         "loops-google",
         "loops-others",
+        "loops-datacos",
+        "staff-signals",
+        "staff-influence",
         "offer-anatomy",
         "offer-execution",
         "offer-close"
       ],
-      "quizzesPlayed": 12,
+      "quizzesPlayed": 15,
       "widgetsPoked": 7,
       "examOk": true,
       "flashOk": true,
       "skipped": null,
-      "lessonRoutes": 46
+      "lessonRoutes": 57
+    },
+    {
+      "name": "Forge",
+      "dir": "devsecops-academy",
+      "url": "http://127.0.0.1:8780/devsecops-academy/index.html",
+      "tracks": [
+        {
+          "id": "found",
+          "name": "Foundations & Secure SDLC",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "pipe",
+          "name": "Pipeline Engineering",
+          "lessons": 20,
+          "modules": 5
+        },
+        {
+          "id": "chain",
+          "name": "Pipeline Security & Supply Chain",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "ctr",
+          "name": "Containers & Kubernetes",
+          "lessons": 14,
+          "modules": 3
+        },
+        {
+          "id": "scan",
+          "name": "Security Testing Gates",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "vuln",
+          "name": "AppSec & Vulnerability Management",
+          "lessons": 10,
+          "modules": 2
+        },
+        {
+          "id": "wiz",
+          "name": "Wiz Cloud Security",
+          "lessons": 11,
+          "modules": 3
+        },
+        {
+          "id": "prog",
+          "name": "Program, Governance & Resilience",
+          "lessons": 17,
+          "modules": 6
+        },
+        {
+          "id": "ops",
+          "name": "Capstone",
+          "lessons": 3,
+          "modules": 1
+        }
+      ],
+      "routes": 121,
+      "checked": 121,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "foundDefectCost",
+        "foundStride",
+        "pipeBranching",
+        "pipeRollout",
+        "pipeActionsTrust",
+        "chainPpe",
+        "ctrBaseImage",
+        "ctrPodSecurity",
+        "scanQualityGate",
+        "scanPrioritizer",
+        "vulnSla",
+        "wizToxic",
+        "wizPolicy",
+        "wizCompliance",
+        "progSod",
+        "progDataRelease",
+        "opsDora"
+      ],
+      "quizIds": [
+        "found-sdlc",
+        "found-ssdlc",
+        "pipe-git",
+        "pipe-ci",
+        "pipe-actions",
+        "pipe-build",
+        "pipe-deploy",
+        "chain-harden",
+        "chain-identity",
+        "chain-supply",
+        "ctr-docker",
+        "ctr-k8s",
+        "ctr-posture",
+        "scan-sast",
+        "scan-sca",
+        "scan-runtime",
+        "vuln-appsec",
+        "vuln-mgmt",
+        "wiz-platform",
+        "wiz-shiftleft",
+        "wiz-operate",
+        "prog-people",
+        "prog-governance",
+        "prog-data",
+        "prog-data-platform",
+        "prog-adjacent",
+        "prog-feedback",
+        "ops-capstone"
+      ],
+      "quizzesPlayed": 28,
+      "widgetsPoked": 17,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 100
+    },
+    {
+      "name": "Lumen",
+      "dir": "llm-academy",
+      "url": "http://127.0.0.1:8780/llm-academy/index.html",
+      "tracks": [
+        {
+          "id": "found",
+          "name": "Foundations",
+          "lessons": 6,
+          "modules": 2
+        },
+        {
+          "id": "core",
+          "name": "How LLMs Work",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "hist",
+          "name": "Evolution of Language Models",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "train",
+          "name": "Training & Alignment",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "api",
+          "name": "Using LLMs",
+          "lessons": 7,
+          "modules": 3
+        },
+        {
+          "id": "prompt",
+          "name": "Prompt Engineering",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "rag",
+          "name": "RAG & Context Engineering",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "agent",
+          "name": "Skills, Tools & Agents",
+          "lessons": 11,
+          "modules": 3
+        },
+        {
+          "id": "local",
+          "name": "Local LLMs",
+          "lessons": 6,
+          "modules": 2
+        },
+        {
+          "id": "ops",
+          "name": "Evaluation, Safety & LLMOps",
+          "lessons": 11,
+          "modules": 3
+        },
+        {
+          "id": "next",
+          "name": "Multimodal & What's Next",
+          "lessons": 5,
+          "modules": 2
+        },
+        {
+          "id": "cap",
+          "name": "Capstone: Build an Assistant",
+          "lessons": 6,
+          "modules": 2
+        }
+      ],
+      "routes": 121,
+      "checked": 121,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "foundDescent",
+        "foundBpe",
+        "foundCosine",
+        "coreAttention",
+        "coreSoftmax",
+        "coreKvCache",
+        "histTimeline",
+        "histNgram",
+        "trainFlops",
+        "trainMoe",
+        "trainLora",
+        "apiLatency",
+        "apiJson",
+        "apiCost",
+        "promptLint",
+        "promptFewShot",
+        "ragChunker",
+        "ragRrf",
+        "ragBudget",
+        "agentReact",
+        "agentApproval",
+        "localFit",
+        "localTps",
+        "opsJudge",
+        "opsInjection",
+        "nextDiffusion",
+        "nextOnDevice",
+        "capEvalGate",
+        "capLaunch"
+      ],
+      "quizIds": [
+        "found-basics",
+        "found-tokens",
+        "core-transformer",
+        "core-generation",
+        "hist-before",
+        "hist-era",
+        "hist-modern",
+        "train-pretrain",
+        "train-finetune",
+        "train-align",
+        "api-basics",
+        "api-structured",
+        "api-choose",
+        "prompt-craft",
+        "prompt-systems",
+        "rag-retrieval",
+        "rag-quality",
+        "rag-context",
+        "agent-loop",
+        "agent-ecosystem",
+        "agent-orchestration",
+        "local-why",
+        "local-runtimes",
+        "ops-evals",
+        "ops-security",
+        "ops-systems",
+        "next-multimodal",
+        "next-frontier",
+        "cap-build",
+        "cap-ship"
+      ],
+      "quizzesPlayed": 30,
+      "widgetsPoked": 29,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 97
+    },
+    {
+      "name": "Glacier",
+      "dir": "snowflake-academy",
+      "url": "http://127.0.0.1:8780/snowflake-academy/index.html",
+      "tracks": [
+        {
+          "id": "arch",
+          "name": "Architecture & Storage",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "perf",
+          "name": "Warehouses & Query Performance",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "ingest",
+          "name": "Ingestion & Pipelines",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "sec",
+          "name": "Security & Governance",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "cost",
+          "name": "Cost & FinOps",
+          "lessons": 7,
+          "modules": 3
+        },
+        {
+          "id": "dev",
+          "name": "Snowpark & Programmability",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "ai",
+          "name": "Cortex AI",
+          "lessons": 7,
+          "modules": 3
+        },
+        {
+          "id": "ops",
+          "name": "CI/CD & Platform Engineering",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "plat",
+          "name": "Platform, Continuity & Ecosystem",
+          "lessons": 10,
+          "modules": 3
+        }
+      ],
+      "routes": 98,
+      "checked": 98,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "pruningLab",
+        "clusterDepthLab",
+        "retentionLab",
+        "warehouseCalc",
+        "scalingLab",
+        "cacheLab",
+        "spillLab",
+        "loadPathLab",
+        "streamLab",
+        "lagLab",
+        "rbacGraph",
+        "policyLab",
+        "cloudServicesLab",
+        "monitorLab",
+        "rightSizeLab",
+        "rightsLab",
+        "lazyLab",
+        "tokenLab",
+        "semanticLab",
+        "promoteLab",
+        "gotchaLab",
+        "splitLab",
+        "failoverLab",
+        "lockLab"
+      ],
+      "quizIds": [
+        "arch-layers",
+        "arch-storage",
+        "arch-protect",
+        "perf-warehouses",
+        "perf-tuning",
+        "perf-accel",
+        "ingest-load",
+        "ingest-transform",
+        "ingest-open",
+        "sec-access",
+        "sec-policies",
+        "sec-perimeter",
+        "cost-model",
+        "cost-control",
+        "cost-observe",
+        "dev-procs",
+        "dev-udfs",
+        "dev-snowpark",
+        "ai-llm",
+        "ai-analyst",
+        "ai-search",
+        "ops-cicd",
+        "ops-gotchas",
+        "plat-continuity",
+        "plat-ecosystem",
+        "plat-operate"
+      ],
+      "quizzesPlayed": 26,
+      "widgetsPoked": 24,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 78
+    },
+    {
+      "name": "Nimbus",
+      "dir": "cloud-academy",
+      "url": "http://127.0.0.1:8780/cloud-academy/index.html",
+      "tracks": [
+        {
+          "id": "found",
+          "name": "Cloud Fundamentals & Landing Zones",
+          "lessons": 9,
+          "modules": 2
+        },
+        {
+          "id": "iam",
+          "name": "IAM & Workload Identity",
+          "lessons": 13,
+          "modules": 4
+        },
+        {
+          "id": "net",
+          "name": "Cloud Networking",
+          "lessons": 11,
+          "modules": 3
+        },
+        {
+          "id": "compute",
+          "name": "Compute: VMs, Containers & Serverless",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "data",
+          "name": "Storage & Managed Data",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "iac",
+          "name": "Infrastructure as Code",
+          "lessons": 11,
+          "modules": 3
+        },
+        {
+          "id": "waf",
+          "name": "Well-Architected",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "obs",
+          "name": "Observability on Cloud",
+          "lessons": 8,
+          "modules": 2
+        }
+      ],
+      "routes": 100,
+      "checked": 100,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "foundSharedResp",
+        "foundServiceMap",
+        "iamPolicyEval",
+        "iamOidcTrust",
+        "iamKmsAccess",
+        "netCidrPlanner",
+        "netSgNacl",
+        "netRouteLookup",
+        "computePicker",
+        "computeAutoscale",
+        "dataS3Lifecycle",
+        "dataDynamoCapacity",
+        "iacPlanSim",
+        "iacCountVsForEach",
+        "wafCostEstimator",
+        "wafDrPicker",
+        "obsAlarmTuner",
+        "obsK8sTriage"
+      ],
+      "quizIds": [
+        "found-basics",
+        "found-migration",
+        "found-landing",
+        "iam-chaining",
+        "iam-protect",
+        "iam-policies",
+        "iam-roles",
+        "iam-guardrails",
+        "net-vpc",
+        "net-traffic",
+        "net-edge",
+        "compute-events",
+        "compute-vms",
+        "compute-containers",
+        "compute-serverless",
+        "data-storage",
+        "data-databases",
+        "data-analytics",
+        "iac-tf-core",
+        "iac-testing",
+        "iac-tf-scale",
+        "iac-native",
+        "waf-reliability",
+        "waf-secops",
+        "waf-cost",
+        "obs-native",
+        "obs-stack"
+      ],
+      "quizzesPlayed": 27,
+      "widgetsPoked": 18,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 80
+    },
+    {
+      "name": "Beacon",
+      "dir": "sre-academy",
+      "url": "http://127.0.0.1:8780/sre-academy/index.html",
+      "tracks": [
+        {
+          "id": "found",
+          "name": "SRE Foundations",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "slo",
+          "name": "SLIs, SLOs & Error Budgets",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "otel",
+          "name": "Telemetry with OpenTelemetry",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "tools",
+          "name": "Observability Tooling",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "alert",
+          "name": "Alerting & On-call",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "inc",
+          "name": "Incident Management & Postmortems",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "perf",
+          "name": "Capacity, Performance & Load Testing",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "chaos",
+          "name": "Resilience & Chaos Engineering",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "data",
+          "name": "Data Pipeline Observability",
+          "lessons": 7,
+          "modules": 2
+        }
+      ],
+      "routes": 85,
+      "checked": 85,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "bcNines",
+        "bcToil",
+        "bcPercentiles",
+        "bcBudget",
+        "bcBurnRate",
+        "bcTraceWaterfall",
+        "bcSampling",
+        "bcCardinality",
+        "bcPromql",
+        "bcAlertTuner",
+        "bcOncall",
+        "bcSeverity",
+        "bcMttx",
+        "bcLittle",
+        "bcQueue",
+        "bcFanout",
+        "bcRetryStorm",
+        "bcBreaker",
+        "bcRtoRpo",
+        "bcFreshness",
+        "bcLineage"
+      ],
+      "quizIds": [
+        "found-principles",
+        "found-practice",
+        "slo-sli",
+        "slo-budgets",
+        "otel-signals",
+        "otel-pipeline",
+        "tools-metrics",
+        "tools-logs-traces",
+        "alert-alerting",
+        "alert-oncall",
+        "inc-response",
+        "inc-learning",
+        "perf-theory",
+        "perf-testing",
+        "chaos-patterns",
+        "chaos-experiments",
+        "data-signals",
+        "data-operate"
+      ],
+      "quizzesPlayed": 18,
+      "widgetsPoked": 21,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 64
+    },
+    {
+      "name": "Ledger",
+      "dir": "db-internals-academy",
+      "url": "http://127.0.0.1:8780/db-internals-academy/index.html",
+      "tracks": [
+        {
+          "id": "store",
+          "name": "Storage Engines",
+          "lessons": 11,
+          "modules": 4
+        },
+        {
+          "id": "idx",
+          "name": "Indexing",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "qp",
+          "name": "Query Processing",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "txn",
+          "name": "Transactions & Concurrency",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "dist",
+          "name": "Replication & Distribution",
+          "lessons": 13,
+          "modules": 4
+        },
+        {
+          "id": "pg",
+          "name": "Postgres in Practice",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "col",
+          "name": "Columnar & MPP Engines",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "sql",
+          "name": "SQL Mastery for Interviews",
+          "lessons": 9,
+          "modules": 3
+        }
+      ],
+      "routes": 102,
+      "checked": 102,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "storeBtree",
+        "storeLsm",
+        "storeBufferPool",
+        "idxComposite",
+        "idxBloom",
+        "idxAnn",
+        "qpJoinCost",
+        "qpCardinality",
+        "qpExplain",
+        "qpRuntimeFilter",
+        "txnIsolation",
+        "txnDeadlock",
+        "txnMvcc",
+        "distQuorum",
+        "distShard",
+        "distRaft",
+        "distClocks",
+        "pgVacuum",
+        "pgPool",
+        "colRowCol",
+        "colEncoding",
+        "colPrune",
+        "sqlWindow",
+        "sqlSargable"
+      ],
+      "quizIds": [
+        "store-pages",
+        "store-btree",
+        "store-lsm",
+        "store-durability",
+        "idx-basics",
+        "idx-beyond",
+        "idx-design",
+        "qp-pipeline",
+        "qp-optimizer",
+        "qp-joins",
+        "txn-acid",
+        "txn-control",
+        "txn-practice",
+        "dist-replication",
+        "dist-partition",
+        "dist-consensus",
+        "dist-time",
+        "pg-vacuum",
+        "pg-ops",
+        "pg-perf",
+        "col-columnar",
+        "col-mpp",
+        "col-formats",
+        "sql-windows",
+        "sql-ctes",
+        "sql-perf"
+      ],
+      "quizzesPlayed": 26,
+      "widgetsPoked": 24,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 82
+    },
+    {
+      "name": "Kernel",
+      "dir": "linux-net-academy",
+      "url": "http://127.0.0.1:8780/linux-net-academy/index.html",
+      "tracks": [
+        {
+          "id": "shell",
+          "name": "Shell & Command Line",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "text",
+          "name": "Text Processing",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "proc",
+          "name": "Processes & Services",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "fs",
+          "name": "Filesystems & Permissions",
+          "lessons": 6,
+          "modules": 2
+        },
+        {
+          "id": "perf",
+          "name": "Performance & Troubleshooting",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "net",
+          "name": "Networking Fundamentals",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "tools",
+          "name": "Network Tools & Troubleshooting",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "cont",
+          "name": "Containers Under the Hood",
+          "lessons": 4,
+          "modules": 1
+        },
+        {
+          "id": "ssh",
+          "name": "SSH & Remote Work",
+          "lessons": 5,
+          "modules": 1
+        }
+      ],
+      "routes": 83,
+      "checked": 83,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "shellRedirect",
+        "shellExpansion",
+        "textRegex",
+        "textPipeline",
+        "procStates",
+        "procSignals",
+        "procCron",
+        "fsChmod",
+        "fsUmask",
+        "fsLinks",
+        "perfLoad",
+        "perfFree",
+        "perfUse",
+        "perfIncident",
+        "netCidr",
+        "netTcp",
+        "netDns",
+        "toolsCurlTiming",
+        "toolsTcpdump",
+        "toolsFirewall",
+        "toolsPicker",
+        "contNamespaces",
+        "contOverlay",
+        "sshTunnel"
+      ],
+      "quizIds": [
+        "shell-basics",
+        "shell-scripting",
+        "text-search",
+        "text-transform",
+        "proc-model",
+        "proc-services",
+        "fs-layout",
+        "fs-perms",
+        "perf-observe",
+        "perf-trace",
+        "perf-incidents",
+        "net-layers",
+        "net-transport",
+        "net-app",
+        "tools-inspect",
+        "tools-probe",
+        "tools-filter",
+        "cont-iso",
+        "ssh-remote"
+      ],
+      "quizzesPlayed": 19,
+      "widgetsPoked": 24,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 62
+    },
+    {
+      "name": "Anvil",
+      "dir": "java-backend-academy",
+      "url": "http://127.0.0.1:8780/java-backend-academy/index.html",
+      "tracks": [
+        {
+          "id": "java",
+          "name": "Modern Java",
+          "lessons": 11,
+          "modules": 4
+        },
+        {
+          "id": "jvm",
+          "name": "JVM Internals",
+          "lessons": 9,
+          "modules": 4
+        },
+        {
+          "id": "conc",
+          "name": "Concurrency",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "boot",
+          "name": "Spring Boot Core",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "api",
+          "name": "Building APIs",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "data",
+          "name": "Data Access",
+          "lessons": 10,
+          "modules": 3
+        },
+        {
+          "id": "res",
+          "name": "Resilience & Microservices",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "sec",
+          "name": "Security",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "test",
+          "name": "Testing & Quality",
+          "lessons": 7,
+          "modules": 3
+        },
+        {
+          "id": "prod",
+          "name": "Production",
+          "lessons": 6,
+          "modules": 2
+        }
+      ],
+      "routes": 107,
+      "checked": 107,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "javaStreamLazy",
+        "javaHashMap",
+        "jvmGcPause",
+        "jvmContainerBudget",
+        "concRace",
+        "concThroughput",
+        "bootConfigPrecedence",
+        "apiStatusCodes",
+        "apiPagination",
+        "apiRateLimiter",
+        "dataNPlusOne",
+        "dataPropagation",
+        "dataPoolSizing",
+        "resRetryBudget",
+        "resBreaker",
+        "secJwt",
+        "testMutation",
+        "prodPackaging"
+      ],
+      "quizIds": [
+        "java-lang",
+        "java-fp",
+        "java-collections",
+        "java-craft",
+        "jvm-memory",
+        "jvm-runtime",
+        "jvm-diagnose",
+        "jvm-perf",
+        "conc-threads",
+        "conc-sync",
+        "conc-loom",
+        "boot-ioc",
+        "boot-config",
+        "boot-jobs",
+        "api-rest",
+        "api-contract",
+        "api-reactive",
+        "data-jpa",
+        "data-tx",
+        "data-ops",
+        "res-calls",
+        "res-events",
+        "res-platform",
+        "sec-authn",
+        "sec-authz",
+        "sec-hardening",
+        "test-unit",
+        "test-integration",
+        "test-quality",
+        "prod-observe",
+        "prod-ship"
+      ],
+      "quizzesPlayed": 31,
+      "widgetsPoked": 18,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 86
+    },
+    {
+      "name": "Orbit",
+      "dir": "salesforce-academy",
+      "url": "http://127.0.0.1:8780/salesforce-academy/index.html",
+      "tracks": [
+        {
+          "id": "plat",
+          "name": "Platform Fundamentals",
+          "lessons": 13,
+          "modules": 5
+        },
+        {
+          "id": "sec",
+          "name": "Security & Sharing",
+          "lessons": 10,
+          "modules": 4
+        },
+        {
+          "id": "flow",
+          "name": "Declarative Automation",
+          "lessons": 8,
+          "modules": 4
+        },
+        {
+          "id": "apex",
+          "name": "Apex",
+          "lessons": 13,
+          "modules": 4
+        },
+        {
+          "id": "lwc",
+          "name": "Lightning Web Components",
+          "lessons": 8,
+          "modules": 4
+        },
+        {
+          "id": "int",
+          "name": "Integration",
+          "lessons": 9,
+          "modules": 4
+        },
+        {
+          "id": "qa",
+          "name": "Testing & Quality",
+          "lessons": 6,
+          "modules": 3
+        },
+        {
+          "id": "ops",
+          "name": "DevOps & Release",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "crma",
+          "name": "CRM Analytics",
+          "lessons": 7,
+          "modules": 3
+        }
+      ],
+      "routes": 101,
+      "checked": 101,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "obSandboxPicker",
+        "obRelationshipPicker",
+        "obValidationTester",
+        "obAccessLayers",
+        "obSharingCalc",
+        "obOrderStepper",
+        "obFlowVsApex",
+        "obGovernorBudget",
+        "obAsyncPicker",
+        "obConfigPicker",
+        "obDataPathPicker",
+        "obEventLab",
+        "obApiPicker",
+        "obCoverageCalc",
+        "obDeployPlanner",
+        "obSaqlBuilder",
+        "obPredicateTester"
+      ],
+      "quizIds": [
+        "plat-arch",
+        "plat-envs",
+        "plat-data",
+        "plat-model",
+        "plat-ux",
+        "sec-access",
+        "sec-records",
+        "sec-code",
+        "sec-protect",
+        "flow-flows",
+        "flow-engine",
+        "flow-choose",
+        "flow-ai",
+        "apex-lang",
+        "apex-bulk",
+        "apex-async",
+        "apex-design",
+        "lwc-model",
+        "lwc-data",
+        "lwc-comm",
+        "lwc-ux",
+        "int-apis",
+        "int-outbound",
+        "int-events",
+        "int-data",
+        "qa-apex-tests",
+        "qa-lwc-tests",
+        "qa-static",
+        "ops-dx",
+        "ops-release",
+        "crma-data",
+        "crma-viz",
+        "crma-govern"
+      ],
+      "quizzesPlayed": 33,
+      "widgetsPoked": 17,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 81
+    },
+    {
+      "name": "Pixel",
+      "dir": "frontend-academy",
+      "url": "http://127.0.0.1:8780/frontend-academy/index.html",
+      "tracks": [
+        {
+          "id": "web",
+          "name": "Web Platform Foundations",
+          "lessons": 7,
+          "modules": 3
+        },
+        {
+          "id": "react",
+          "name": "React Core",
+          "lessons": 10,
+          "modules": 4
+        },
+        {
+          "id": "state",
+          "name": "State & Data",
+          "lessons": 6,
+          "modules": 3
+        },
+        {
+          "id": "comp",
+          "name": "Composition Patterns",
+          "lessons": 5,
+          "modules": 2
+        },
+        {
+          "id": "next",
+          "name": "Next.js & Rendering Strategies",
+          "lessons": 6,
+          "modules": 3
+        },
+        {
+          "id": "perf",
+          "name": "Performance",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "a11y",
+          "name": "Accessibility",
+          "lessons": 6,
+          "modules": 3
+        },
+        {
+          "id": "test",
+          "name": "Testing & Quality",
+          "lessons": 5,
+          "modules": 3
+        },
+        {
+          "id": "sec",
+          "name": "Frontend Security & Delivery",
+          "lessons": 6,
+          "modules": 2
+        },
+        {
+          "id": "sd",
+          "name": "Frontend System Design",
+          "lessons": 7,
+          "modules": 3
+        }
+      ],
+      "routes": 87,
+      "checked": 87,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "webFlexGrid",
+        "webEventLoop",
+        "webSpecificity",
+        "reactRerender",
+        "reactKeys",
+        "reactEffectDeps",
+        "reactTransition",
+        "stateChooser",
+        "stateQueryCache",
+        "compBooleanExplosion",
+        "compPatternPicker",
+        "nextStrategy",
+        "nextStreamTimeline",
+        "perfVitals",
+        "perfMemo",
+        "perfBundle",
+        "a11yContrast",
+        "a11yFocusOrder",
+        "testMix",
+        "testQueryPicker",
+        "secXssSink",
+        "secCspBuilder",
+        "sdAutocomplete"
+      ],
+      "quizIds": [
+        "web-html-css",
+        "web-browser",
+        "web-js-ts",
+        "react-basics",
+        "react-hooks",
+        "react-tree",
+        "react-concurrent",
+        "state-local",
+        "state-global",
+        "state-forms",
+        "comp-patterns",
+        "comp-api",
+        "next-strategies",
+        "next-rsc",
+        "next-app",
+        "perf-vitals",
+        "perf-loading",
+        "perf-runtime",
+        "a11y-foundations",
+        "a11y-interaction",
+        "a11y-verify",
+        "test-strategy",
+        "test-components",
+        "test-quality",
+        "sec-threats",
+        "sec-delivery",
+        "sd-framework",
+        "sd-platform",
+        "sd-breakdowns"
+      ],
+      "quizzesPlayed": 29,
+      "widgetsPoked": 23,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 66
+    },
+    {
+      "name": "Chisel",
+      "dir": "software-craft-academy",
+      "url": "http://127.0.0.1:8780/software-craft-academy/index.html",
+      "tracks": [
+        {
+          "id": "clean",
+          "name": "Clean Code",
+          "lessons": 13,
+          "modules": 4
+        },
+        {
+          "id": "refac",
+          "name": "Refactoring & Legacy Code",
+          "lessons": 8,
+          "modules": 3
+        },
+        {
+          "id": "test",
+          "name": "Testing Strategy",
+          "lessons": 11,
+          "modules": 4
+        },
+        {
+          "id": "review",
+          "name": "Code Review",
+          "lessons": 9,
+          "modules": 4
+        },
+        {
+          "id": "git",
+          "name": "Advanced Git",
+          "lessons": 11,
+          "modules": 4
+        },
+        {
+          "id": "design",
+          "name": "Design in the Small",
+          "lessons": 9,
+          "modules": 4
+        },
+        {
+          "id": "docs",
+          "name": "Documentation & Communication",
+          "lessons": 9,
+          "modules": 4
+        },
+        {
+          "id": "ai",
+          "name": "Working with AI Coding Agents",
+          "lessons": 9,
+          "modules": 4
+        }
+      ],
+      "routes": 98,
+      "checked": 98,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "cleanSmellSpotter",
+        "cleanNamingLab",
+        "cleanLogLevelDrill",
+        "refacStepper",
+        "refacSeamPicker",
+        "testPortfolioBalancer",
+        "testMutationLab",
+        "testDoubleSorter",
+        "reviewPrSizer",
+        "reviewCommentCoach",
+        "gitGraphSim",
+        "gitBisectLab",
+        "gitHookPlacer",
+        "designCouplingMeter",
+        "designCoreShellSplitter",
+        "designSemverDrill",
+        "docsAdrBuilder",
+        "docsReadmeAudit",
+        "docsEstimator",
+        "aiDiffReviewer",
+        "aiPromptGrader"
+      ],
+      "quizIds": [
+        "clean-ops",
+        "clean-names",
+        "clean-errors",
+        "clean-structure",
+        "refac-smells",
+        "refac-legacy",
+        "refac-scale",
+        "test-contracts",
+        "test-strategy",
+        "test-practice",
+        "test-advanced",
+        "review-team",
+        "review-purpose",
+        "review-feedback",
+        "review-flow",
+        "git-flow",
+        "git-model",
+        "git-recover",
+        "git-scale",
+        "design-interfaces",
+        "design-solid",
+        "design-composition",
+        "design-shape",
+        "docs-planning",
+        "docs-types",
+        "docs-decisions",
+        "docs-comms",
+        "ai-habits",
+        "ai-setup",
+        "ai-prompting",
+        "ai-verify"
+      ],
+      "quizzesPlayed": 31,
+      "widgetsPoked": 21,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 79
+    },
+    {
+      "name": "Pyxis",
+      "dir": "python-academy",
+      "url": "http://127.0.0.1:8780/python-academy/index.html",
+      "tracks": [
+        {
+          "id": "lang",
+          "name": "Python Language & Data Model",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "idiom",
+          "name": "Idioms & Standard Library",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "types",
+          "name": "Typing, Generics & Protocols",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "pkg",
+          "name": "Packaging & Tooling",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "test",
+          "name": "Testing Python",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "conc",
+          "name": "Concurrency & asyncio",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "perf",
+          "name": "Profiling & Performance",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "web",
+          "name": "Web Services",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "data",
+          "name": "Data Engineering in Python",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "prod",
+          "name": "Production Python",
+          "lessons": 8,
+          "modules": 2
+        }
+      ],
+      "routes": 101,
+      "checked": 101,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "mutabilityLab",
+        "generatorLab",
+        "typeChecker",
+        "depResolver",
+        "fixtureGraph",
+        "threadVsProcess",
+        "asyncTimeline",
+        "complexityLab",
+        "poolSizer",
+        "dfPlanner",
+        "configResolver"
+      ],
+      "quizIds": [
+        "lang-objects",
+        "lang-runtime",
+        "idiom-iteration",
+        "idiom-stdlib",
+        "types-basics",
+        "types-generics",
+        "pkg-envs",
+        "pkg-build",
+        "test-pytest",
+        "test-beyond",
+        "conc-parallel",
+        "conc-asyncio",
+        "perf-measure",
+        "perf-speed",
+        "web-fastapi",
+        "web-platform",
+        "data-frames",
+        "data-pipelines",
+        "prod-config",
+        "prod-ship"
+      ],
+      "quizzesPlayed": 20,
+      "widgetsPoked": 11,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 80
+    },
+    {
+      "name": "Summit",
+      "dir": "certification-academy",
+      "url": "http://127.0.0.1:8780/certification-academy/index.html",
+      "tracks": [
+        {
+          "id": "aws",
+          "name": "AWS Solutions Architect Associate",
+          "lessons": 16,
+          "modules": 4
+        },
+        {
+          "id": "snow",
+          "name": "SnowPro Core",
+          "lessons": 16,
+          "modules": 5
+        },
+        {
+          "id": "cka",
+          "name": "Certified Kubernetes Administrator",
+          "lessons": 14,
+          "modules": 5
+        },
+        {
+          "id": "secplus",
+          "name": "Security+ (defensive)",
+          "lessons": 15,
+          "modules": 5
+        },
+        {
+          "id": "strat",
+          "name": "Exam strategy",
+          "lessons": 12,
+          "modules": 3
+        }
+      ],
+      "routes": 86,
+      "checked": 86,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "suSgNacl",
+        "suAzPlanner",
+        "suDrPicker",
+        "suS3Tier",
+        "suWarehouseSizer",
+        "suCacheLayers",
+        "suTimeTravel",
+        "suRoleTree",
+        "suScheduler",
+        "suRbacCheck",
+        "suServicePicker",
+        "suPodTriage",
+        "suControlSorter",
+        "suRiskCalc",
+        "suIrStepper",
+        "suZonePlacer",
+        "suSpacing",
+        "suEliminator",
+        "suPacing"
+      ],
+      "quizIds": [
+        "aws-iam-foundations",
+        "aws-multi-account",
+        "aws-vpc-security",
+        "aws-data-protection",
+        "aws-ha-multi-az",
+        "aws-decoupling",
+        "aws-dr-strategies",
+        "aws-dns-failover",
+        "aws-compute-choice",
+        "aws-storage-choice",
+        "aws-database-choice",
+        "aws-caching-edge",
+        "aws-pricing-models",
+        "aws-storage-cost",
+        "aws-network-cost",
+        "aws-scenario-reading",
+        "snow-three-layers",
+        "snow-micro-partitions",
+        "snow-objects-hierarchy",
+        "snow-warehouse-sizing",
+        "snow-caching",
+        "snow-query-profile",
+        "snow-stages-formats",
+        "snow-copy-into",
+        "snow-continuous-loading",
+        "snow-semi-structured",
+        "snow-time-travel-failsafe",
+        "snow-cloning",
+        "snow-sharing",
+        "snow-rbac",
+        "snow-governance-features",
+        "snow-cost-monitoring",
+        "cka-control-plane",
+        "cka-kubeadm-lifecycle",
+        "cka-etcd-backup",
+        "cka-rbac",
+        "cka-controllers",
+        "cka-scheduling",
+        "cka-config-quotas",
+        "cka-services",
+        "cka-dns-ingress",
+        "cka-netpol",
+        "cka-pv-pvc",
+        "cka-pod-debug",
+        "cka-node-debug",
+        "cka-kubectl-speed",
+        "secplus-cia-aaa",
+        "secplus-controls",
+        "secplus-crypto-pki",
+        "secplus-change-mgmt",
+        "secplus-threat-actors",
+        "secplus-indicators",
+        "secplus-mitigations",
+        "secplus-network-design",
+        "secplus-resilience",
+        "secplus-data-protection",
+        "secplus-iam-ops",
+        "secplus-monitoring-vuln",
+        "secplus-incident-response",
+        "secplus-risk",
+        "secplus-governance",
+        "strat-objectives-first",
+        "strat-study-plan",
+        "strat-labs-hands-on",
+        "strat-ethics-integrity",
+        "strat-read-the-stem",
+        "strat-elimination",
+        "strat-scenario-patterns",
+        "strat-confidence-flagging",
+        "strat-pacing",
+        "strat-online-vs-center",
+        "strat-performance-based",
+        "strat-after-exam"
+      ],
+      "quizzesPlayed": 73,
+      "widgetsPoked": 19,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 73
+    },
+    {
+      "name": "Pulse",
+      "dir": "streaming-academy",
+      "url": "http://127.0.0.1:8780/streaming-academy/index.html",
+      "tracks": [
+        {
+          "id": "fund",
+          "name": "Streaming Fundamentals",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "kafka",
+          "name": "Kafka Internals",
+          "lessons": 11,
+          "modules": 3
+        },
+        {
+          "id": "kops",
+          "name": "Kafka Operations",
+          "lessons": 7,
+          "modules": 2
+        },
+        {
+          "id": "sem",
+          "name": "Time, Windows & State",
+          "lessons": 8,
+          "modules": 2
+        },
+        {
+          "id": "flink",
+          "name": "Apache Flink",
+          "lessons": 9,
+          "modules": 3
+        },
+        {
+          "id": "eo",
+          "name": "Exactly-Once & Transactions",
+          "lessons": 6,
+          "modules": 2
+        },
+        {
+          "id": "cdc",
+          "name": "CDC & Integration",
+          "lessons": 6,
+          "modules": 2
+        },
+        {
+          "id": "engines",
+          "name": "Engine Comparison",
+          "lessons": 5,
+          "modules": 1
+        },
+        {
+          "id": "ops",
+          "name": "Observability, Capacity & Security",
+          "lessons": 7,
+          "modules": 3
+        },
+        {
+          "id": "cases",
+          "name": "Production Case Studies",
+          "lessons": 6,
+          "modules": 2
+        }
+      ],
+      "routes": 94,
+      "checked": 94,
+      "failures": [],
+      "warnings": [],
+      "widgetIds": [
+        "pl-partitions",
+        "pl-isr",
+        "pl-lag",
+        "pl-watermark",
+        "pl-checkpoint",
+        "pl-capacity"
+      ],
+      "quizIds": [
+        "fund-model",
+        "fund-flow",
+        "kafka-log",
+        "kafka-replication",
+        "kafka-consumers",
+        "kops-sizing",
+        "kops-lifecycle",
+        "sem-time",
+        "sem-state",
+        "flink-runtime",
+        "flink-resilience",
+        "flink-sql",
+        "eo-guarantees",
+        "eo-endtoend",
+        "cdc-capture",
+        "cdc-pipelines",
+        "engines-compare",
+        "ops-observe",
+        "ops-resilience",
+        "ops-security",
+        "cases-design",
+        "cases-production"
+      ],
+      "quizzesPlayed": 22,
+      "widgetsPoked": 6,
+      "examOk": true,
+      "flashOk": true,
+      "skipped": null,
+      "lessonRoutes": 73
     }
   ],
   "totals": {
-    "routesChecked": 679,
+    "routesChecked": 2220,
     "routesWithProblems": 0,
     "failures": 0,
-    "warnings": 3,
+    "warnings": 2,
     "skipped": []
   },
-  "finishedAt": "2026-08-29T18:04:10.622Z"
+  "finishedAt": "2026-10-28T15:38:46.655Z"
 }

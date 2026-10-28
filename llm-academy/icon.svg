@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Lumen LLM Atlas icon">
+  <rect width="100" height="100" rx="22" fill="#0a0d12"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="50" cy="50" r="17" stroke="#a3e635" stroke-width="6"/>
+    <path d="M50 14 V24 M50 76 V86 M14 50 H24 M76 50 H86" stroke="#a3e635" stroke-width="6"/>
+    <path d="M25 25 L32 32 M68 68 L75 75 M75 25 L68 32 M32 68 L25 75" stroke="#22d3ee" stroke-width="6"/>
+  </g>
+</svg>

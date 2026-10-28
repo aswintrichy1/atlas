@@ -1,0 +1,16 @@
+{
+  "name": "Ledger \u00b7 The Database Internals Atlas",
+  "short_name": "Ledger",
+  "description": "Offline database internals course: pages, B+trees, LSM trees and the WAL; indexing; query optimization and join algorithms; isolation, MVCC and SSI; replication, sharding and Raft; Postgres operations; columnar and MPP engines; and SQL for interviews \u2014 with interactive engine simulators, checkpoint quizzes, exam mode and flashcards.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

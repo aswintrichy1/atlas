@@ -1,0 +1,16 @@
+{
+  "name": "Beacon \u00b7 The Observability & SRE Atlas",
+  "short_name": "Beacon",
+  "description": "Offline Observability & SRE course: SLIs, SLOs and error budgets, OpenTelemetry, Prometheus and Grafana, alerting and on-call, incident management and blameless postmortems, capacity and load testing, chaos engineering and data pipeline observability \u2014 with interactive labs, an incident simulator, exam mode and flashcards.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

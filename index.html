@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="The Atlas Collection — a local launcher for seven interactive, fully-offline learning atlases: Blueprint, Codex, Synapse, Compass, Citadel, Cascade, and TechLead." />
+  <meta name="description" content="The Atlas Collection — a local launcher for twenty-one interactive, fully-offline learning atlases: Codex, Compass, Summit, Blueprint, Ledger, TechLead, Synapse, Lumen, Cascade, Pulse, Glacier, Kernel, Nimbus, Beacon, Citadel, Forge, Chisel, Pyxis, Pixel, Anvil, and Orbit." />
   <meta name="theme-color" content="#0a0d12" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon.svg" />
@@ -24,6 +24,30 @@
       --emerald: #34d399; /* Citadel */
       --azure: #38bdf8;   /* Cascade */
       --gold: #f59e0b;    /* Techno Managerial */
+      --lime: #a3e635;    /* Lumen */
+      /* per-academy card accents; each has a darker light-theme twin below
+         so accent-coloured text stays >= 4.5:1 on the light surface */
+      --c-blueprint: var(--amber);
+      --c-codex: #f472b6;
+      --c-synapse: #a78bfa;
+      --c-lumen: var(--lime);
+      --c-compass: #fb7185;
+      --c-citadel: var(--emerald);
+      --c-forge: #f97316;
+      --c-cascade: var(--azure);
+      --c-techlead: var(--gold);
+      --c-glacier: #67e8f9;
+      --c-nimbus: #60a5fa;
+      --c-beacon: #facc15;
+      --c-ledger: #e879f9;
+      --c-kernel: #4ade80;
+      --c-anvil: #ef4444;
+      --c-orbit: #2dd4bf;
+      --c-pixel: #ec4899;
+      --c-chisel: #d4a373;
+      --c-pyxis: #fbbf24;
+      --c-summit: #fb923c;
+      --c-pulse: #22d3ee;
       --radius: 18px;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
       --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -43,6 +67,28 @@
       --emerald: #0e9f6e;
       --azure: #0a7ea8;
       --gold: #b9700c;
+      --lime: #4d7c0f;
+      --c-blueprint: #a35a00;
+      --c-codex: #9d174d;
+      --c-synapse: #6d28d9;
+      --c-lumen: #4d7c0f;
+      --c-compass: #be123c;
+      --c-citadel: #047857;
+      --c-forge: #c2410c;
+      --c-cascade: #0369a1;
+      --c-techlead: #92400e;
+      --c-glacier: #0e7490;
+      --c-nimbus: #1d4ed8;
+      --c-beacon: #a16207;
+      --c-ledger: #c026d3;
+      --c-kernel: #15803d;
+      --c-anvil: #b91c1c;
+      --c-orbit: #0f766e;
+      --c-pixel: #be185d;
+      --c-chisel: #8a5a2b;
+      --c-pyxis: #b45309;
+      --c-summit: #b84a00;
+      --c-pulse: #155e75;
     }
     * { box-sizing: border-box; margin: 0; }
     html { -webkit-text-size-adjust: 100%; }
@@ -129,6 +175,56 @@
     .open svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.25s var(--ease); }
     .card:hover .open svg { transform: translateX(4px); }
 
+    /* jump nav + filter */
+    .finder {
+      position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin: 0 calc(-1 * clamp(8px, 2vw, 16px)) 10px; padding: 12px clamp(8px, 2vw, 16px);
+      background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .finder nav { flex: 1 1 520px; min-width: 0; }
+    .jump { display: flex; gap: 8px; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; }
+    .jump a {
+      display: inline-flex; align-items: center; gap: 7px; font-size: 0.8rem; font-weight: 600; color: var(--text-dim);
+      text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; background: var(--surface);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .jump a:hover { color: var(--text); border-color: var(--line-strong); }
+    .jump a:focus-visible, .search input:focus-visible { outline: 2px solid var(--emerald); outline-offset: 2px; }
+    .jump a.dim { opacity: 0.4; }
+    .jump .n { font-family: var(--mono); font-size: 0.7rem; color: var(--text-faint); }
+    .search { position: relative; flex: 0 1 260px; min-width: 200px; }
+    .search svg { position: absolute; left: 11px; top: 50%; width: 15px; height: 15px; transform: translateY(-50%); fill: none; stroke: var(--text-faint); stroke-width: 2; stroke-linecap: round; pointer-events: none; }
+    .search input {
+      width: 100%; font: inherit; font-size: 0.88rem; color: var(--text); background: var(--surface);
+      border: 1px solid var(--line-strong); border-radius: 10px; padding: 8px 34px 8px 32px;
+    }
+    .search input::placeholder { color: var(--text-faint); }
+    .search kbd { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 0.7rem; color: var(--text-faint); border: 1px solid var(--line); border-radius: 5px; padding: 0 6px; }
+
+    .group { margin-top: clamp(30px, 5vw, 48px); scroll-margin-top: 84px; }
+    .group[hidden] { display: none; }
+    .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .group-head h2 { font-size: clamp(1.25rem, 3vw, 1.55rem); letter-spacing: -0.02em; line-height: 1.2; }
+    .group-head p { color: var(--text-dim); font-size: 0.95rem; margin-top: 4px; max-width: 70ch; }
+    .group-meta { font-family: var(--mono); font-size: 0.76rem; color: var(--text-faint); white-space: nowrap; }
+    .card[hidden] { display: none; }
+    .empty { text-align: center; color: var(--text-dim); margin-top: 40px; }
+    .empty[hidden] { display: none; }
+
+    @media (max-width: 680px) {
+      .finder nav { flex-basis: 100%; }
+      .jump { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+      .jump::-webkit-scrollbar { display: none; }
+      .jump a { white-space: nowrap; }
+      .search { flex: 1 1 100%; }
+      .search kbd { display: none; }
+    }
+    @media (max-width: 460px) {
+      .card { padding: 22px 18px 20px; }
+      .card-name { font-size: 1.2rem; }
+    }
+
     footer { margin-top: 48px; text-align: center; color: var(--text-faint); font-size: 0.85rem; }
     footer code { font-family: var(--mono); color: var(--text-dim); background: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; }
     .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -157,17 +253,68 @@
     <header class="masthead">
       <span class="eyebrow reveal"><span class="dot"></span>Local · offline · no account</span>
       <h1 class="reveal d1">The <span class="grad">Atlas</span> Collection</h1>
-      <p class="lede reveal d2">Seven interactive, fully-offline learning atlases. Read the concept, then <em>poke</em> it — every idea has something you can drive. Your progress lives in your browser; nothing leaves your machine.</p>
+      <p class="lede reveal d2">Twenty-one interactive, fully-offline learning atlases in seven tracks. Read the concept, then <em>poke</em> it — every idea has something you can drive. Your progress lives in your browser; nothing leaves your machine.</p>
       <div class="totals reveal d3" id="totals">
         <span class="pill" id="pillTotal" hidden></span>
-        <span class="pill">5 <b>atlases</b></span>
+        <span class="pill" id="pillApps">21 <b>atlases</b></span>
+        <span class="pill" id="pillGroups">7 <b>tracks</b></span>
       </div>
     </header>
 
-    <section class="cards" id="cards"></section>
+    <div class="finder reveal d3" role="search">
+      <nav aria-label="Jump to a track">
+        <ul class="jump" id="jump">
+          <li><a href="#g-interview" data-g="interview">Interview &amp; Certs <span class="n"></span></a></li>
+          <li><a href="#g-design" data-g="design">Design &amp; Architecture <span class="n"></span></a></li>
+          <li><a href="#g-ai" data-g="ai">AI &amp; ML <span class="n"></span></a></li>
+          <li><a href="#g-data" data-g="data">Data Engineering <span class="n"></span></a></li>
+          <li><a href="#g-infra" data-g="infra">Infrastructure &amp; Ops <span class="n"></span></a></li>
+          <li><a href="#g-security" data-g="security">Security &amp; Delivery <span class="n"></span></a></li>
+          <li><a href="#g-craft" data-g="craft">Craft &amp; Stacks <span class="n"></span></a></li>
+        </ul>
+      </nav>
+      <label class="search">
+        <span class="visually-hidden">Filter atlases</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="filter" type="search" placeholder="Filter atlases…" autocomplete="off" spellcheck="false" />
+        <kbd aria-hidden="true">/</kbd>
+      </label>
+    </div>
+
+    <div id="groups">
+      <section class="group" id="g-interview" data-g="interview" aria-labelledby="h-interview">
+        <div class="group-head"><div><h2 id="h-interview">Interview &amp; Certification Prep</h2><p>The coding round and the human round — patterns you can reuse under a timer, stories that survive follow-ups — plus timed, exam-style certification practice.</p></div><span class="group-meta"></span></div>
+        <div class="cards"></div>
+      </section>
+      <section class="group" id="g-design" data-g="design" aria-labelledby="h-design">
+        <div class="group-head"><div><h2 id="h-design">Design &amp; Architecture</h2><p>From boxes-and-arrows to what the database really does underneath, then defending the decision in front of the room.</p></div><span class="group-meta"></span></div>
+        <div class="cards"></div>
+      </section>
+      <section class="group" id="g-ai" data-g="ai" aria-labelledby="h-ai">
+        <div class="group-head"><div><h2 id="h-ai">AI &amp; ML</h2><p>Classic ML system design first, then how large language models work and how to build on them.</p></div><span class="group-meta"></span></div>
+        <div class="cards"></div>
+      </section>
+      <section class="group" id="g-data" data-g="data" aria-labelledby="h-data">
+        <div class="group-head"><div><h2 id="h-data">Data Engineering</h2><p>Pipelines and modeling that hold up in production, streaming systems end to end, then running Snowflake as the platform owner.</p></div><span class="group-meta"></span></div>
+        <div class="cards"></div>
+      </section>
+      <section class="group" id="g-infra" data-g="infra" aria-labelledby="h-infra">
+        <div class="group-head"><div><h2 id="h-infra">Infrastructure &amp; Operations</h2><p>The machine and the network, the cloud built on top of them, and keeping it all observable and reliable.</p></div><span class="group-meta"></span></div>
+        <div class="cards"></div>
+      </section>
+      <section class="group" id="g-security" data-g="security" aria-labelledby="h-security">
+        <div class="group-head"><div><h2 id="h-security">Security &amp; Delivery</h2><p>Think like an attacker to defend well, then build those defences into every stage of the pipeline.</p></div><span class="group-meta"></span></div>
+        <div class="cards"></div>
+      </section>
+      <section class="group" id="g-craft" data-g="craft" aria-labelledby="h-craft">
+        <div class="group-head"><div><h2 id="h-craft">Engineering Craft &amp; Stacks</h2><p>Code that is easy to change, then the Python, frontend, Java backend, and Salesforce stacks you ship it on.</p></div><span class="group-meta"></span></div>
+        <div class="cards"></div>
+      </section>
+    </div>
+    <p class="empty" id="empty" hidden>No atlas matches that filter.</p>
 
     <footer class="reveal d4">
-      <p>Serve this folder once to launch everything offline: <code>cd ~/Documents/atlas &amp;&amp; python3 -m http.server 8800</code></p>
+      <p>Serve this folder once to launch everything offline: <code>cd ~/Documents/atlas-main &amp;&amp; python3 -m http.server 8800</code></p>
     </footer>
   </main>
 
@@ -192,57 +339,156 @@
       setTheme(next);
     });
 
-    /* ---------- app cards (trusted, hard-coded data only) ---------- */
+    /* ---------- app cards (trusted, hard-coded data only) ----------
+       Each card renders into the .group section whose data-g matches `group`;
+       within a section, cards keep the order they have in this array. */
     var APPS = [
       {
-        name: "Blueprint", tag: "system & software design", color: "var(--amber)",
-        href: "./hld-lld-academy/index.html", key: "bp_progress_v1",
-        desc: "Architect systems that scale and code that bends — high-level design, technology deep dives, recurring design patterns, thirty-one full problem breakdowns, production case studies, and low-level design from SOLID through concurrency.",
-        chips: ["HLD", "Deep dives", "Patterns", "Breakdowns", "LLD"],
-        glyph: '<path d="M24 74 L50 24 L76 74 M35 74 L50 46 L65 74"/>'
-      },
-
-      {
-        name: "Codex", tag: "DSA & interview patterns", color: "#f472b6",
+        name: "Codex", tag: "DSA & interview patterns", color: "var(--c-codex)", group: "interview",
         href: "./dsa-patterns-academy/index.html", key: "cd_progress_v1",
-        desc: "Build the coding-interview core — data structures, algorithms, reusable problem-solving patterns, weighted graphs and DP shapes, delivery craft, and a full track on interviewing with an AI pair programmer.",
-        chips: ["DSA", "Patterns", "Advanced", "AI-enabled", "Interview"],
+        desc: "Build the coding-interview core — data structures, algorithms, reusable problem-solving patterns, SQL coding rounds, concurrency coding problems, weighted graphs and DP shapes, delivery craft, and a full track on interviewing with an AI pair programmer.",
+        chips: ["DSA", "Patterns", "SQL rounds", "Concurrency", "AI-enabled", "Interview"],
         glyph: '<path d="M24 28 H76 M24 50 H76 M24 72 H76"/><path d="M32 20 L24 28 L32 36 M68 42 L76 50 L68 58 M32 64 L24 72 L32 80"/>'
       },
       {
-        name: "Synapse", tag: "ML system design", color: "#a78bfa",
-        href: "./ml-ai-academy/index.html", key: "sy_progress_v1",
-        desc: "Design machine-learning systems you can defend — turning a business goal into a measurable ML objective, features and embeddings, evaluation and A/B testing, serving inside a latency budget, and seven graded problem breakdowns.",
-        chips: ["Framework", "Features", "Evaluation", "Serving", "Breakdowns"],
-        glyph: '<circle cx="30" cy="32" r="7"/><circle cx="30" cy="68" r="7"/><circle cx="58" cy="50" r="7"/><circle cx="80" cy="30" r="6"/><circle cx="80" cy="70" r="6"/><path d="M36 35 L52 47 M36 65 L52 53 M64 46 L75 34 M64 54 L75 66"/>'
-      },
-      {
-        name: "Compass", tag: "behavioral & offers", color: "#fb7185",
+        name: "Compass", tag: "behavioral & offers", color: "var(--c-compass)", group: "interview",
         href: "./behavioral-academy/index.html", key: "cp_progress_v1",
-        desc: "Prepare the human side of the loop — decoding what each question actually probes, engineering a reusable story bank, company and level playbooks for the loops you will actually sit, and negotiating the offer at the end.",
-        chips: ["Course", "Story bank", "Playbooks", "Negotiation"],
+        desc: "Prepare the human side of the loop — decoding what each question actually probes, engineering a reusable story bank, Staff and Principal loops, company and level playbooks including Snowflake, Databricks, Stripe and Netflix guides, and negotiating the offer at the end.",
+        chips: ["Course", "Story bank", "Staff & Principal", "Company guides", "Negotiation"],
         glyph: '<circle cx="50" cy="50" r="28"/><path d="M62 38 L44 44 L38 62 L56 56 Z"/><circle cx="50" cy="50" r="3"/>'
       },
       {
-        name: "Citadel", tag: "cybersecurity", color: "var(--emerald)",
-        href: "./cyber-academy/index.html", key: "cy_progress_v1",
-        desc: "Learn to attack so you can truly defend — foundations, cryptography, application security, network defense, offensive security, threats & forensics, infrastructure domains, reverse engineering, and a sandbox-only Attack Lab of 20 attack families.",
-        chips: ["8 tracks", "Crypto", "AppSec", "Defense", "Attack Lab"],
-        glyph: '<path d="M50 22 L78 33 V53 C78 70 66 80 50 86 C34 80 22 70 22 53 V33 Z"/><circle cx="50" cy="48" r="7"/><path d="M50 55 V66"/>'
+        name: "Summit", tag: "certification prep", color: "var(--c-summit)", group: "interview",
+        href: "./certification-academy/index.html", key: "su_progress_v1",
+        desc: "Unofficial, original exam-style prep for AWS Solutions Architect Associate, SnowPro Core, CKA and Security+ — domain-by-domain lessons, exam strategy, a timed offline exam simulator, study plans and a readiness dashboard.",
+        chips: ["AWS SAA", "SnowPro Core", "CKA", "Security+", "Exam simulator", "Readiness"],
+        glyph: '<path d="M12 78 L40 34 L54 54 L64 40 L88 78 Z"/><path d="M33 45 L40 34 L47 45"/>'
       },
       {
-        name: "Cascade", tag: "data engineering", color: "var(--azure)",
+        name: "Blueprint", tag: "system & software design", color: "var(--c-blueprint)", group: "design",
+        href: "./hld-lld-academy/index.html", key: "bp_progress_v1",
+        desc: "System design from first principles: scaling, caching, clocks & ordering, reliability, technology deep dives, recurring patterns, thirty-four interview breakdowns including CDC, clickstream and feature-store data platforms, plus LLD.",
+        chips: ["HLD", "Clocks", "Deep dives", "Patterns", "Breakdowns", "LLD"],
+        glyph: '<path d="M24 74 L50 24 L76 74 M35 74 L50 46 L65 74"/>'
+      },
+      {
+        name: "Ledger", tag: "database internals", color: "var(--c-ledger)", group: "design",
+        href: "./db-internals-academy/index.html", key: "lg_progress_v1",
+        desc: "See what the database is really doing — pages, B+trees, LSM trees and the WAL, indexing, the query optimizer and join algorithms, isolation levels, MVCC and SSI, replication and Raft, Postgres operations, columnar and MPP engines, and SQL for interviews.",
+        chips: ["Storage", "Indexing", "Optimizer", "Transactions", "Distributed", "Postgres", "Columnar", "SQL"],
+        glyph: '<path d="M38 16 H62 V34 H38 Z"/><path d="M44 34 L24 66 M50 34 V66 M56 34 L76 66"/><path d="M12 66 H36 V84 H12 Z M38 66 H62 V84 H38 Z M64 66 H88 V84 H64 Z"/>'
+      },
+      {
+        name: "TechLead", tag: "techno managerial", color: "var(--c-techlead)", group: "design",
+        href: "./techno-managerial-academy/index.html", key: "tm_progress_v1",
+        desc: "Defend the decision, not just the diagram — business goals turned into architecture drivers, reviews that decide, re-platforming and multi-region trade-offs, code-level credibility, owning data trust and platform strategy, leading people and teams, and turning strategy into delivered work.",
+        chips: ["Framing", "Trade-offs", "Rollout", "LLD", "Data trust", "People", "Strategy"],
+        glyph: '<path d="M22 70 L50 22 L78 70 M34 70 L50 44 L66 70"/><path d="M24 80 H76"/><circle cx="50" cy="36" r="5"/>'
+      },
+      {
+        name: "Synapse", tag: "ML system design", color: "var(--c-synapse)", group: "ai",
+        href: "./ml-ai-academy/index.html", key: "sy_progress_v1",
+        desc: "Classical ML system design, built and shipped — metrics and A/B testing, labels, leakage and feature stores, distributed training and GPU cost, MLOps with drift playbooks, search, ranking and recommendations, responsible ML, and thirteen graded interview breakdowns.",
+        chips: ["Foundations", "Data & Features", "Training", "MLOps", "Ranking & Recs", "Responsible ML", "Breakdowns"],
+        glyph: '<circle cx="30" cy="32" r="7"/><circle cx="30" cy="68" r="7"/><circle cx="58" cy="50" r="7"/><circle cx="80" cy="30" r="6"/><circle cx="80" cy="70" r="6"/><path d="M36 35 L52 47 M36 65 L52 53 M64 46 L75 34 M64 54 L75 66"/>'
+      },
+      {
+        name: "Lumen", tag: "LLMs & GenAI", color: "var(--c-lumen)", group: "ai",
+        href: "./llm-academy/index.html", key: "lm_progress_v1",
+        desc: "Understand how large language models work and build with them — tokens and transformers, the road from n-grams to reasoning models, fine-tuning and alignment, prompt engineering, RAG and context engineering, agents, skills and MCP, local models with Ollama, evals and LLM security, production LLM serving and RAG operations, and a fully local LLM playground.",
+        chips: ["Transformers", "Prompting", "RAG", "Agents & MCP", "LLMOps", "Local LLMs", "Playground"],
+        glyph: '<circle cx="50" cy="50" r="17"/><path d="M50 14 V24 M50 76 V86 M14 50 H24 M76 50 H86 M25 25 L32 32 M68 68 L75 75 M75 25 L68 32 M32 68 L25 75"/>'
+      },
+      {
+        name: "Cascade", tag: "data engineering", color: "var(--c-cascade)", group: "data",
         href: "./data-eng-academy/index.html", key: "cs_progress_v1",
-        desc: "Move and model data that holds up in production — pipelines, batch & streaming, SQL and query engines, Spark, dimensional modeling, and the warehouse patterns behind modern analytics.",
-        chips: ["Pipelines", "Spark", "SQL", "Modeling", "Streaming"],
+        desc: "Move and model data that holds up in production — storage and file formats, batch and Spark, Databricks and Delta Lake, streaming, SQL and query engines, dimensional modeling, orchestration and data quality, Python for data engineering, and DataOps with governance and cost.",
+        chips: ["Pipelines", "Spark", "Databricks & Delta", "SQL", "Modeling", "Streaming", "Python"],
         glyph: '<path d="M26 30 H74 M26 30 C26 38 74 38 74 30 M26 30 V70 C26 78 74 78 74 70 V30 M26 50 C26 58 74 58 74 50"/>'
       },
       {
-        name: "TechLead", tag: "techno managerial", color: "var(--gold)",
-        href: "./techno-managerial-academy/index.html", key: "tm_progress_v1",
-        desc: "Defend the decision, not just the diagram — turning business goals into architecture drivers, reading stakeholders who disagree for good reasons, cost and reversibility as design constraints, rollout and incident leadership, code-level credibility, and owning data trust.",
-        chips: ["Framing", "Trade-offs", "Rollout", "LLD", "Data trust"],
-        glyph: '<path d="M22 70 L50 22 L78 70 M34 70 L50 44 L66 70"/><path d="M24 80 H76"/><circle cx="50" cy="36" r="5"/>'
+        name: "Pulse", tag: "streaming systems", color: "var(--c-pulse)", group: "data",
+        href: "./streaming-academy/index.html", key: "pl_progress_v1",
+        desc: "Streaming systems end to end — Kafka internals and operations, event time, windows and state, Apache Flink checkpoints and savepoints, exactly-once and transactions, CDC and Kafka Connect, engine trade-offs, observability and capacity, and production case studies.",
+        chips: ["Kafka", "Flink", "Exactly-once", "CDC", "Ops"],
+        glyph: '<path d="M10 54 H30 L38 32 L50 76 L60 42 L67 54 H90"/>'
+      },
+      {
+        name: "Glacier", tag: "Snowflake platform", color: "var(--c-glacier)", group: "data",
+        href: "./snowflake-academy/index.html", key: "gl_progress_v1",
+        desc: "Run Snowflake like the platform owner — architecture and micro-partitions, warehouses and query performance, ingestion pipelines, security and governance, FinOps and cost control, Snowpark and Cortex AI, and CI/CD with business continuity.",
+        chips: ["Architecture", "Performance", "Pipelines", "Governance", "FinOps", "Cortex", "Continuity"],
+        glyph: '<path d="M50 16 V84 M20.6 33 L79.4 67 M20.6 67 L79.4 33"/><path d="M41 22 L50 31 L59 22 M41 78 L50 69 L59 78"/>'
+      },
+      {
+        name: "Kernel", tag: "Linux & networking", color: "var(--c-kernel)", group: "infra",
+        href: "./linux-net-academy/index.html", key: "kn_progress_v1",
+        desc: "Run Linux and networks like an SRE — shell and text tools, processes and systemd, filesystems and permissions, performance triage, TCP/IP, DNS and TLS, tcpdump and firewalls, containers from namespaces up, SSH, and a hands-on terminal lab, with macOS vs Linux differences throughout.",
+        chips: ["Shell & awk", "systemd", "TCP/IP & DNS", "tcpdump", "Terminal lab"],
+        glyph: '<rect x="18" y="24" width="64" height="52" rx="8"/><path d="M32 42 L44 52 L32 62"/><path d="M52 62 H68"/>'
+      },
+      {
+        name: "Nimbus", tag: "cloud platforms", color: "var(--c-nimbus)", group: "infra",
+        href: "./cloud-academy/index.html", key: "nb_progress_v1",
+        desc: "Build on the cloud without guessing — AWS first with every concept mapped to Azure and Google Cloud: landing zones, IAM and workload identity, networking, compute, storage and managed data, Terraform, Well-Architected reviews and observability, with hands-on labs.",
+        chips: ["AWS · Azure · GCP", "IAM", "Networking", "Terraform", "Well-Architected"],
+        glyph: '<path d="M28 70 H72 A15 15 0 0 0 70 40 A21 21 0 0 0 30 44 A13 13 0 0 0 28 70 Z"/><path d="M40 58 H60"/>'
+      },
+      {
+        name: "Beacon", tag: "observability & SRE", color: "var(--c-beacon)", group: "infra",
+        href: "./sre-academy/index.html", key: "bc_progress_v1",
+        desc: "Keep production honest — SLIs, SLOs and error budgets, OpenTelemetry, Prometheus, PromQL and Grafana, alerting and on-call, incident management and postmortems, capacity and chaos engineering, data pipeline observability, and a live incident simulator.",
+        chips: ["SLOs & budgets", "OpenTelemetry", "PromQL", "Incidents", "Simulator"],
+        glyph: '<path d="M40 86 L44 46 H56 L60 86 Z"/><path d="M42 46 V34 H58 V46"/><path d="M26 26 L38 34 M74 26 L62 34 M50 12 V22"/>'
+      },
+      {
+        name: "Citadel", tag: "cybersecurity", color: "var(--c-citadel)", group: "security",
+        href: "./cyber-academy/index.html", key: "cy_progress_v1",
+        desc: "Learn to attack so you can truly defend — foundations, cryptography, application security, federated identity with OAuth, OIDC and SAML, network defense with AD and Kerberos, detection-as-code, cloud IAM privilege paths, offensive security, threats & forensics, reverse engineering, and a sandbox-only Attack Lab of 20 attack families.",
+        chips: ["8 tracks", "Crypto", "AppSec", "OAuth/OIDC/SAML", "AD & Kerberos", "Detection-as-code", "Cloud IAM", "Attack Lab"],
+        glyph: '<path d="M50 22 L78 33 V53 C78 70 66 80 50 86 C34 80 22 70 22 53 V33 Z"/><circle cx="50" cy="48" r="7"/><path d="M50 55 V66"/>'
+      },
+      {
+        name: "Forge", tag: "DevSecOps", color: "var(--c-forge)", group: "security",
+        href: "./devsecops-academy/index.html", key: "fg_progress_v1",
+        desc: "Build security into every stage of delivery — secure SDLC, Git, Jenkins and GitHub Actions, hardening the pipeline itself, Docker and Kubernetes, SonarQube and Snyk gates, progressive delivery and feature flags, Snowflake and dbt CI/CD, vulnerability management, a deep Wiz track from code to runtime, governance and evidence, and a live pipeline simulator.",
+        chips: ["Jenkins & GH Actions", "Docker & K8s", "SonarQube & Snyk", "Feature flags", "Snowflake & dbt CI/CD", "Wiz", "Simulator"],
+        glyph: '<path d="M50 20 L76 30 V52 C76 68 65 78 50 84 C35 78 24 68 24 52 V30 Z"/><path d="M38 52 L47 61 L63 42"/>'
+      },
+      {
+        name: "Chisel", tag: "software craft", color: "var(--c-chisel)", group: "craft",
+        href: "./software-craft-academy/index.html", key: "ch_progress_v1",
+        desc: "Write code that is easy to change — clean, production-ready code, refactoring legacy systems, testing strategy and contracts, code review and ownership, advanced Git and trunk-based flow, API and dependency design, docs and estimation, and working well with AI coding agents.",
+        chips: ["Clean code", "Refactoring", "Testing", "Review", "Git", "AI agents"],
+        glyph: '<path d="M22 78 L44 56"/><path d="M44 56 L68 32 L78 42 L54 66 Z"/><path d="M62 80 H82"/>'
+      },
+      {
+        name: "Pyxis", tag: "Python engineering", color: "var(--c-pyxis)", group: "craft",
+        href: "./python-academy/index.html", key: "py_progress_v1",
+        desc: "Write Python that is clear, typed and fast — the data model and idioms, typing with generics and Protocols, packaging with uv and Ruff, pytest to mutation testing, the GIL and asyncio, profiling, FastAPI services, pandas, Polars, DuckDB and Snowpark pipelines, and production config, containers and CI.",
+        chips: ["Typing", "uv + Ruff", "pytest", "asyncio", "FastAPI", "Polars"],
+        glyph: '<path d="M50 10 L58 42 L90 50 L58 58 L50 90 L42 58 L10 50 L42 42 Z"/><circle cx="50" cy="50" r="7"/>'
+      },
+      {
+        name: "Pixel", tag: "frontend engineering", color: "var(--c-pixel)", group: "craft",
+        href: "./frontend-academy/index.html", key: "px_progress_v1",
+        desc: "Build frontends that stay fast and usable — web platform foundations, React core, state and data, composition patterns, Next.js rendering strategies, performance, accessibility, testing, frontend security, and frontend system design.",
+        chips: ["React", "Next.js", "Performance", "Accessibility", "System design"],
+        glyph: '<path d="M36 30 L16 50 L36 70"/><path d="M64 30 L84 50 L64 70"/><path d="M56 24 L44 76"/>'
+      },
+      {
+        name: "Anvil", tag: "Java backend", color: "var(--c-anvil)", group: "craft",
+        href: "./java-backend-academy/index.html", key: "av_progress_v1",
+        desc: "Ship Java services that hold up under load — modern Java 21, JVM internals, concurrency and virtual threads, Spring Boot, REST APIs, JPA and transactions, resilience with Resilience4j and Kafka, Spring Security, testing, and production observability.",
+        chips: ["Java 21", "Spring Boot", "JPA", "Resilience4j", "Virtual threads", "Spring Security"],
+        glyph: '<path d="M14 34 H74 Q74 46 88 48 V54 H66 L60 64 H68 V74 H32 V64 H40 L34 54 H26 Q16 48 14 34 Z"/><path d="M50 12 V22 M36 16 L42 24 M64 16 L58 24"/>'
+      },
+      {
+        name: "Orbit", tag: "Salesforce platform", color: "var(--c-orbit)", group: "craft",
+        href: "./salesforce-academy/index.html", key: "ob_progress_v1",
+        desc: "Build on Salesforce the way production orgs demand — multitenancy, data model design and limits, the sharing model and Shield, Flow vs Apex and the order of execution, bulk-safe Apex with config, cache and logging, Lightning Web Components, integration and data loading, Agentforce actions, testing and code analysis, source-driven DevOps, and CRM Analytics with XMD, predicates and bindings.",
+        chips: ["Sharing model", "Apex & Flow", "LWC", "Integration", "DevOps", "CRM Analytics"],
+        glyph: '<circle cx="50" cy="50" r="17"/><path d="M12 58 A40 14 -20 1 1 88 42 A40 14 -20 1 1 12 58 Z"/>'
       }
     ];
 
@@ -257,19 +503,24 @@
       } catch (e) { return null; }
     }
 
-    var cards = document.getElementById("cards");
     var grandTotal = 0, anyProgress = false;
     var ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    var groups = {};
+    Array.prototype.forEach.call(document.querySelectorAll(".group"), function (s) {
+      groups[s.getAttribute("data-g")] = { el: s, grid: s.querySelector(".cards"), meta: s.querySelector(".group-meta"), cards: [], done: 0 };
+    });
+    var fallback = groups.craft;
 
-    APPS.forEach(function (app, i) {
+    APPS.forEach(function (app) {
+      var g = groups[app.group] || fallback;
       var a = document.createElement("a");
-      a.className = "card reveal d" + Math.min(i + 1, 4);
+      a.className = "card reveal d" + Math.min(g.cards.length + 1, 4);
       a.href = app.href;
       a.style.setProperty("--tc", app.color);
-      a.setAttribute("aria-label", "Open " + app.name);
+      a.setAttribute("aria-label", "Open " + app.name + " — " + app.tag);
 
       var count = readCount(app.key);
-      if (count != null) { grandTotal += count; anyProgress = true; }
+      if (count != null) { grandTotal += count; anyProgress = true; g.done += count; }
       var progressHtml = count != null
         ? '<span class="progress"><b>' + count + '</b> completed</span>'
         : '<span class="progress">Start learning</span>';
@@ -283,8 +534,59 @@
         '<p class="card-desc">' + app.desc + "</p>" +
         '<div class="chips">' + chips + "</div>" +
         '<div class="card-foot">' + progressHtml + '<span class="open">Open' + ARROW + "</span></div>";
-      cards.appendChild(a);
+      a.setAttribute("data-search", [app.name, app.tag, app.desc, app.chips.join(" ")].join(" ").toLowerCase());
+      g.grid.appendChild(a);
+      g.cards.push(a);
     });
+
+    var jumpLinks = {};
+    Array.prototype.forEach.call(document.querySelectorAll("#jump a"), function (l) { jumpLinks[l.getAttribute("data-g")] = l; });
+
+    function paintCounts() {
+      var total = 0;
+      Object.keys(groups).forEach(function (k) {
+        var g = groups[k];
+        var shown = g.cards.filter(function (c) { return !c.hidden; }).length;
+        total += shown;
+        g.el.hidden = shown === 0;
+        var n = g.cards.length;
+        g.meta.textContent = (shown === n ? n : shown + " of " + n) + (n === 1 ? " atlas" : " atlases") +
+          (g.done ? " · " + g.done + " done" : "");
+        var link = jumpLinks[k];
+        if (link) {
+          link.querySelector(".n").textContent = String(shown);
+          link.classList.toggle("dim", shown === 0);
+        }
+      });
+      document.getElementById("empty").hidden = total !== 0;
+    }
+
+    var filter = document.getElementById("filter");
+    function applyFilter() {
+      var terms = filter.value.toLowerCase().split(/\s+/).filter(Boolean);
+      Object.keys(groups).forEach(function (k) {
+        groups[k].cards.forEach(function (c) {
+          var hay = c.getAttribute("data-search");
+          c.hidden = !terms.every(function (t) { return hay.indexOf(t) !== -1; });
+        });
+      });
+      paintCounts();
+    }
+    filter.addEventListener("input", applyFilter);
+    filter.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { filter.value = ""; applyFilter(); filter.blur(); }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      var t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      e.preventDefault();
+      filter.focus();
+    });
+    paintCounts();
+
+    document.getElementById("pillApps").innerHTML = APPS.length + " <b>atlases</b>";
+    document.getElementById("pillGroups").innerHTML = Object.keys(groups).length + " <b>tracks</b>";
 
     if (anyProgress) {
       var pillTotal = document.getElementById("pillTotal");

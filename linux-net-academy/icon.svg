@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Kernel Linux and Networking Atlas icon">
+  <rect width="100" height="100" rx="22" fill="#0a0d12"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+    <rect x="14" y="20" width="72" height="60" rx="10" stroke="#4ade80"/>
+    <path d="M30 40 L44 52 L30 64" stroke="#e6edf3"/>
+    <path d="M52 64 H70" stroke="#e6edf3"/>
+  </g>
+</svg>

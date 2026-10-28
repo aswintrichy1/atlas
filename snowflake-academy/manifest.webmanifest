@@ -1,0 +1,16 @@
+{
+  "name": "Glacier \u00b7 The Snowflake Platform Atlas",
+  "short_name": "Glacier",
+  "description": "Offline Snowflake course for senior data engineers: architecture and micro-partitions, warehouses and query performance, ingestion and pipelines, security and governance, FinOps, Snowpark and procedures, Cortex AI, and CI/CD \u2014 with checkpoint quizzes, interactive labs, exam mode and flashcards.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

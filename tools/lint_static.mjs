@@ -2,7 +2,7 @@
 /*
  * Atlas static guardrail lint (no dependencies).
  *
- * For every app (5 sub-apps + hub) it checks the things that silently break a
+ * For every app (21 sub-apps + hub) it checks the things that silently break a
  * fully-offline static PWA collection:
  *   - every sw.js CORE precache entry points at a file that exists
  *     (Cache.addAll is all-or-nothing: one missing entry kills the whole SW)
@@ -30,6 +30,20 @@ const APPS = [
   { name: "TechLead", dir: join(ROOT, "techno-managerial-academy") },
   { name: "Compass", dir: join(ROOT, "behavioral-academy") },
   { name: "Synapse", dir: join(ROOT, "ml-ai-academy") },
+  { name: "Forge", dir: join(ROOT, "devsecops-academy") },
+  { name: "Lumen", dir: join(ROOT, "llm-academy") },
+  { name: "Glacier", dir: join(ROOT, "snowflake-academy") },
+  { name: "Nimbus", dir: join(ROOT, "cloud-academy") },
+  { name: "Beacon", dir: join(ROOT, "sre-academy") },
+  { name: "Ledger", dir: join(ROOT, "db-internals-academy") },
+  { name: "Kernel", dir: join(ROOT, "linux-net-academy") },
+  { name: "Anvil", dir: join(ROOT, "java-backend-academy") },
+  { name: "Orbit", dir: join(ROOT, "salesforce-academy") },
+  { name: "Pixel", dir: join(ROOT, "frontend-academy") },
+  { name: "Chisel", dir: join(ROOT, "software-craft-academy") },
+  { name: "Pyxis", dir: join(ROOT, "python-academy") },
+  { name: "Summit", dir: join(ROOT, "certification-academy") },
+  { name: "Pulse", dir: join(ROOT, "streaming-academy") },
 ];
 
 let fails = 0;

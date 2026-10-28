@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Lumen — an interactive LLM atlas: tokens and transformers, the history of language models, training and alignment, LLM APIs, prompt engineering, RAG, agents, skills and MCP, local models with Ollama, evals and LLM security, and a fully local LLM playground." />
+  <meta name="theme-color" content="#0b0e14" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <title>Lumen &middot; The LLM Atlas</title>
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/exam.css" />
+  <link rel="stylesheet" href="css/pwa.css" />
+  <link rel="stylesheet" href="css/playground.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b0e14'/%3E%3Cg fill='none' stroke='%23a3e635' stroke-width='6' stroke-linecap='round'%3E%3Ccircle cx='50' cy='50' r='17'/%3E%3Cpath d='M50 14V24M50 76V86M14 50H24M76 50H86M25 25L32 32M68 68L75 75M75 25L68 32M32 68L25 75'/%3E%3C/g%3E%3C/svg%3E" />
+</head>
+<body>
+  <!-- Atmospheric layers -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="bg-noise" aria-hidden="true"></div>
+
+  <!-- Skip link for a11y -->
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="icon-btn nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <a class="brand" href="#/" aria-label="Lumen home">
+      <svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="17" />
+        <path d="M50 14 V24 M50 76 V86 M14 50 H24 M76 50 H86 M25 25 L32 32 M68 68 L75 75 M75 25 L68 32 M32 68 L25 75" />
+      </svg>
+      <span class="brand-text">Lumen<em>the LLM atlas</em></span>
+    </a>
+
+    <a class="atlas-home-top" href="../index.html" aria-label="Atlas Home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+      <span>Atlas Home</span>
+    </a>
+
+    <div class="search-wrap">
+      <svg class="search-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+      <input id="search" type="search" placeholder="Search concepts…  (press /)" autocomplete="off" aria-label="Search concepts" />
+      <kbd class="search-kbd">/</kbd>
+      <div id="searchResults" class="search-results" role="listbox" hidden></div>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="progress-pill" id="progressPill" title="Your overall progress">
+        <svg viewBox="0 0 36 36" class="progress-ring" aria-hidden="true">
+          <circle class="pr-track" cx="18" cy="18" r="15.5"></circle>
+          <circle class="pr-value" id="prValue" cx="18" cy="18" r="15.5"></circle>
+        </svg>
+        <span id="progressText">0%</span>
+      </div>
+      <button class="cmdk-btn" id="cmdkBtn" aria-label="Open command palette" title="Command palette (Cmd/Ctrl-K)">⌘K</button>
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle light / dark theme" title="Toggle theme">
+        <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><g class="rays"><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/><line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/></g></svg>
+        <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar navigation (built by JS) -->
+    <aside class="sidebar" id="sidebar" aria-label="Curriculum navigation">
+      <nav id="nav" class="nav"></nav>
+      <div class="sidebar-foot">
+        <button class="foot-link feature-toggle" id="featureToggle" type="button" aria-controls="featurePane" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+          Features
+        </button>
+      </div>
+    </aside>
+    <aside class="feature-pane" id="featurePane" aria-label="Feature navigation" hidden>
+      <div class="feature-pane-head">
+        <span>Features</span>
+        <button class="feature-pane-close" id="featurePaneClose" type="button" aria-label="Close features">×</button>
+      </div>
+      <nav class="feature-list">
+        <a href="#/playground"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h3l2-6 4 12 2-6h5"/></svg><span>LLM playground</span></a>
+        <a href="#/paths"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15"/></svg><span>Learning paths</span></a>
+        <a href="#/scenarios"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 7h6M8 11h6M8 15h4"/></svg><span>Practice library</span></a>
+        <a href="#/review"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg><span>Study list</span></a>
+        <a href="#/exam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Exam mode</span></a>
+        <a href="#/flashcards"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg><span>Flashcards</span></a>
+      </nav>
+      <div class="feature-utilities">
+        <div class="foot-backup">
+          <button id="exportData" class="ghost-btn ghost-sm" title="Download a backup of your progress">Export</button>
+          <button id="importData" class="ghost-btn ghost-sm" title="Restore progress from a backup file">Import</button>
+          <input id="importFile" type="file" accept="application/json,.json" hidden aria-hidden="true" />
+        </div>
+        <button id="resetProgress" class="ghost-btn">Reset progress</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
+
+    <!-- Main content (built by JS) -->
+    <main id="main" class="main" tabindex="-1"></main>
+  </div>
+
+  <!-- Toast region -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Scripts: order matters -->
+  <script src="js/track-found.js" defer></script>
+  <script src="js/track-core.js" defer></script>
+  <script src="js/track-hist.js" defer></script>
+  <script src="js/track-train.js" defer></script>
+  <script src="js/track-api.js" defer></script>
+  <script src="js/track-prompt.js" defer></script>
+  <script src="js/track-rag.js" defer></script>
+  <script src="js/track-agent.js" defer></script>
+  <script src="js/track-local.js" defer></script>
+  <script src="js/track-ops.js" defer></script>
+  <script src="js/track-next.js" defer></script>
+  <script src="js/track-cap.js" defer></script>
+  <script src="js/practice-content.js" defer></script>
+  <script src="js/playground.js" defer></script>
+  <script src="js/exam.js" defer></script>
+  <script src="js/pwa.js" defer></script>
+  <script src="js/app.js" defer></script>
+  <script>
+    // Register the service worker for full offline support (no-op on file://).
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () { /* offline-by-nature anyway */ });
+      });
+    }
+  </script>
+</body>
+</html>

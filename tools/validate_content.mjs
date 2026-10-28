@@ -40,6 +40,20 @@ const APPS = [
   { name: "TechLead", dir: "techno-managerial-academy" },
   { name: "Compass", dir: "behavioral-academy" },
   { name: "Synapse", dir: "ml-ai-academy" },
+  { name: "Forge", dir: "devsecops-academy" },
+  { name: "Lumen", dir: "llm-academy" },
+  { name: "Glacier", dir: "snowflake-academy" },
+  { name: "Nimbus", dir: "cloud-academy" },
+  { name: "Beacon", dir: "sre-academy" },
+  { name: "Ledger", dir: "db-internals-academy" },
+  { name: "Kernel", dir: "linux-net-academy" },
+  { name: "Anvil", dir: "java-backend-academy" },
+  { name: "Orbit", dir: "salesforce-academy" },
+  { name: "Pixel", dir: "frontend-academy" },
+  { name: "Chisel", dir: "software-craft-academy" },
+  { name: "Pyxis", dir: "python-academy" },
+  { name: "Summit", dir: "certification-academy" },
+  { name: "Pulse", dir: "streaming-academy" },
 ];
 
 let fails = 0, warns = 0, checks = 0;
@@ -112,6 +126,10 @@ function makeSandbox() {
         contains(c) { return node._classes.has(c); },
       },
       appendChild(c) { if (c) { c.parentNode = node; node.children.push(c); } return c; },
+      /* ParentNode.append/prepend/replaceChildren take nodes or strings */
+      append(...cs) { for (const c of cs) node.appendChild(typeof c === "object" && c ? c : document.createTextNode(c)); },
+      prepend(...cs) { for (const c of cs.reverse()) node.insertBefore(typeof c === "object" && c ? c : document.createTextNode(c), node.children[0]); },
+      replaceChildren(...cs) { node.children.length = 0; node.append(...cs); },
       insertBefore(c, ref) { if (!c) return c; c.parentNode = node; const i = node.children.indexOf(ref); i < 0 ? node.children.push(c) : node.children.splice(i, 0, c); return c; },
       replaceChild(n, o) { const i = node.children.indexOf(o); if (i >= 0) node.children[i] = n; return o; },
       removeChild(c) { const i = node.children.indexOf(c); if (i >= 0) node.children.splice(i, 1); return c; },

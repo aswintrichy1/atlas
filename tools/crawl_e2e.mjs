@@ -820,16 +820,28 @@ async function navAudit(s, route) {
   return JSON.parse(json);
 }
 
+/* "the control isn't on the page yet" answers when the view finished rendering,
+ * not whether the feature works: nav() resolves on hashchange plus two frames,
+ * and a view that renders a beat later (Citadel's exam and flashcards did) was
+ * being filed as broken. Poll for it before concluding anything. */
+const NOT_RENDERED_YET = /^no (start|flip) control|^no card face rendered|^no widget mount/;
+
 async function runOn(s, route, call) {
   await s.evaluate(`window.__e2e.nav(${JSON.stringify(route)}).then(function(){return 1;})`, { awaitPromise: true });
   await s.flush();
   s.take();                          // render noise for this route was already scored in pass 1
-  try {
-    return JSON.parse(await s.evaluate(`JSON.stringify(${call})`));
-  } catch (e) {
-    if (e.harnessFault) throw e;
-    return { ok: false, why: e.message };
+  let r;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      r = JSON.parse(await s.evaluate(`JSON.stringify(${call})`));
+    } catch (e) {
+      if (e.harnessFault) throw e;
+      return { ok: false, why: e.message };
+    }
+    if (r && (r.ok || !NOT_RENDERED_YET.test(r.why || ""))) return r;
+    await new Promise((res) => setTimeout(res, 150));
   }
+  return r;
 }
 
 /* ==================================================================== main */

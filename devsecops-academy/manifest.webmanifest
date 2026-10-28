@@ -1,0 +1,16 @@
+{
+  "name": "Forge \u00b7 The DevSecOps Atlas",
+  "short_name": "Forge",
+  "description": "Offline DevSecOps course from SDLC basics to a production pipeline: secure SDLC, Git, Jenkins, SonarQube, Snyk, artifacts, GitOps delivery, a deep Wiz track and a live pipeline simulator \u2014 with checkpoint quizzes, interactive labs, exam mode and flashcards.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

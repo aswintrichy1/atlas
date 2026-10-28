@@ -1,0 +1,16 @@
+{
+  "name": "Lumen \u00b7 The LLM Atlas",
+  "short_name": "Lumen",
+  "description": "Offline LLM and GenAI course from tokens to production: transformers, history, training and alignment, APIs, prompt engineering, RAG, agents, skills and MCP, local models, evals and LLM security, and a fully local LLM playground \u2014 with checkpoint quizzes, interactive labs, exam mode and flashcards.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

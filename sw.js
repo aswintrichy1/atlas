@@ -1,10 +1,10 @@
 /* =====================================================================
    The Atlas Collection · hub service worker
    Caches only the hub's OWN root-level files. It deliberately never
-   touches the five sub-apps (each ships its own service worker with a
+   touches the twenty-one sub-apps (each ships its own service worker with a
    more specific scope), so it cannot interfere with their caching.
    ===================================================================== */
-const CACHE = "atlas-hub-v6";
+const CACHE = "atlas-hub-v10";
 const CACHE_PREFIX = "atlas-hub-";
 const CORE = [
   "./",
@@ -13,7 +13,7 @@ const CORE = [
   "./manifest.webmanifest"
 ];
 // Sub-app directories the hub must never intercept.
-const SUBAPPS = /\/(hld-lld-academy|dsa-patterns-academy|ml-ai-academy|behavioral-academy|cyber-academy|data-eng-academy|techno-managerial-academy)\//;
+const SUBAPPS = /\/(hld-lld-academy|dsa-patterns-academy|ml-ai-academy|behavioral-academy|cyber-academy|data-eng-academy|techno-managerial-academy|devsecops-academy|llm-academy|snowflake-academy|cloud-academy|sre-academy|db-internals-academy|linux-net-academy|java-backend-academy|salesforce-academy|frontend-academy|software-craft-academy|python-academy|certification-academy|streaming-academy)\//;
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
