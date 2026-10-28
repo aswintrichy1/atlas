@@ -342,6 +342,12 @@ window.QUIZZES = Object.assign(window.QUIZZES || {}, {
         options: ["phishing", "physical theft of hardware", "a poisoned supply chain", "a volumetric DDoS"],
         answer: 0,
         explain: "Most intrusions start with someone clicking a phishing lure. Technical controls must assume a click will happen and limit what it can achieve."
+      },
+      {
+        q: "A detection rule produces thousands of alerts during approved maintenance. What is the best engineering response?",
+        options: ["Delete all maintenance logs", "Document the benign pattern, add a bounded exclusion and a should-not-fire test fixture, then review residual coverage", "Ignore every alert", "Disable the data source"],
+        answer: 1,
+        explain: "A narrow, tested exclusion keeps the original behavior covered while preventing a known operation from paging analysts. Global suppression destroys coverage."
       }
     ]
   },

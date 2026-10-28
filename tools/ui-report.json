@@ -1,0 +1,2247 @@
+{
+  "base": "http://127.0.0.1:8780",
+  "viewport": {
+    "width": 1440,
+    "height": 913
+  },
+  "thresholds": {
+    "invisible": 1.5,
+    "regression": 2.2,
+    "dim": 3
+  },
+  "startedAt": "2026-10-28T15:38:47.814Z",
+  "apps": [
+    {
+      "name": "Blueprint",
+      "dir": "hld-lld-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 249,
+      "unmeasurable": 102,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "skip",
+          "why": "the app has no such surface"
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/deepdives/specialized/probabilistic",
+          "symptom": "theme flip changed the node set",
+          "detail": "90 measurable in dark vs 78 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/sdpatterns/delivery/realtime-updates",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 22 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/breakdowns/data/cdc-pipeline",
+          "symptom": "theme flip changed the node set",
+          "detail": "37 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/hld/distributed/cap",
+          "symptom": "theme flip changed the node set",
+          "detail": "21 measurable in dark vs 13 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/hld/production-readiness/capacity-planning",
+          "symptom": "theme flip changed the node set",
+          "detail": "44 measurable in dark vs 33 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/lld/concurrency-deep/lockfree-and-atomics",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/breakdowns/foundations/whatsapp",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 24 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/hld/scaling/load-balancing",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Codex",
+      "dir": "dsa-patterns-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 220,
+      "unmeasurable": 74,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/patterns/arrays/sliding-window",
+          "symptom": "theme flip changed the node set",
+          "detail": "37 measurable in dark vs 31 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/patterns/search/binary-search",
+          "symptom": "theme flip changed the node set",
+          "detail": "56 measurable in dark vs 46 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/patterns/trees-graphs/dfs",
+          "symptom": "theme flip changed the node set",
+          "detail": "38 measurable in dark vs 29 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/cpat/craft/phase-plan",
+          "symptom": "theme flip changed the node set",
+          "detail": "46 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/cpat/structures/range-structures",
+          "symptom": "theme flip changed the node set",
+          "detail": "32 measurable in dark vs 22 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/dsa/linear/sliding-window",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 29 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/dsa/recursion/backtracking",
+          "symptom": "theme flip changed the node set",
+          "detail": "23 measurable in dark vs 17 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/dsa/recursion/dynamic-programming",
+          "symptom": "theme flip changed the node set",
+          "detail": "21 measurable in dark vs 16 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Citadel",
+      "dir": "cyber-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 135,
+      "unmeasurable": 71,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "skip",
+          "why": "the app has no such surface"
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/crypto/primitives/encoding-vs-encryption",
+          "symptom": "theme flip changed the node set",
+          "detail": "24 measurable in dark vs 16 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/reversing/pwn/mitigations",
+          "symptom": "theme flip changed the node set",
+          "detail": "27 measurable in dark vs 19 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/core/foundations/cia-triad",
+          "symptom": "theme flip changed the node set",
+          "detail": "19 measurable in dark vs 12 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/core/access/access-control-models",
+          "symptom": "theme flip changed the node set",
+          "detail": "24 measurable in dark vs 17 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/crypto/keys/key-exchange",
+          "symptom": "theme flip changed the node set",
+          "detail": "31 measurable in dark vs 22 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/crypto/applied/tls",
+          "symptom": "theme flip changed the node set",
+          "detail": "22 measurable in dark vs 16 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/defense/network/network-security",
+          "symptom": "theme flip changed the node set",
+          "detail": "21 measurable in dark vs 15 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/defense/detect/threat-detection",
+          "symptom": "theme flip changed the node set",
+          "detail": "23 measurable in dark vs 18 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Cascade",
+      "dir": "data-eng-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 203,
+      "unmeasurable": 85,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/modeling/scd/scd-types",
+          "symptom": "theme flip changed the node set",
+          "detail": "59 measurable in dark vs 48 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/dataops/cost/cost",
+          "symptom": "theme flip changed the node set",
+          "detail": "42 measurable in dark vs 29 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/storage/lakehouse/catalogs-evolution-row-changes",
+          "symptom": "theme flip changed the node set",
+          "detail": "24 measurable in dark vs 16 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/modeling/relational/normalization",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/batch/compute/spark-model",
+          "symptom": "theme flip changed the node set",
+          "detail": "26 measurable in dark vs 18 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/batch/shuffle/shuffle",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/streaming/kafka/consumer-groups",
+          "symptom": "theme flip changed the node set",
+          "detail": "22 measurable in dark vs 16 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/streaming/processing/windowing",
+          "symptom": "theme flip changed the node set",
+          "detail": "28 measurable in dark vs 20 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "TechLead",
+      "dir": "techno-managerial-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 295,
+      "unmeasurable": 88,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/people/coaching/feedback-sbi",
+          "symptom": "theme flip changed the node set",
+          "detail": "55 measurable in dark vs 42 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/hld/framing/round-decoder",
+          "symptom": "theme flip changed the node set",
+          "detail": "47 measurable in dark vs 37 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/hld/framing/stakeholder-map",
+          "symptom": "theme flip changed the node set",
+          "detail": "47 measurable in dark vs 37 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/hld/execution/adr-leadership",
+          "symptom": "theme flip changed the node set",
+          "detail": "35 measurable in dark vs 25 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/lld/modeling/idempotency",
+          "symptom": "theme flip changed the node set",
+          "detail": "42 measurable in dark vs 31 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/data/trust/metric-ownership",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 22 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/people/org/team-health",
+          "symptom": "theme flip changed the node set",
+          "detail": "56 measurable in dark vs 47 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/strategy/direction/roadmaps",
+          "symptom": "theme flip changed the node set",
+          "detail": "64 measurable in dark vs 54 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Synapse",
+      "dir": "ml-ai-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 310,
+      "unmeasurable": 102,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "skip",
+          "why": "the app has no such surface"
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/ops/monitoring/drift-and-skew",
+          "symptom": "theme flip changed the node set",
+          "detail": "65 measurable in dark vs 52 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/metrics/confusion-matrix",
+          "symptom": "theme flip changed the node set",
+          "detail": "90 measurable in dark vs 78 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/experiments/ab-test-design",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/mlsd/framework/phase-plan",
+          "symptom": "theme flip changed the node set",
+          "detail": "48 measurable in dark vs 33 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/mlsd/concepts/feature-engineering",
+          "symptom": "theme flip changed the node set",
+          "detail": "42 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/train/compute/gpu-economics",
+          "symptom": "theme flip changed the node set",
+          "detail": "39 measurable in dark vs 24 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/rank/retrieval/ranking-funnel",
+          "symptom": "theme flip changed the node set",
+          "detail": "46 measurable in dark vs 35 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/rank/dynamics/bandits",
+          "symptom": "theme flip changed the node set",
+          "detail": "43 measurable in dark vs 32 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Compass",
+      "dir": "behavioral-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 156,
+      "unmeasurable": 77,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/offer/anatomy/components",
+          "symptom": "theme flip changed the node set",
+          "detail": "28 measurable in dark vs 20 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/beh/foundation/select",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 24 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/beh/delivery/deliver-salt",
+          "symptom": "theme flip changed the node set",
+          "detail": "40 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/story/catalog/coverage-matrix",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/story/playbooks/mock-drills",
+          "symptom": "theme flip changed the node set",
+          "detail": "21 measurable in dark vs 16 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/story/catalog/journaling",
+          "symptom": "theme flip changed the node set",
+          "detail": "10 measurable in dark vs 5 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/loops/amazon/amazon-l5",
+          "symptom": "theme flip changed the node set",
+          "detail": "20 measurable in dark vs 16 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/loops/google/google-manager",
+          "symptom": "theme flip changed the node set",
+          "detail": "29 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Forge",
+      "dir": "devsecops-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 194,
+      "unmeasurable": 72,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/wiz/shiftleft/wizcli",
+          "symptom": "theme flip changed the node set",
+          "detail": "48 measurable in dark vs 32 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/sdlc/devsecops",
+          "symptom": "theme flip changed the node set",
+          "detail": "38 measurable in dark vs 31 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/ssdlc/threat-modeling",
+          "symptom": "theme flip changed the node set",
+          "detail": "38 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/pipe/git/branching",
+          "symptom": "theme flip changed the node set",
+          "detail": "27 measurable in dark vs 22 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/pipe/deploy/strategies",
+          "symptom": "theme flip changed the node set",
+          "detail": "27 measurable in dark vs 20 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/chain/harden/ppe-deps",
+          "symptom": "theme flip changed the node set",
+          "detail": "21 measurable in dark vs 15 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/ctr/docker/image-hygiene",
+          "symptom": "theme flip changed the node set",
+          "detail": "24 measurable in dark vs 17 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/scan/sast/sonarqube",
+          "symptom": "theme flip changed the node set",
+          "detail": "40 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Lumen",
+      "dir": "llm-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 228,
+      "unmeasurable": 93,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/found/tokens/tokenization",
+          "symptom": "theme flip changed the node set",
+          "detail": "49 measurable in dark vs 38 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/local/why/hardware",
+          "symptom": "theme flip changed the node set",
+          "detail": "39 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/ops/security/prompt-injection",
+          "symptom": "theme flip changed the node set",
+          "detail": "52 measurable in dark vs 39 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/basics/learning",
+          "symptom": "theme flip changed the node set",
+          "detail": "32 measurable in dark vs 20 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/tokens/vector-space",
+          "symptom": "theme flip changed the node set",
+          "detail": "27 measurable in dark vs 17 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/core/transformer/attention",
+          "symptom": "theme flip changed the node set",
+          "detail": "41 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/core/generation/sampling",
+          "symptom": "theme flip changed the node set",
+          "detail": "40 measurable in dark vs 29 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/core/generation/context-kv",
+          "symptom": "theme flip changed the node set",
+          "detail": "39 measurable in dark vs 29 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Glacier",
+      "dir": "snowflake-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 209,
+      "unmeasurable": 73,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/arch/storage/clustering",
+          "symptom": "theme flip changed the node set",
+          "detail": "38 measurable in dark vs 29 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/arch/protect/fail-safe",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 25 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/perf/warehouses/sizing",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 25 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/perf/tuning/caching",
+          "symptom": "theme flip changed the node set",
+          "detail": "22 measurable in dark vs 16 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/perf/tuning/spilling",
+          "symptom": "theme flip changed the node set",
+          "detail": "29 measurable in dark vs 21 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/ingest/transform/dynamic-tables",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/sec/access/rbac-hierarchy",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/sec/policies/row-access",
+          "symptom": "theme flip changed the node set",
+          "detail": "48 measurable in dark vs 39 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Nimbus",
+      "dir": "cloud-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 245,
+      "unmeasurable": 122,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/iam/protect/kms",
+          "symptom": "theme flip changed the node set",
+          "detail": "40 measurable in dark vs 31 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/net/vpc/routing-gateways",
+          "symptom": "theme flip changed the node set",
+          "detail": "45 measurable in dark vs 36 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/iac/tf-core/tf-language",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/obs/stack/alarms",
+          "symptom": "theme flip changed the node set",
+          "detail": "39 measurable in dark vs 28 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/obs/native/containers-k8s",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/basics/service-models",
+          "symptom": "theme flip changed the node set",
+          "detail": "26 measurable in dark vs 19 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/basics/service-map",
+          "symptom": "theme flip changed the node set",
+          "detail": "63 measurable in dark vs 56 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/iam/policies/evaluation-logic",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Beacon",
+      "dir": "sre-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 217,
+      "unmeasurable": 74,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/slo/budgets/burn-rate",
+          "symptom": "theme flip changed the node set",
+          "detail": "30 measurable in dark vs 20 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/otel/pipeline/cardinality",
+          "symptom": "theme flip changed the node set",
+          "detail": "37 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/inc/response/severity",
+          "symptom": "theme flip changed the node set",
+          "detail": "42 measurable in dark vs 32 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/perf/theory/queueing",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 28 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/chaos/patterns/circuit-breakers",
+          "symptom": "theme flip changed the node set",
+          "detail": "32 measurable in dark vs 24 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/chaos/experiments/dr-drills",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/data/signals/freshness-volume",
+          "symptom": "theme flip changed the node set",
+          "detail": "43 measurable in dark vs 34 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/found/principles/embracing-risk",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Ledger",
+      "dir": "db-internals-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 228,
+      "unmeasurable": 75,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/qp/joins/reading-explain",
+          "symptom": "theme flip changed the node set",
+          "detail": "40 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/qp/joins/adaptive-execution",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/col/columnar/compression-encoding",
+          "symptom": "theme flip changed the node set",
+          "detail": "39 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/store/btree/btree-insert-split",
+          "symptom": "theme flip changed the node set",
+          "detail": "28 measurable in dark vs 20 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/store/lsm/compaction",
+          "symptom": "theme flip changed the node set",
+          "detail": "44 measurable in dark vs 35 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/store/durability/buffer-pool",
+          "symptom": "theme flip changed the node set",
+          "detail": "56 measurable in dark vs 49 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/idx/basics/composite-order",
+          "symptom": "theme flip changed the node set",
+          "detail": "35 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/idx/beyond/vector-indexes",
+          "symptom": "theme flip changed the node set",
+          "detail": "22 measurable in dark vs 14 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Kernel",
+      "dir": "linux-net-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 248,
+      "unmeasurable": 60,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/fs/perms/permissions",
+          "symptom": "theme flip changed the node set",
+          "detail": "52 measurable in dark vs 45 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/shell/basics/pipes-redirection",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/shell/basics/globbing-expansion",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 28 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/proc/model/process-model",
+          "symptom": "theme flip changed the node set",
+          "detail": "46 measurable in dark vs 40 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/proc/services/cron-timers",
+          "symptom": "theme flip changed the node set",
+          "detail": "29 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/fs/layout/inodes-links",
+          "symptom": "theme flip changed the node set",
+          "detail": "31 measurable in dark vs 25 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/perf/observe/cpu-memory",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 21 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/perf/trace/use-method",
+          "symptom": "theme flip changed the node set",
+          "detail": "46 measurable in dark vs 39 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Anvil",
+      "dir": "java-backend-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 208,
+      "unmeasurable": 73,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/java/collections/collections-internals",
+          "symptom": "theme flip changed the node set",
+          "detail": "42 measurable in dark vs 31 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/conc/sync/locks-atomics",
+          "symptom": "theme flip changed the node set",
+          "detail": "30 measurable in dark vs 19 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/data/ops/connection-pooling",
+          "symptom": "theme flip changed the node set",
+          "detail": "28 measurable in dark vs 19 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/java/fp/streams",
+          "symptom": "theme flip changed the node set",
+          "detail": "26 measurable in dark vs 18 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/jvm/memory/gc-choosing",
+          "symptom": "theme flip changed the node set",
+          "detail": "40 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/jvm/perf/container-awareness",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 28 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/conc/loom/virtual-threads",
+          "symptom": "theme flip changed the node set",
+          "detail": "29 measurable in dark vs 21 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/boot/config/profiles-config",
+          "symptom": "theme flip changed the node set",
+          "detail": "49 measurable in dark vs 42 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Orbit",
+      "dir": "salesforce-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 259,
+      "unmeasurable": 84,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/plat/model/validation-formulas",
+          "symptom": "theme flip changed the node set",
+          "detail": "51 measurable in dark vs 43 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/flow/choose/flow-vs-apex",
+          "symptom": "theme flip changed the node set",
+          "detail": "42 measurable in dark vs 30 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/lwc/data/wire-vs-imperative",
+          "symptom": "theme flip changed the node set",
+          "detail": "43 measurable in dark vs 33 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/int/events/cdc-events",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/ops/release/deploy-validation",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 29 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/crma/viz/saql",
+          "symptom": "theme flip changed the node set",
+          "detail": "46 measurable in dark vs 38 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/plat/envs/sandboxes",
+          "symptom": "theme flip changed the node set",
+          "detail": "35 measurable in dark vs 28 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/plat/data/relationships",
+          "symptom": "theme flip changed the node set",
+          "detail": "40 measurable in dark vs 31 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Pixel",
+      "dir": "frontend-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 180,
+      "unmeasurable": 97,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/web/browser/event-loop",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/state/global/server-state",
+          "symptom": "theme flip changed the node set",
+          "detail": "31 measurable in dark vs 24 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/sec/threats/csp",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 28 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/web/html-css/flex-grid",
+          "symptom": "theme flip changed the node set",
+          "detail": "26 measurable in dark vs 20 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/web/html-css/cascade-specificity",
+          "symptom": "theme flip changed the node set",
+          "detail": "27 measurable in dark vs 21 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/react/hooks/use-effect-correctly",
+          "symptom": "theme flip changed the node set",
+          "detail": "23 measurable in dark vs 17 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/react/tree/render-commit",
+          "symptom": "theme flip changed the node set",
+          "detail": "23 measurable in dark vs 17 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/react/tree/reconciliation-keys",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Chisel",
+      "dir": "software-craft-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 290,
+      "unmeasurable": 54,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/docs/types/readmes",
+          "symptom": "theme flip changed the node set",
+          "detail": "41 measurable in dark vs 34 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/clean/names/intent-names",
+          "symptom": "theme flip changed the node set",
+          "detail": "51 measurable in dark vs 45 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/clean/names/small-functions",
+          "symptom": "theme flip changed the node set",
+          "detail": "46 measurable in dark vs 40 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/clean/ops/logging",
+          "symptom": "theme flip changed the node set",
+          "detail": "46 measurable in dark vs 39 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/refac/smells/safe-steps",
+          "symptom": "theme flip changed the node set",
+          "detail": "26 measurable in dark vs 18 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/refac/legacy/seams",
+          "symptom": "theme flip changed the node set",
+          "detail": "45 measurable in dark vs 39 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/test/strategy/pyramid-trophy",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/test/practice/test-doubles",
+          "symptom": "theme flip changed the node set",
+          "detail": "55 measurable in dark vs 49 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Pyxis",
+      "dir": "python-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 206,
+      "unmeasurable": 69,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "skip",
+          "why": "the app has no such surface"
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/web/platform/migrations-pools",
+          "symptom": "theme flip changed the node set",
+          "detail": "32 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/prod/config/twelve-factor-config",
+          "symptom": "theme flip changed the node set",
+          "detail": "44 measurable in dark vs 33 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/lang/objects/names-objects",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 28 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/idiom/iteration/generators",
+          "symptom": "theme flip changed the node set",
+          "detail": "30 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/types/basics/unions-narrowing",
+          "symptom": "theme flip changed the node set",
+          "detail": "29 measurable in dark vs 21 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/pkg/envs/pip-uv",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/test/pytest/fixtures",
+          "symptom": "theme flip changed the node set",
+          "detail": "34 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/conc/parallel/threads-processes",
+          "symptom": "theme flip changed the node set",
+          "detail": "36 measurable in dark vs 29 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Summit",
+      "dir": "certification-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 159,
+      "unmeasurable": 45,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/snow/perf/caching",
+          "symptom": "theme flip changed the node set",
+          "detail": "27 measurable in dark vs 21 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/secplus/archi/network-design",
+          "symptom": "theme flip changed the node set",
+          "detail": "19 measurable in dark vs 15 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/strat/day/pacing",
+          "symptom": "theme flip changed the node set",
+          "detail": "30 measurable in dark vs 23 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/aws/secure/vpc-security",
+          "symptom": "theme flip changed the node set",
+          "detail": "23 measurable in dark vs 18 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/aws/resilient/ha-multi-az",
+          "symptom": "theme flip changed the node set",
+          "detail": "24 measurable in dark vs 18 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/aws/resilient/dr-strategies",
+          "symptom": "theme flip changed the node set",
+          "detail": "22 measurable in dark vs 17 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/snow/perf/warehouse-sizing",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/snow/protect/time-travel-failsafe",
+          "symptom": "theme flip changed the node set",
+          "detail": "25 measurable in dark vs 20 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    },
+    {
+      "name": "Pulse",
+      "dir": "streaming-academy",
+      "themeRoutes": 9,
+      "nodesMeasured": 163,
+      "unmeasurable": 92,
+      "ariaSkipped": 0,
+      "keyboard": [
+        {
+          "id": "cmdk",
+          "name": "Cmd/Ctrl-K opens the command palette",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "slash",
+          "name": "\"/\" focuses the search box",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "help",
+          "name": "\"?\" opens the shortcuts modal",
+          "result": "pass",
+          "advertised": true
+        },
+        {
+          "id": "quizkeys",
+          "name": "A-E answers the visible quiz",
+          "result": "skip",
+          "why": "the app has no such surface"
+        },
+        {
+          "id": "arrows",
+          "name": "left/right move between lessons",
+          "result": "pass",
+          "advertised": true
+        }
+      ],
+      "failures": [],
+      "warnings": [
+        {
+          "route": "#/kafka/consumers/rebalance-protocols",
+          "symptom": "theme flip changed the node set",
+          "detail": "45 measurable in dark vs 34 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/kops/sizing/broker-capacity",
+          "symptom": "theme flip changed the node set",
+          "detail": "38 measurable in dark vs 26 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/kafka/replication/replication-isr",
+          "symptom": "theme flip changed the node set",
+          "detail": "32 measurable in dark vs 24 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/sem/time/watermarks",
+          "symptom": "theme flip changed the node set",
+          "detail": "30 measurable in dark vs 22 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/flink/resilience/checkpoints",
+          "symptom": "theme flip changed the node set",
+          "detail": "33 measurable in dark vs 22 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/ops/observe/lag-slos",
+          "symptom": "theme flip changed the node set",
+          "detail": "37 measurable in dark vs 27 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/fund/model/time",
+          "symptom": "theme flip changed the node set",
+          "detail": "8 measurable in dark vs 4 in light — dark/light pairing is partial on this route"
+        },
+        {
+          "route": "#/fund/model/stateless-stateful",
+          "symptom": "theme flip changed the node set",
+          "detail": "8 measurable in dark vs 4 in light — dark/light pairing is partial on this route"
+        }
+      ],
+      "skipped": null,
+      "advertised": {
+        "cmdk": true,
+        "slash": true,
+        "help": true,
+        "arrows": true,
+        "quizkeys": true,
+        "escape": true,
+        "sources": [
+          "/Focus the search box",
+          "⌘ K/Ctrl KOpen the command palette",
+          "←/→Previous / next lesson",
+          "A–Eor1–9Answer the current quiz",
+          "?Show this shortcuts help",
+          "EscClose dialogs & menus",
+          "/",
+          "/",
+          "⌘ K",
+          "Ctrl K",
+          "←",
+          "→"
+        ]
+      }
+    }
+  ],
+  "totals": {
+    "failures": 0,
+    "warnings": 168,
+    "skipped": []
+  },
+  "finishedAt": "2026-10-28T15:46:06.599Z"
+}

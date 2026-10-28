@@ -344,6 +344,51 @@ window.TRACKS.core = {
           ]
         },
         {
+          id: "oauth-oidc-defense",
+          title: "OAuth 2.0 and OIDC attack paths and defenses",
+          summary: "Secure redirects, state, nonce, PKCE, clients, scopes, tokens and consent without confusing delegated access with identity.",
+          minutes: 12,
+          tags: ["advanced", "oauth2", "oidc", "pkce", "token-security"],
+          blocks: [
+            { t: "p", html: "OAuth delegates API access; OIDC adds authentication. Most failures are trust-boundary mistakes: a redirect reaches the wrong client, a token is accepted by the wrong audience, a browser flow is not bound to the browser that started it, or a scope grants more than the user understood." },
+            { t: "table", headers: ["Risk", "Control"], rows: [
+              ["Redirect URI manipulation", "Exact pre-registered redirect matching; no open redirects in the chain"],
+              ["Login CSRF / flow swapping", "Unpredictable state bound to the user's browser session"],
+              ["Authorization-code interception", "PKCE with a fresh verifier and S256 challenge"],
+              ["ID-token replay", "Validate nonce, issuer, audience, signature, time and authorized party"],
+              ["Access-token substitution", "API validates issuer, audience, scopes and token type; client never treats it as an ID token"],
+              ["Refresh-token theft", "Secure storage, rotation with reuse detection, narrow scope and revocation"],
+              ["Consent abuse", "Verified publishers, least scopes, admin consent workflow and grant review"]
+            ] },
+            { t: "p", html: "Public clients such as browser and mobile apps cannot keep a client secret. Their security comes from exact redirects, PKCE, platform-protected token storage and a backend that enforces authorization. Confidential clients protect credentials server-side and still use PKCE where supported." },
+            { t: "note", variant: "trap", html: "A valid signature answers who issued a token, not whether this API should accept it. Issuer, audience, token purpose, scope and time checks are all mandatory." },
+            { t: "note", variant: "key", html: "<strong>Bind every artifact to the transaction that created it: redirect to client, state to browser, code to verifier, token to issuer and audience.</strong>" }
+          ]
+        },
+        {
+          id: "saml-defense",
+          title: "SAML attack paths and defenses",
+          summary: "Validate the exact signed assertion, destination and session, and treat identity-provider configuration as production code.",
+          minutes: 11,
+          tags: ["advanced", "saml", "federation", "xml-signature", "sso"],
+          blocks: [
+            { t: "table", headers: ["Risk", "Defensive invariant"], rows: [
+              ["Signature wrapping / ambiguous XML", "Use a hardened library and consume only the exact element whose signature was validated"],
+              ["Wrong recipient or audience", "Match destination, recipient, audience and configured entity ids exactly"],
+              ["Assertion replay", "Enforce NotBefore/NotOnOrAfter, one-time identifiers and short session creation windows"],
+              ["Unsolicited or mixed-up response", "Bind response to the initiated request where the flow supports it"],
+              ["Over-privileged claim mapping", "Allow-list groups and roles; unknown claims never become admin"],
+              ["Signing-key or metadata change", "Controlled metadata update, key rollover rehearsal, alerting and independent review"]
+            ] },
+            { t: "p", html: "SAML's XML complexity makes custom parsing dangerous. Use a maintained implementation with secure XML settings, reject duplicate or unexpected assertions, and log the issuer, assertion id, subject, audience, roles and result without storing the full sensitive assertion." },
+            { t: "compare",
+              bad: { title: "Fragile trust", items: ["Accept any valid IdP signature", "Map arbitrary group strings to roles", "Long assertion window", "Metadata changed manually in production"] },
+              good: { title: "Bound trust", items: ["Exact issuer, audience, destination and signed element", "Allow-listed role mapping", "Short time window plus replay cache", "Reviewed metadata and rehearsed rollover"] } },
+            { t: "quiz", id: "core-federation-defense" },
+            { t: "note", variant: "key", html: "<strong>Federation is safe only when the statement, receiver, time, transaction and resulting authorization are all bound precisely.</strong>" }
+          ]
+        },
+        {
           id: "access-control-models",
           title: "Access-control models",
           summary: "DAC, MAC, RBAC and ABAC — four ways to answer 'can this subject do this action on this object?'.",

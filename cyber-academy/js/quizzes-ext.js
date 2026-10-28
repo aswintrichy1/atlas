@@ -758,5 +758,69 @@ window.QUIZZES = Object.assign(window.QUIZZES || {}, {
         explain: "Communication plans need trusted channels and named owners before the incident. Normal collaboration tools may be unavailable or untrusted during a compromise."
       }
     ]
+  },
+  "core-federation-defense": {
+    title: "Federation defense checkpoint",
+    sub: "OAuth, OIDC and SAML transaction binding, token purpose and replay defense.",
+    questions: [
+      { q: "What does PKCE protect in an OAuth authorization-code flow?", options: ["The resource owner's password", "An intercepted authorization code by requiring the original client to prove a one-time verifier", "The TLS certificate", "The API schema"], answer: 1,
+        explain: "The client commits to a challenge before authorization and later presents the verifier. An interceptor holding only the code cannot redeem it." },
+      { q: "Which value binds an OAuth response to the browser flow that started it?", options: ["scope", "state", "audience", "issuer"], answer: 1,
+        explain: "A high-entropy state value bound to the browser session prevents login CSRF and response mix-up. OIDC nonce separately binds an ID token to the authentication request." },
+      { q: "Why is validating only a JWT signature insufficient?", options: ["Signatures never work", "A correctly signed token can still have the wrong issuer, audience, purpose or time window", "It makes tokens too short", "It disables encryption"], answer: 1,
+        explain: "The signature authenticates the issuer's key. The receiver must still prove the token was issued by the configured issuer, for this audience, for this purpose and within time." },
+      { q: "What is the core SAML signature-wrapping defense?", options: ["Parse any assertion with the right username", "Use the exact element whose signature was validated and reject ambiguous or duplicate assertions", "Disable audience checks", "Accept unsigned role claims"], answer: 1,
+        explain: "A hardened library must bind business logic to the precise signed element. Looking up a different duplicate element after signature validation creates ambiguity attackers can abuse." },
+      { q: "How should federated group claims become application roles?", options: ["Every new group becomes admin", "Through an explicit allow-listed mapping with least privilege and review", "By string length", "They should bypass authorization"], answer: 1,
+        explain: "Claims are inputs, not authority by themselves. A controlled mapping prevents unexpected or externally managed group names from creating privilege." }
+    ]
+  },
+  "defense-ad": {
+    title: "AD & Kerberos defense checkpoint",
+    sub: "Tickets, service identities, tier zero, attack paths and detection.",
+    questions: [
+      { q: "What is a Kerberos service ticket for?", options: ["Changing the domain schema", "Presenting authenticated identity to one specific service", "Replacing backups", "Encrypting every file"], answer: 1,
+        explain: "The KDC issues a service ticket for a named service after the client has a TGT. Scope and lifetime limit where and how long it is useful." },
+      { q: "Why prefer managed service accounts?", options: ["They never need owners", "They support strong automatically rotated credentials and reduce long-lived human-chosen passwords", "They grant domain admin", "They disable logging"], answer: 1,
+        explain: "Managed identities reduce password age and manual handling, but still need a named owner, narrow permissions and monitoring." },
+      { q: "What is the strongest administrative tiering rule?", options: ["Use one admin account on every device", "Tier-zero credentials appear only on hardened tier-zero administration endpoints", "Let admins browse email while elevated", "Share privileged sessions"], answer: 1,
+        explain: "Keeping privileged credentials off lower-trust devices prevents one workstation compromise from becoming a directory compromise." },
+      { q: "A privileged group membership changes unexpectedly. What should detection correlate first?", options: ["Theme settings", "Actor, source device, target group, approval record and follow-on access", "Only the group name", "Printer status"], answer: 1,
+        explain: "The sequence distinguishes approved administration from compromise and reveals whether the new privilege was immediately used." },
+      { q: "Why model AD compromise as a graph path?", options: ["Graphs look better", "Attackers chain group, ACL, delegation, session and local-admin relationships; removing one edge can break the route to tier zero", "Kerberos has no logs", "Only networks have paths"], answer: 1,
+        explain: "Effective privilege is often indirect. Graphing relationships exposes the shortest path and verifies whether an alternate path remains after remediation." }
+    ]
+  },
+  "defense-rule-engineering": {
+    title: "Detection-as-code checkpoint",
+    sub: "Sigma, KQL, SPL, fixtures, CI and rule operations.",
+    questions: [
+      { q: "What should remain stable when translating Sigma into KQL or SPL?", options: ["Every field name", "The behavior hypothesis, required telemetry and expected test outcomes", "The file extension", "The vendor dashboard color"], answer: 1,
+        explain: "Backends have different schemas and syntax. The portable contract is the behavior being detected, the evidence it needs and fixtures proving match and non-match." },
+      { q: "Why include a known-benign fixture?", options: ["To force every rule to fire", "To prevent a normal workflow from becoming a recurring false positive", "To hide missing logs", "To replace peer review"], answer: 1,
+        explain: "A benign edge-case test locks in tuning and stops a later refactor from paging analysts on an approved operation." },
+      { q: "What does a field-contract test catch?", options: ["A data source stopped sending or mapping a field the rule relies on", "An expired CSS file", "A slow workstation", "A missing logo"], answer: 0,
+        explain: "Rules silently fail when schemas drift. Testing required normalized fields makes telemetry health part of the detection release." },
+      { q: "What is the safest first production mode for a new broad rule?", options: ["Automatic account disable", "Shadow or alert-only with volume and false-positive review", "Permanent suppression", "No logging"], answer: 1,
+        explain: "Progressive release measures behavior without granting untested logic destructive authority. Containment automation needs separate approvals and dry runs." },
+      { q: "Why must a detection have an owner and runbook?", options: ["To make the YAML longer", "So someone maintains data dependencies and analysts know evidence, escalation and allowed containment", "To avoid tests", "To store credentials"], answer: 1,
+        explain: "A rule is an operational product. Without ownership and response guidance it decays, creates noise and cannot produce consistent decisions." }
+    ]
+  },
+  "domains-cloud-iam": {
+    title: "Cloud IAM paths checkpoint",
+    sub: "Trust, effective permissions, pass-role, resource policies and graph-based prioritization.",
+    questions: [
+      { q: "Why can reviewing only an identity policy miss effective privilege?", options: ["Identity policies are encrypted", "Trust policies, groups, resource policies, role chaining and service actions create indirect paths", "Cloud has no authorization", "Only passwords matter"], answer: 1,
+        explain: "Effective access is the union of connected controls and conditions. A narrow-looking principal can reach privilege through another role or resource policy." },
+      { q: "What is the danger of broad pass-role permission?", options: ["It slows logins", "A principal may create or configure a service that runs with a more privileged role", "It disables storage", "It rotates keys"], answer: 1,
+        explain: "Passing a role lets a service act with that role. Restrict both which roles may be passed and which services may receive them." },
+      { q: "What is a toxic combination in a cloud graph?", options: ["One low-severity label", "Connected exposure, exploitable weakness, excessive privilege and sensitive data that form a real attack path", "A private subnet", "A patched image"], answer: 1,
+        explain: "Connected risks matter more than isolated findings because they describe a plausible path from entry to impact." },
+      { q: "What should a workload identity look like?", options: ["One administrator role shared by all functions", "A separate short-lived identity with only the actions and resources needed for one workload", "A key in source code", "A human account"], answer: 1,
+        explain: "A compromised workload inherits its role. Narrow, separate workload identities bound blast radius and improve attribution." },
+      { q: "After removing one privilege edge, what should defenders verify?", options: ["That the console looks cleaner", "That no alternate path still reaches the crown-jewel resource and intended workloads still function", "That logs are deleted", "That all users are admins"], answer: 1,
+        explain: "Graph paths can be redundant. Recompute effective access and test legitimate use so the remediation is both complete and safe." }
+    ]
   }
 });

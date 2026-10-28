@@ -13,14 +13,14 @@
         title: "Scenario packs",
         route: "#/scenarios",
         summary: "Compact drills with model-answer outlines for capstone practice, interview prep and team tabletop review.",
-        count: "4 packs"
+        count: "5 packs"
       },
       {
         id: "interview",
         title: "Interview prompts",
         route: "#/interview",
         summary: "Five security prompts with what to listen for in a strong answer.",
-        count: "5 prompts"
+        count: "6 prompts"
       },
       {
         id: "rubrics",
@@ -83,7 +83,7 @@
           }
         ],
         links: [
-          { label: "Breach capstone", route: "#/threats/case-studies/breach-capstone" },
+          { label: "Breach capstone", route: "#/threats/capstones/breach-capstone" },
           { label: "IR flow cheat sheet", route: "#/cheatsheets/ir-flow" },
           { label: "Rubric bands", route: "#/rubrics" }
         ]
@@ -125,7 +125,7 @@
           }
         ],
         links: [
-          { label: "Architecture capstone", route: "#/threats/case-studies/security-architecture-capstone" },
+          { label: "Architecture capstone", route: "#/threats/capstones/security-architecture-capstone" },
           { label: "Secure upload checklist", route: "#/cheatsheets/secure-upload-checklist" },
           { label: "Auth/session checklist", route: "#/cheatsheets/auth-session-checklist" }
         ]
@@ -160,9 +160,27 @@
           }
         ],
         links: [
+          { label: "Cloud IAM privilege paths", route: "#/domains/modern/cloud-iam-paths" },
           { label: "Cloud case study", route: "#/threats/case-studies/capital-one-ssrf" },
           { label: "Detection card template", route: "#/cheatsheets/detection-card-template" },
           { label: "Least privilege", route: "#/glossary/least-privilege" }
+        ]
+      },
+      {
+        id: "directory-compromise-tabletop",
+        title: "Directory compromise tabletop",
+        timebox: "40 minutes",
+        role: "Identity incident lead",
+        prompt: "A privileged group changed unexpectedly, a service identity requested an unusual volume of tickets, and a tier-zero account appeared on a normal workstation. Build a defensive investigation and containment plan.",
+        modelAnswer: [
+          { heading: "Preserve and scope", points: ["Preserve domain-controller, endpoint and identity logs; identify actor, source device, target group, service principals and follow-on access.", "Map group, delegation, session and local-admin relationships to find every path to tier zero."] },
+          { heading: "Contain deliberately", points: ["Disable or expire the unexpected grant, isolate the lower-tier endpoint and rotate only the affected identities through the incident runbook.", "Protect evidence and plan sensitive domain-key rotation with directory owners rather than improvising."] },
+          { heading: "Harden and detect", points: ["Keep tier-zero credentials on hardened admin endpoints, adopt managed service identities and remove unnecessary delegation.", "Add tested detections for privileged changes, ticket anomalies and privileged logons from the wrong device tier."] }
+        ],
+        links: [
+          { label: "AD attack paths", route: "#/defense/identity-defense/ad-attack-paths" },
+          { label: "AD hardening", route: "#/defense/identity-defense/ad-hardening-detection" },
+          { label: "Rule CI", route: "#/defense/detect/detection-rule-ci" }
         ]
       },
       {
@@ -195,7 +213,9 @@
           }
         ],
         links: [
-          { label: "Detection engineering lesson", route: "#/threats/case-studies/detection-engineering" },
+          { label: "Detection engineering lesson", route: "#/defense/detect/detection-engineering" },
+          { label: "Sigma, KQL and SPL", route: "#/defense/detect/sigma-kql-spl" },
+          { label: "Detection rule CI", route: "#/defense/detect/detection-rule-ci" },
           { label: "Detection card template", route: "#/cheatsheets/detection-card-template" },
           { label: "Telemetry", route: "#/glossary/telemetry" }
         ]
@@ -296,6 +316,26 @@
         links: [
           { label: "Breach triage scenario", route: "#/scenarios/breach-triage" },
           { label: "Containment", route: "#/glossary/containment" }
+        ]
+      },
+      {
+        id: "federation-design-review",
+        title: "OAuth, OIDC and SAML design review",
+        ask: "Review a design that uses OIDC for customer login and SAML for workforce SSO. Which trust bindings and recovery controls must be explicit?",
+        strongSignals: [
+          "Separates OAuth delegated access from OIDC authentication and validates issuer, audience, token type, time and nonce.",
+          "Requires exact redirects, state and PKCE; protects and rotates refresh tokens with reuse detection.",
+          "For SAML, validates the exact signed element, destination, recipient, audience and replay id, then maps claims through an allow-list.",
+          "Includes metadata/key rollover, session revocation and strongly verified MFA recovery."
+        ],
+        pitfalls: [
+          "Says a valid signature is enough.",
+          "Uses access tokens as proof of user identity.",
+          "Maps any asserted group directly to administrator."
+        ],
+        links: [
+          { label: "OAuth and OIDC defense", route: "#/core/access/oauth-oidc-defense" },
+          { label: "SAML defense", route: "#/core/access/saml-defense" }
         ]
       }
     ],

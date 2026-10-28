@@ -58,7 +58,10 @@
     "appsec/building/ai-secure-sdlc": "appsec/ai-security/ai-secure-sdlc",
     "appsec/building/ai-governance": "appsec/ai-security/ai-governance",
     "appsec/building/secure-headers": "appsec/hardening/secure-headers",
-    "appsec/building/secrets-supply-chain": "appsec/hardening/secrets-supply-chain"
+    "appsec/building/secrets-supply-chain": "appsec/hardening/secrets-supply-chain",
+    "threats/case-studies/detection-engineering": "defense/detect/detection-engineering",
+    "threats/case-studies/breach-capstone": "threats/capstones/breach-capstone",
+    "threats/case-studies/security-architecture-capstone": "threats/capstones/security-architecture-capstone"
   };
   const GUIDED_PATHS = [
     {
@@ -73,6 +76,8 @@
         "core/foundations/defense-in-depth",
         "core/threat-modeling/stride",
         "core/access/authn-authz",
+        "core/access/oauth-oidc-defense",
+        "core/access/saml-defense",
         "appsec/web-attacks/owasp-top-10",
         "defense/respond/incident-response",
         "domains/path/homelab"
@@ -93,7 +98,7 @@
         "appsec/building/api-security-deep-dive",
         "appsec/building/secure-coding-by-stack",
         "appsec/hardening/secure-headers",
-        "threats/case-studies/detection-engineering"
+        "defense/detect/detection-engineering"
       ]
     },
     {
@@ -107,12 +112,16 @@
         "defense/network/zero-trust",
         "defense/detect/logging-siem",
         "defense/detect/ids-ips",
+        "defense/detect/sigma-kql-spl",
+        "defense/detect/detection-rule-ci",
+        "defense/identity-defense/ad-hardening-detection",
+        "domains/modern/cloud-iam-paths",
         "defense/respond/incident-response",
         "defense/respond/cyber-resilience-recovery",
         "threats/intel/threat-hunting",
-        "threats/case-studies/detection-engineering",
+        "defense/detect/detection-engineering",
         "threats/forensics/dfir",
-        "threats/case-studies/breach-capstone"
+        "threats/capstones/breach-capstone"
       ]
     },
     {
@@ -130,7 +139,7 @@
         "appsec/ai-security/ai-soc-copilot",
         "appsec/ai-security/ai-secure-sdlc",
         "appsec/ai-security/ai-governance",
-        "threats/case-studies/security-architecture-capstone"
+        "threats/capstones/security-architecture-capstone"
       ]
     }
   ];
@@ -1202,6 +1211,12 @@
     const rawKey = parts.length >= 3 ? parts[0] + "/" + parts[1] + "/" + parts[2] : "";
     const lessonKey = ROUTE_ALIASES[rawKey] || rawKey;
     if (rawKey && ROUTE_ALIASES[rawKey]) {
+      if (done.has(rawKey)) { done.delete(rawKey); done.add(lessonKey); saveProgress(); }
+      if (review.has(rawKey)) { review.delete(rawKey); review.add(lessonKey); saveReview(); }
+      try {
+        const last = localStorage.getItem("cy_last_v1");
+        if (last === rawKey || last === "#/" + rawKey) localStorage.setItem("cy_last_v1", lessonKey);
+      } catch (e) {}
       location.replace("#/" + lessonKey + (parts[3] ? "/" + parts[3] : ""));
       return;
     }

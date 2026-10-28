@@ -479,23 +479,15 @@ window.TRACKS.appsec = {
         },
         {
           id: "ai-secure-sdlc",
-          title: "AI in the secure SDLC",
-          summary: "Use AI during design, code review and dependency triage without turning generated output into unreviewed authority.",
-          minutes: 7,
-          tags: ["ai", "sdlc", "secure-by-design"],
+          title: "AI in the secure SDLC: security recap",
+          summary: "A security-angle recap: AI drafts are untrusted input, and named people remain accountable for accepting risk.",
+          minutes: 4,
+          tags: ["practitioner", "ai", "sdlc", "secure-by-design"],
           blocks: [
-            { t: "p", html: "AI can move security review earlier by drafting threat models, finding risky sinks, explaining dependency advisories, proposing tests and summarizing design changes. Each output is a <em>candidate</em> until normal engineering review accepts it." },
-            { t: "table", headers: ["SDLC step", "AI-assisted security use"], rows: [
-              ["Requirements", "Identify abuse cases, sensitive data, roles and trust boundaries."],
-              ["Design", "Draft STRIDE-style threats and control options for reviewers."],
-              ["Code review", "Flag injection sinks, missing authorization, unsafe parsing and secret handling."],
-              ["Dependencies", "Summarize advisories, affected paths and upgrade risk."],
-              ["Testing", "Suggest negative tests for authz, validation, rate limits and logging."],
-              ["Release", "Generate rollback notes, security checklist deltas and residual-risk summaries."]
-            ] },
+            { t: "p", html: "AI can cheaply draft abuse cases, threat-model questions, risky code paths, dependency summaries and negative tests. That makes security review earlier and broader, but the output is still <strong>untrusted input</strong>: it can miss context, invent evidence or recommend an unsafe pattern confidently." },
             { t: "note", variant: "trap", html: "Generated code and generated security advice can both be wrong. Require tests, human review, source citations where possible, and a clear owner for accepting residual risk." },
-            { t: "note", variant: "tip", html: "The highest-value pattern is <strong>AI-assisted checklists from your own standards</strong>: feed it the change description and ask what local security requirements need review, then verify manually." },
-            { t: "note", variant: "key", html: "<strong>AI pulls security review earlier by making it cheap, and cheap is also how it fails.</strong> Low-cost output invites volume, volume invites acceptance without evidence, and a threat model nobody argued with protects roughly as much as no threat model at all. Keep the gate exactly where it was \u2014 a named person accepts residual risk, and every generated claim earns its place through a test, a citation, or a reviewer who disagreed with part of it." }
+            { t: "p", html: "The Forge academy's <strong>AI in the SDLC</strong> lesson is the canonical pipeline treatment: it maps each lifecycle step to review evidence and automated gates. Citadel keeps the defender's invariant: model output never authorizes access, closes a finding or accepts residual risk by itself." },
+            { t: "note", variant: "key", html: "<strong>AI pulls security review earlier; it does not move accountability.</strong> Every generated claim earns its place through a test, a citation, or a named reviewer who challenged it." }
           ]
         },
         {

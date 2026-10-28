@@ -225,7 +225,7 @@
 
     "lld-quality": {
       title: "Consistency and quality checkpoint",
-      sub: "Transaction boundaries, cross-system side effects, and choosing the test that matches the risk.",
+      sub: "Transaction boundaries, cross-system side effects, choosing the test that matches the risk, and owning the suite as a strategy.",
       questions: [
         {
           q: "Two services must both change state as part of one business operation. Which approach is soundest?",
@@ -281,13 +281,24 @@
           ],
           answer: 2,
           explain: "A gate has to be checkable by someone who was not in the argument, and \u201cgood\u201d is an opinion that the most motivated person in the room will always declare satisfied. The other three name an artifact or an outcome you can point at. Subjective gates do not raise quality; they just relocate the debate to the worst possible moment."
+        },
+        {
+          q: "The team's pull-request suite has grown to 40 minutes and a handful of tests fail intermittently. As the lead who owns testing strategy, what do you do first?",
+          options: [
+            "Set a suite time budget, quarantine flaky tests within a day with a named owner and a fix-or-delete deadline, and move slow integration paths to a later pipeline stage",
+            "Raise the coverage target so the extra tests are at least useful",
+            "Re-run failing tests automatically until they pass",
+            "Ask each engineer to fix the flaky tests they notice in their spare time"
+          ],
+          answer: 0,
+          explain: "A slow, flaky suite stops being trusted, and an untrusted suite is skipped or retried until green \u2014 which is worse than having fewer tests. A time budget, an explicit quarantine with an owner and a deadline, and staging slower tests later restore the suite as a signal. Automatic retries hide the flakiness, a coverage target makes the suite slower, and unowned spare-time fixes never happen."
         }
       ]
     },
 
     "lld-leadership": {
       title: "Review and extensibility checkpoint",
-      sub: "Reviews that teach, abstractions that earn their keep, and launch gates that mean something.",
+      sub: "Reviews that teach, API governance across teams, abstractions that earn their keep, and launch gates that mean something.",
       questions: [
         {
           q: "Which review comment is most likely to improve both the code and the author?",
@@ -343,6 +354,17 @@
           ],
           answer: 1,
           explain: "Good gates name checkable artifacts and outcomes across the dimensions that actually cause incidents: correctness, operability, security and reversibility. \u201cEvery known bug\u201d and a coverage number are proxies that can be satisfied while the risky path stays untested. A sign-off meeting records agreement rather than readiness."
+        },
+        {
+          q: "Forty teams publish internal APIs and breaking changes keep reaching consumers. Which governance model scales best?",
+          options: [
+            "A central API review board that approves every endpoint before release",
+            "Tier APIs by audience, enforce a style guide and breaking-change detection automatically in CI, and reserve human review for partner and public APIs",
+            "Let each team choose its own conventions and resolve breakages bilaterally",
+            "Freeze all existing APIs and allow only new versions"
+          ],
+          answer: 1,
+          explain: "Most breakages are mechanical \u2014 a removed field, a changed type, a new required parameter \u2014 and a machine catches them on every change without a queue. Tiering keeps human attention for the APIs where a mistake reaches customers or partners. A board that reviews everything becomes the bottleneck teams route around, bilateral resolution does not scale past a handful of teams, and a freeze multiplies versions without reducing breakage."
         }
       ]
     }
@@ -411,6 +433,15 @@
                 good: { title: "Justified structure", items: ["A boundary with a named owner and a reason to change", "An interface introduced when the second tenant arrived", "Layers that isolate a side effect from a pure calculation"] }
               },
               { t: "note", variant: "trap", html: "<strong>Reciting patterns is read as inexperience, not fluency.</strong> The senior version of the same knowledge is naming the pressure first and the pattern second \u2014 and being willing to say \u201cnone yet, a function is fine\u201d." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Can sketch classes and methods for a component."],
+                  ["Senior", "Starts from states, transitions and invariants, then derives the structure from them."],
+                  ["Staff", "Picks the two or three code-level decisions that carry the risk \u2014 side-effect boundary, transaction scope, contract \u2014 and spends the time there instead of on the class diagram."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> When an interviewer says <em>\u201cnow design the classes\u201d</em> or <em>\u201chow would you implement that\u201d</em>, they are checking whether your architecture was ever grounded. Answer with state and invariants before you answer with structure." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Turn a payout workflow into components and state transitions in ninety seconds, naming the invariant each boundary protects." },
               { t: "note", variant: "key", html: "<strong>Structure is only defensible once you can name what it protects or absorbs.</strong> Invariants first, boundaries second, names last \u2014 in the other order you get a tidy diagram of a system that cannot express its own rules." }
@@ -455,6 +486,15 @@
                 "  -> illegal combinations cannot be constructed at all"
               },
               { t: "note", variant: "trap", html: "<strong>Do not model the whole domain before shipping any of it.</strong> Model the part with rules that bite \u2014 money, state transitions, permissions \u2014 and leave the rest as plain data until it earns more." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Identifies the main entities and their fields."],
+                  ["Senior", "Distinguishes entities from value objects and makes illegal states unrepresentable for the rules that matter."],
+                  ["Staff", "Aligns model boundaries with team boundaries, so the most common change lives inside one module owned by one team."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> The trigger is any requirement where two stakeholders use the same word confidently and mean different things, or where a status is expressed as several independent flags." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Model an approval workflow with explicit states, then name the invariant that the booleans version would have let someone break." },
               { t: "note", variant: "key", html: "<strong>Every illegal state you make representable is a bug you have agreed to catch by hand forever.</strong> Collapsing flags into one state with explicit transitions moves the rule from every call site into the type, which is the cheapest correctness win available at this level." }
@@ -505,6 +545,15 @@
                   ["Standout", "The same, plus a metric on which consumers still cannot handle the new value, and a dated deprecation of the old behaviour", "You can see the migration finish instead of assuming it."]
                 ]
               },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Designs a clean request and response shape."],
+                  ["Senior", "Defaults to additive change, versions only on meaning changes, and publishes error semantics as part of the contract."],
+                  ["Staff", "Sets the compatibility policy for the organisation and builds the checks that catch a breaking change before a reviewer has to."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> Anything phrased as <em>\u201canother team wants to change the contract we depend on\u201d</em> is asking about consumer impact, a compatibility window, contract tests and a deprecation plan \u2014 in that order." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Design the error response for a request where two fields fail validation for different reasons, and say what makes it safe to add a third reason later." },
               { t: "note", variant: "key", html: "<strong>The dangerous change is not the one that breaks consumers \u2014 it is the one that lets them keep working while being wrong.</strong> Adding is safe, removing is loud, and quietly redefining a value is silent, which is why meaning changes are the only ones that genuinely require a version." }
@@ -550,6 +599,15 @@
                 "and write the number down where the on-call can find it."
               },
               { t: "note", variant: "trap", html: "<strong>\u201cThe client should not retry\u201d is not a design.</strong> Load balancers, proxies, mobile networks and impatient people all retry, and none of them read your documentation." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Knows that retries can cause duplicates."],
+                  ["Senior", "Places a durable idempotency key at the side-effect boundary and defines what a same-key, different-payload request does."],
+                  ["Staff", "Makes idempotency a default \u2014 a shared library, a review checklist item, a test fixture \u2014 so individual teams cannot forget it."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> Every question containing <em>timeout</em>, <em>submitted twice</em>, <em>replay</em>, or <em>at-least-once</em> is an idempotency question, whatever it appears to be about on the surface." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> A customer submits checkout twice during a timeout. Design the safe path, and say what you do when the second request has a different total." },
               { t: "note", variant: "key", html: "<strong>Idempotency is a durable record at the side-effect boundary, not a lock and not a client instruction.</strong> Get the placement and the payload check right and a retry becomes indistinguishable from a duplicate click \u2014 which is exactly the property that lets the rest of your system be at-least-once." },
@@ -604,6 +662,15 @@
                 bad: { title: "Boundary from the schema", items: ["Everything in the same database goes in one transaction", "A remote call inside the transaction \u201cfor consistency\u201d", "Nothing stated about what may be eventual"] },
                 good: { title: "Boundary from the invariant", items: ["Only what must agree is atomic", "Side effects moved outside, made idempotent", "Written down: what is immediate, what is eventual, and by how long"] }
               },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Wraps related writes in a transaction."],
+                  ["Senior", "Chooses the boundary from what must be true together, and uses an outbox or a compensation where a transaction cannot reach."],
+                  ["Staff", "Explains the customer consequence of each consistency choice to product owners, so a compensating action is designed into the journey rather than discovered in support tickets."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> The trigger is any requirement of the form <em>\u201cboth of these must happen\u201d</em>. Ask immediately whether both must happen <em>together</em>, or merely both eventually \u2014 the answers produce completely different systems." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Choose the transaction boundary for coupon redemption and justify what you deliberately left outside it." },
               { t: "note", variant: "key", html: "<strong>Ask what must be true together, and put exactly that in one transaction.</strong> Everything else becomes an event plus an idempotent consumer \u2014 which is slower to reason about but is the only version that survives a dependency being down." }
@@ -635,9 +702,75 @@
               ] },
               { t: "note", variant: "trap", html: "<strong>Snapshot tests pin shape, not behaviour.</strong> They fail on harmless formatting changes and pass while the numbers inside are wrong, which trains the team to update them without reading them." },
               { t: "note", variant: "warn", html: "<strong>Coverage is a diagnostic, not a target.</strong> Made a goal, it reliably produces tests that execute lines and assert nothing \u2014 the number goes up and the protection does not." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Writes unit and integration tests for their own changes."],
+                  ["Senior", "Chooses each test by the risk it retires, and treats hard-to-test code as design feedback."],
+                  ["Staff", "Shapes the suite so it stays fast and trusted as the team grows, and can name the risks deliberately left to production monitoring."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> When an interviewer asks what you would test, answer in risks: correctness of a rule, compatibility with a consumer, side effects on persistence, and one journey end to end. Naming the risk is the answer; the test type follows." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Pick the tests for a refund workflow that calls payment, inventory and notification, and justify each by the risk it retires." },
               { t: "note", variant: "key", html: "<strong>Every test should be traceable to a risk you can name.</strong> That single discipline replaces the coverage argument, keeps the suite fast enough to be trusted, and turns \u201cthis is hard to test\u201d into the design feedback it actually is." }
+            ]
+          },
+          {
+            id: "testing-strategy",
+            title: "Owning the team\u2019s testing strategy",
+            summary: "Choosing a test per risk is an engineer\u2019s skill. Keeping the whole suite fast, trusted and pointed at the right risks is the lead\u2019s job.",
+            minutes: 9,
+            tags: ["quality", "testing", "leadership"],
+            blocks: [
+              { t: "p", html: "<a class='inline' href='#/lld/quality/testing-design'>Tests as design feedback</a> covers choosing the right test for a risk. The lead\u2019s problem is one level up: <strong>a suite of thousands of tests written by many people over years</strong>, which is either a trusted signal that lets the team ship daily or a slow, flaky ritual everyone retries until it goes green. Which one you have is a management outcome, not an accident." },
+              { t: "table",
+                headers: ["Strategy decision", "A workable default", "Why"],
+                rows: [
+                  ["Pull-request suite time", "A budget, typically under ten minutes", "Past that, people batch changes and stop running it locally"],
+                  ["Flaky tests", "Quarantined within a day, owner named, fixed or deleted within a week", "One known-flaky test teaches everyone to ignore red"],
+                  ["Cross-team boundaries", "Consumer-driven contract tests, run in the provider\u2019s pipeline", "The provider learns it broke a consumer before merging, not after deploying"],
+                  ["End-to-end tests", "A handful of journey smoke tests, owned by named teams", "More become slow, flaky and unowned"],
+                  ["Test data", "Synthetic fixtures and factories; never production copies with personal data", "Production copies leak, drift, and make tests order-dependent"],
+                  ["Escaped defects", "Each one asks which layer should have caught it", "Turns incidents into specific gaps in the suite rather than general guilt"]
+                ]
+              },
+              { t: "h", text: "Measuring whether the strategy works" },
+              { t: "ul", items: [
+                "<strong>Change-failure rate.</strong> The share of deploys that need a fix or rollback. It is the outcome the suite exists to move.",
+                "<strong>Escaped defects by layer.</strong> Rules escaping means weak unit tests; integration escapes point at mocks standing in for real engines.",
+                "<strong>Suite time and flake rate, trended.</strong> Both creep a little every week and are only fixable when caught early.",
+                "<strong>Time to diagnose a failure.</strong> A red build that takes an hour to interpret is nearly as costly as a flaky one."
+              ] },
+              { t: "code", lang: "text", code:
+                "Testing strategy on one page\n" +
+                "\n" +
+                "BUDGET     PR suite <= 8 min; full suite <= 25 min, pre-deploy\n" +
+                "LAYERS     rules: unit | persistence: real engine in container\n" +
+                "           boundaries: consumer contracts in provider CI\n" +
+                "           journeys: 6 smoke paths, owners listed below\n" +
+                "FLAKES     auto-quarantine on 2 fails in 50 runs; owner paged\n" +
+                "           in channel; fix or delete in 5 working days\n" +
+                "DATA       factories only; no production snapshots\n" +
+                "REVIEW     monthly: change-failure rate, escapes by layer,\n" +
+                "           suite time, flake rate\n" +
+                "NOT TESTED in CI: load (weekly job), third-party sandboxes\n" +
+                "           (nightly), visual layout (manual before release)"
+              },
+              { t: "note", variant: "trap", html: "<strong>Mandating a coverage percentage is the most common way a lead degrades a suite.</strong> It rewards tests that execute lines and assert nothing, slows the suite, and moves the change-failure rate not at all. Use coverage to find untested risky code, never as a target." },
+              { t: "note", variant: "warn", html: "<strong>Automatic retries on failure hide flakiness instead of fixing it.</strong> They make the build green and the signal meaningless, and the real intermittent bug in production code is retried away along with the bad tests." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Writes good tests for their own changes and fixes the ones they break."],
+                  ["Senior", "Sets the suite time budget and flaky-test policy, and introduces contract tests at team boundaries."],
+                  ["Staff", "Runs testing as a strategy measured by change-failure rate and escapes by layer, and states which risks are deliberately left to monitoring."]
+                ]
+              },
+              { t: "cue", html: "<strong>Spotting it in a prompt.</strong> <em>\u201cOur builds are slow and flaky\u201d</em>, <em>\u201cbugs keep escaping to production\u201d</em> or <em>\u201chow do you ensure quality on your team\u201d</em> are asking for a strategy with a budget, a policy and an outcome metric \u2014 not a list of test types." },
+              { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Your pull-request suite takes 40 minutes and fails intermittently about one run in ten. Lay out the first two weeks of changes and the metric you would report a month later." },
+              { t: "note", variant: "key", html: "<strong>A suite is only worth what the team trusts it to say.</strong> Protect its speed with a budget, its signal with a flaky-test policy that has an owner and a deadline, and its aim with escaped-defect reviews \u2014 then report change-failure rate, which is the number the suite exists to move." }
             ]
           },
           {
@@ -680,6 +813,15 @@
                 "NOT DOING  The billing engine. Out of scope, deliberately."
               },
               { t: "note", variant: "trap", html: "<strong>A refactor that changes behaviour and gets called a refactor destroys the word for everyone.</strong> If behaviour moves, it is a change, it needs a flag, and it needs to be reviewed as one." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Refactors in small steps with tests."],
+                  ["Senior", "Characterises first, ships behind a flag where behaviour could shift, and funds the work with a trend and a blocked commitment."],
+                  ["Staff", "Runs refactoring as a portfolio against measured cycle-time and defect data, and stops a half-done refactor deliberately when the value runs out."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> The trigger for this framing is any version of <em>\u201cwhy should we spend a sprint on tech debt\u201d</em>. Answer with a trend, a blocked commitment, a slice and a metric \u2014 never with maintainability as an end in itself." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Order a safe refactor of a legacy rule engine, then make the two-minute case for it to a product manager who wants features." },
               { t: "note", variant: "key", html: "<strong>Refactoring is funded by risk and cycle time, never by cleanliness.</strong> Characterize first so you can prove you changed nothing, ship in small reverts-friendly steps, and state up front the number that will show it worked \u2014 including the point at which you would stop." },
@@ -722,7 +864,28 @@
                 "<strong>Send style to a linter.</strong> Every human comment spent on formatting is one not spent on a real risk.",
                 "<strong>Approve with the nits noted.</strong> Blocking a correct change on preferences is how review becomes a bottleneck people route around."
               ] },
+              { t: "h", text: "Standards a lead sets for the team" },
+              { t: "table",
+                headers: ["Standard", "A workable default", "What it prevents"],
+                rows: [
+                  ["First-response time", "Within one working day; same day for anything blocking a release", "Changes ageing in a queue until the author context-switches away"],
+                  ["Change size", "Aim for a few hundred lines; split anything larger by behaviour", "Rubber-stamp approvals on diffs nobody can hold in their head"],
+                  ["Who must review", "A second reviewer on money, auth, data deletion and migrations; one elsewhere", "Uniform ceremony that over-reviews trivia and under-reviews the risky paths"],
+                  ["Author\u2019s description", "What changed, why, how it was tested, how to roll it back", "Reviewers reverse-engineering intent from the diff"],
+                  ["Disagreement path", "Two rounds in comments, then a short call, then the code owner decides", "Week-long comment threads that end in whoever gives up first"]
+                ]
+              },
+              { t: "p", html: "Check the standards against outcomes every quarter: review turnaround, change size, and how many escaped defects a reviewer could plausibly have caught. A review process that never catches anything and always slows delivery needs changing, not defending." },
               { t: "note", variant: "trap", html: "<strong>The reviewer who leaves fifty comments is often the least effective one on the team.</strong> Volume signals thoroughness and delivers noise; the author cannot find the two that mattered, and neither can the next reviewer." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Leaves accurate, polite comments."],
+                  ["Senior", "Tiers comments so blocking is unmistakable, keeps the blocking set small, and teaches a reusable principle."],
+                  ["Staff", "Sets the team\u2019s review standards \u2014 turnaround, change size, who must review what \u2014 and checks whether review is catching defects or only slowing delivery."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> When you are asked how you would handle a disagreement in review, the expected shape is: separate correctness from preference, name the criteria, time-box the missing evidence, and record what was decided." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Rewrite \u201cthis is too complex, please simplify\u201d into a comment that names a defect and teaches a principle the author can reuse." },
               { t: "note", variant: "key", html: "<strong>A comment earns its place by naming a specific risk and the principle behind the fix.</strong> Tier them so blocking is unmistakable, keep the blocking set small, and hand formatting to a tool \u2014 that is what makes review a teaching mechanism instead of a toll gate." }
@@ -768,9 +931,72 @@
                 "    the interface you guess now will be the wrong shape."
               },
               { t: "note", variant: "trap", html: "<strong>An interface with one implementation and no named second is a guess wearing a design pattern.</strong> It costs indirection today and usually turns out to be the wrong seam when the real second case arrives." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Knows the common patterns and when they apply."],
+                  ["Senior", "Abstracts only on named change pressure and can argue the concrete version honestly."],
+                  ["Staff", "Removes abstractions that never earned their keep, and makes that removal socially acceptable on the team."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> The honest test is whether you can finish this sentence with something specific: <em>\u201cthis exists so that when ___ changes, only ___ has to move.\u201d</em> If either blank is vague, write the simple version." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Design an extension point for multiple payout rules, then argue the opposite case \u2014 why a single function might be the better answer this quarter." },
               { t: "note", variant: "key", html: "<strong>Abstract on named pressure, not on imagination.</strong> The asymmetry is what decides it: too little structure is visible and cheap to fix, too much is invisible and socially expensive to remove \u2014 so when in doubt, ship the concrete version." }
+            ]
+          },
+          {
+            id: "api-governance",
+            title: "API governance across many teams",
+            summary: "Contracts survive other teams when compatibility is checked by machines and human review is reserved for the APIs where mistakes reach customers.",
+            minutes: 9,
+            tags: ["leadership", "api", "governance"],
+            blocks: [
+              { t: "p", html: "<a class='inline' href='#/lld/modeling/api-contracts'>Contracts that survive other teams</a> covers designing one API well. Governance is the organisational version: <strong>forty teams publishing hundreds of endpoints, with consistent conventions and no surprise breakages</strong>, without creating a review board that every change has to queue for." },
+              { t: "table",
+                headers: ["Audience tier", "Examples", "Governance it needs"],
+                rows: [
+                  ["Team-internal", "Calls between a team\u2019s own services", "Linting only; the team can change both sides together"],
+                  ["Internal shared", "A platform or domain API other teams consume", "Style guide, breaking-change detection in CI, a consumer list and a deprecation window"],
+                  ["Partner", "Integrations with named external organisations", "All of the above, plus human design review and contractual notice periods"],
+                  ["Public", "Anything a stranger can build against", "All of the above, plus versioning policy, a changelog and a long support window"]
+                ]
+              },
+              { t: "h", text: "Mechanisms, cheapest first" },
+              { t: "ul", items: [
+                "<strong>A short style guide, enforced by a linter.</strong> Naming, pagination, error shape, idempotency headers. If a rule cannot be linted, question whether it needs to be a rule.",
+                "<strong>Breaking-change detection on every change.</strong> Compare the new specification against the published one in CI and fail on removed fields, narrowed types or new required parameters.",
+                "<strong>An ownership and consumer registry.</strong> Every API has an owning team and a list of known consumers, which is what makes a deprecation possible at all.",
+                "<strong>A deprecation policy with dates.</strong> Notice period, brownout schedule and removal date per tier \u2014 so retiring an endpoint is a process, not a negotiation.",
+                "<strong>Human review where the audience is external.</strong> Partner and public APIs are one-way doors; internal ones mostly are not."
+              ] },
+              { t: "code", lang: "text", code:
+                "API change policy, internal shared tier\n" +
+                "\n" +
+                "ALLOWED     add optional field, add endpoint, add enum value\n" +
+                "            (consumers must ignore unknown values)\n" +
+                "BLOCKED     remove or rename field, narrow a type, add a\n" +
+                "  IN CI     required parameter, change error semantics\n" +
+                "BREAKING    new version alongside old; notify every\n" +
+                "  CHANGE    registered consumer; 90-day window; brownouts\n" +
+                "            at day 60 and 75; remove at 90\n" +
+                "EXCEPTIONS  platform lead approves, in writing, with a\n" +
+                "            named owner for the migration"
+              },
+              { t: "note", variant: "trap", html: "<strong>A central API board that approves every endpoint becomes the slowest part of every delivery.</strong> Teams respond by tunnelling new behaviour through existing endpoints or skipping review altogether, which produces exactly the inconsistency the board was created to prevent. Automate the mechanical checks; spend humans on the external tiers." },
+              { t: "p", html: "For the design mechanics \u2014 versioning schemes, schema evolution, designing for real clients \u2014 Blueprint covers <a class='inline' href='../hld-lld-academy/index.html#/hld/architecture/api-schema-evolution'>API versioning and schema evolution</a> and <a class='inline' href='../hld-lld-academy/index.html#/hld/api/api-design-real-clients'>API design for real clients</a>. Running the removal itself is covered in <a class='inline' href='#/strategy/execution/deprecations'>deprecations people actually finish</a>." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Follows the API style guide and avoids breaking changes in their own endpoints."],
+                  ["Senior", "Adds breaking-change detection and a consumer list for their team\u2019s shared APIs, and runs deprecations to a date."],
+                  ["Staff", "Designs the tiered governance model for the organisation, automates the mechanical checks, and keeps human review where it prevents external harm."]
+                ]
+              },
+              { t: "cue", html: "<strong>Spotting it in a prompt.</strong> <em>\u201cTeams keep breaking each other\u2019s integrations\u201d</em>, <em>\u201cevery team designs APIs differently\u201d</em> or <em>\u201cour API review is a bottleneck\u201d</em> is asking for tiering and automation, not for a stricter board." },
+              { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> You inherit an organisation where a removed field broke three consumers last month. Describe the two mechanisms you would put in place first, and what you would deliberately not require human review for." },
+              { t: "note", variant: "key", html: "<strong>Govern by audience and automate the mechanical rules.</strong> Breaking-change detection, a consumer registry and a dated deprecation policy prevent most breakages without a queue; human design review is worth its cost only where the consumer is outside your organisation." }
             ]
           },
           {
@@ -801,6 +1027,15 @@
               { t: "compare",
                 bad: { title: "Unusable gates", items: ["\u201cCode quality is good\u201d", "\u201cNo known bugs\u201d", "\u201cCoverage above 80%\u201d", "\u201cThe team feels ready\u201d"] },
                 good: { title: "Checkable gates", items: ["\u201cEvery invariant has a failing-first test\u201d", "\u201cRollback rehearsed; 6 minutes, recorded\u201d", "\u201cAlert fires on checkout success rate, verified in staging\u201d", "\u201cData-path review signed by a named reviewer\u201d"] }
+              },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Follows the release checklist."],
+                  ["Senior", "Writes gates a stranger could verify, with named owners and a written waiver path."],
+                  ["Staff", "Keeps the list short by retiring gates that never catch anything, and uses escaped defects to decide which gate is missing."]
+                ]
               },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> Whenever you hear <em>\u201care we ready to launch\u201d</em>, the useful reply is a short list of checkable conditions with owners \u2014 plus which ones are being waived, and by whom." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Create five readiness gates for a new approval-workflow service, each phrased so a stranger could verify it." },

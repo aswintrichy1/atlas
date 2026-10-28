@@ -827,5 +827,68 @@
     render();
   };
 
+  Widgets.ruleplanner = function (mount) {
+    shell(mount, "rule lab", "One hypothesis, three representations",
+      "Choose a layer to see what must remain stable when portable logic becomes a SIEM query.");
+    const data = {
+      hypothesis: ["Behavior", "A privileged group membership changes outside the approved identity workflow."],
+      sigma: ["Portable rule", "Select identity group-change events where the target group is classified privileged."],
+      kql: ["KQL implementation", "Filter the normalized identity audit table, project actor/target/device, then enrich with risk in a bounded window."],
+      spl: ["SPL implementation", "Search the correct identity index and sourcetype, normalize fields, then aggregate by actor, target group and source device."],
+      test: ["Test contract", "A synthetic approved change must not match; an unapproved privileged change must match."]
+    };
+    const stage = h("div", { class: "w-stage" });
+    const paint = (id) => {
+      stage.innerHTML = "";
+      stage.appendChild(h("h4", {}, data[id][0]));
+      stage.appendChild(h("p", {}, data[id][1]));
+    };
+    mount.appendChild(seg([["Hypothesis", "hypothesis"], ["Sigma", "sigma"], ["KQL", "kql"], ["SPL", "spl"], ["Tests", "test"]], "hypothesis", paint));
+    mount.appendChild(stage);
+    paint("hypothesis");
+  };
+
+  Widgets.addefense = function (mount) {
+    shell(mount, "identity path", "Break the directory attack path",
+      "Choose a control point. This is a defensive model: it shows which relationship is removed and which evidence validates the change.");
+    const data = {
+      endpoint: ["Harden admin endpoint", "Privileged credentials no longer appear on lower-trust workstations.", "Validate privileged logons by device tier and EDR health."],
+      service: ["Rotate managed service identity", "Long-lived, human-chosen service passwords leave the path.", "Validate owner, automatic rotation and service continuity."],
+      delegation: ["Remove unnecessary delegation", "A service can no longer impersonate users to unrelated services.", "Review directory configuration and test the required application flow."],
+      group: ["Expire privileged membership", "The standing group edge disappears after the approved window.", "Confirm directory audit, ticket closure and effective access."],
+      detect: ["Alert on path creation", "New privileged edges become visible before they are used.", "Test with a synthetic directory change in a lab tenant."]
+    };
+    const stage = h("div", { class: "w-stage" });
+    const paint = (id) => {
+      const x = data[id]; stage.innerHTML = "";
+      stage.appendChild(h("h4", {}, x[0]));
+      stage.appendChild(h("p", {}, x[1]));
+      stage.appendChild(h("p", { class: "widget-desc" }, x[2]));
+    };
+    mount.appendChild(seg([["Admin endpoint", "endpoint"], ["Service identity", "service"], ["Delegation", "delegation"], ["Group", "group"], ["Detection", "detect"]], "endpoint", paint));
+    mount.appendChild(stage);
+    paint("endpoint");
+  };
+
+  Widgets.cloudpath = function (mount) {
+    shell(mount, "cloud graph", "Which edge breaks the privilege path?",
+      "Inspect a fictional path from a CI identity to sensitive data and choose the narrowest durable control.");
+    const paths = {
+      trust: ["CI identity → assumable role → sensitive store", "Restrict role trust to the exact repository, workflow, ref and approved environment."],
+      passrole: ["Developer → pass role → new workload → data", "Limit pass-role to approved service/role pairs and narrow the workload role."],
+      resource: ["External principal → resource policy → archive", "Remove the external principal and add organization/account conditions."],
+      metadata: ["Compromised workload → metadata identity → secrets", "Use one narrow workload role, harden metadata access and remove secret-list permissions."]
+    };
+    const stage = h("div", { class: "w-stage" });
+    const paint = (id) => {
+      stage.innerHTML = "";
+      stage.appendChild(h("p", { class: "anl-q" }, paths[id][0]));
+      stage.appendChild(h("p", {}, h("b", {}, "Break it: "), paths[id][1]));
+    };
+    mount.appendChild(seg([["Trust", "trust"], ["Pass role", "passrole"], ["Resource policy", "resource"], ["Metadata", "metadata"]], "trust", paint));
+    mount.appendChild(stage);
+    paint("trust");
+  };
+
   window.Widgets = Object.assign(window.Widgets || {}, Widgets);
 })();

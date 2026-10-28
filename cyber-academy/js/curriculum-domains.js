@@ -240,6 +240,29 @@ window.TRACKS.domains = {
           ]
         },
         {
+          id: "cloud-iam-paths",
+          title: "Cloud IAM privilege paths and graph-based defense",
+          summary: "Effective privilege emerges from identities, policies, resources, trust and sessions connected into paths.",
+          minutes: 12,
+          tags: ["advanced", "cloud-iam", "privilege-path", "ciem", "wiz"],
+          blocks: [
+            { t: "p", html: "Cloud authorization is a graph, not one policy document. A principal can inherit permissions from groups and roles, assume another role through trust, invoke a workload with its own identity, alter a resource policy, or pass a role to a service that acts on its behalf. The effective path is what matters." },
+            { t: "table", headers: ["Edge", "Risk question", "Control"], rows: [
+              ["Identity → role", "Who may assume it, under which conditions?", "Exact trust, MFA/device context and short sessions"],
+              ["Role → action", "Can wildcards or broad resources reach sensitive data?", "Action/resource scoping and permission boundaries"],
+              ["Identity → pass role → service", "Can a modest principal create a more privileged workload?", "Restrict pass-role and allowed service/role combinations"],
+              ["Resource policy → principal", "Does a bucket, key, queue or secret trust an external identity?", "Review both identity and resource policies"],
+              ["Workload → metadata identity", "What does code inherit if the workload is compromised?", "One narrow workload identity, hardened metadata access"],
+              ["Privilege → data/exposure", "Does the path actually reach a sensitive, exposed asset?", "Prioritize connected toxic combinations"]
+            ] },
+            { t: "widget", id: "cloudpath" },
+            { t: "p", html: "Start investigations from both ends: a risky identity and a crown-jewel resource. Follow effective permissions, trust conditions, recent sessions and configuration changes. Remove the shortest unnecessary edge first, then verify no alternate path remains." },
+            { t: "p", html: "Wiz is useful here because its Security Graph connects identities, effective entitlements, workloads, exposure, vulnerabilities and sensitive data into attack paths. The Forge academy contains the operational Wiz deep dive; this is a prose cross-reference, not a cross-app link." },
+            { t: "quiz", id: "domains-cloud-iam" },
+            { t: "note", variant: "key", html: "<strong>Privilege is the reachable path through the graph, not the statement attached to the identity you started with.</strong>" }
+          ]
+        },
+        {
           id: "containers-devsecops",
           title: "Containers & DevSecOps",
           summary: "Ship fast without shipping holes: securing images, pipelines, and infrastructure as code by building security in.",

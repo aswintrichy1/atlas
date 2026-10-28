@@ -460,6 +460,9 @@
     { front: "SAML assertion", track: "core", back: "A signed XML statement from an identity provider to a service provider, commonly used for enterprise SSO. It must be checked for signature, issuer, audience, recipient, time bounds and replay." },
     { front: "Refresh token risk", track: "core", back: "A refresh token can mint new access tokens over time, so theft can persist beyond a short access-token lifetime. Rotate, bind, protect and revoke refresh tokens on logout or suspicious activity." },
     { front: "MFA reset abuse", track: "core", back: "An attacker bypasses strong MFA by convincing support or recovery workflows to reset it. Defend with verified channels, step-up checks, cooldowns, user alerts and approval logs." },
+    { front: "OAuth state vs OIDC nonce", track: "core", back: "State binds the authorization response to the browser flow and prevents CSRF/mix-up; nonce binds the ID token to the authentication request and reduces replay." },
+    { front: "PKCE", track: "core", back: "Proof Key for Code Exchange binds an authorization code to a one-time verifier held by the client, so an intercepted code cannot be redeemed alone." },
+    { front: "SAML signed-element binding", track: "core", back: "The application must consume the exact assertion element whose signature was validated, while checking issuer, audience, recipient, time and replay id." },
 
     /* ---- crypto ---- */
     { front: "Symmetric encryption", track: "crypto", back: "Encryption where the same secret key both encrypts and decrypts. It is fast and ideal for bulk data, but the key must be shared securely in advance." },
@@ -526,6 +529,10 @@
     { front: "Immutable backup", track: "defense", back: "A backup copy protected from modification or deletion for a defined period, giving ransomware response a recovery path even if production credentials are compromised." },
     { front: "Restore test", track: "defense", back: "A planned exercise that restores systems or data from backup and measures whether the process meets the required RTO, RPO and validation checks." },
     { front: "Crisis communications", track: "defense", back: "Pre-planned messages, owners and trusted channels for informing employees, customers, regulators, partners and executives during an incident when normal tools may be unavailable." },
+    { front: "Kerberos TGT vs service ticket", track: "defense", back: "A TGT lets a principal request tickets from the KDC; a service ticket presents that identity to one named service. Both need bounded lifetime and protected endpoints." },
+    { front: "AD tier zero", track: "defense", back: "Directory controllers, identity synchronization, certificate services and privileged access systems whose compromise grants control over the identity plane." },
+    { front: "Sigma", track: "defense", back: "A portable detection-rule format describing log source, selections and conditions. Backend KQL or SPL still needs schema-aware implementation and tests." },
+    { front: "Detection rule CI", track: "defense", back: "Schema linting, should-fire and should-not-fire fixtures, backend compilation, safe replay, peer review and progressive release for detection logic." },
 
     /* ---- offensive ---- */
     { front: "Reconnaissance", track: "offensive", back: "The information-gathering phase of an attack. Passive recon uses public sources without touching the target; active recon probes it directly and risks detection." },
@@ -564,6 +571,8 @@
     { front: "Network policy", track: "domains", back: "A Kubernetes segmentation control that limits which pods may communicate, replacing the dangerous default of broad pod-to-pod reachability." },
     { front: "Serverless invocation permission", track: "domains", back: "The rule that decides which event sources can trigger a function. It must be paired with a narrow runtime role and input validation." },
     { front: "Cloud guardrail", track: "domains", back: "A preventive or detective policy that continuously blocks or flags forbidden cloud configurations such as public storage, privileged pods or unencrypted data." },
+    { front: "Cloud IAM privilege path", track: "domains", back: "A chain of trust, group, policy, resource, pass-role or workload edges that gives a principal effective access beyond its direct policy." },
+    { front: "Pass-role risk", track: "domains", back: "A principal can configure a cloud service to run with another role. Restrict which roles may be passed and which services may receive them." },
     { front: "Data retention", track: "domains", back: "Rules for how long data is kept based on business, legal, safety and privacy needs, followed by provable disposal when the data is no longer required." },
     { front: "DLP", track: "domains", back: "Data Loss Prevention controls that detect or restrict sensitive data leaving expected boundaries through email, file sharing, endpoints, SaaS exports or cloud storage." },
     { front: "Key ownership", track: "domains", back: "Clear accountability for who can use, rotate and administer encryption keys. Key administrators often have practical power over the protected data." },

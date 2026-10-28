@@ -1,0 +1,16 @@
+{
+  "name": "Synapse · The ML System Design Atlas",
+  "short_name": "Synapse",
+  "description": "An interactive, fully-offline atlas for classical ML system design: metrics and experiments, data and features, training at scale, MLOps, search, ranking and recommendations, responsible ML, and interview problem breakdowns.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

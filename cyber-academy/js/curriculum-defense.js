@@ -201,6 +201,166 @@ window.TRACKS.defense = {
             { t: "note", variant: "key", html: "<strong>You do not have to catch the first move.</strong> That is the whole reason for staging an intrusion: the callback to command and control, the reuse of a credential somewhere it has never been used, the bulk read that precedes exfiltration \u2014 each is another link, and the later ones are harder for an attacker to avoid than the initial click. Build detection on the assumption that delivery already worked, because a defense that only tries to stop step one gets exactly one chance to be right." },
             { t: "quiz", id: "defense-detect" }
           ]
+        },
+        {
+          id: "detection-engineering",
+          title: "Detection engineering: from case study to rule",
+          summary: "Turn painful incidents into durable detections, tests, false-positive notes and analyst runbooks.",
+          minutes: 11,
+          tags: ["practitioner", "detection", "soc", "rule-engineering"],
+          blocks: [
+            { t: "p", html: "A case study is useful only if it changes what you do. <strong>Detection engineering</strong> converts attacker behavior into a maintained detection: data source, logic, severity, triage steps, false-positive notes and tests." },
+            { t: "ol", items: [
+              "<strong>Pick behavior</strong> high on the Pyramid of Pain: process spawning, credential reset, unusual egress or privilege change.",
+              "<strong>Confirm telemetry</strong>: which log source proves it, and is it retained long enough?",
+              "<strong>Write logic</strong>: start broad, then tune with known-good examples.",
+              "<strong>Add a runbook</strong>: what should an analyst check in the first five minutes?",
+              "<strong>Test and review</strong>: simulate safe fixtures that should and should not match; track false positives."
+            ] },
+            { t: "h", text: "The detection card" },
+            { t: "table", headers: ["Field", "What to write"], rows: [
+              ["Hypothesis", "If an attacker is using this technique, what behavior should appear?"],
+              ["Telemetry source", "Which endpoint, identity, proxy, DNS or cloud event proves it?"],
+              ["Plain-language logic", "Which events, thresholds, joins, time windows and exclusions?"],
+              ["False positives", "Which admin tasks, automation or maintenance can look similar?"],
+              ["Runbook", "First five checks, evidence, escalation and containment trigger"],
+              ["Test cases", "One should fire, one should not and one known-benign edge case"]
+            ] },
+            { t: "p", html: "Use the builder below to assemble a complete detection card for a fictional identity or endpoint scenario. The output stays in plain language so peers can challenge the hypothesis before anyone writes SIEM syntax." },
+            { t: "widget", id: "detectioncard" },
+            { t: "quiz", id: "threats-detection" },
+            { t: "note", variant: "key", html: "Every incident should leave behind at least one maintained control: a detection, a blocked path, a patch SLA, a runbook or an architecture change." }
+          ]
+        },
+        {
+          id: "sigma-kql-spl",
+          title: "Portable detection logic: Sigma, KQL and SPL",
+          summary: "Express one behavior clearly, then implement it against the fields and time model of each SIEM.",
+          minutes: 12,
+          tags: ["advanced", "sigma", "kql", "spl", "siem"],
+          blocks: [
+            { t: "p", html: "<strong>Sigma</strong> is a portable rule format for log detections; <strong>KQL</strong> and <strong>SPL</strong> are query languages used by Microsoft and Splunk ecosystems. Translation is not mechanical: field names, event semantics, joins and ingestion delay differ by data source." },
+            { t: "table", headers: ["Layer", "Question", "Example"], rows: [
+              ["Hypothesis", "What attacker behavior should be visible?", "A new privileged group member is followed by access from a new device"],
+              ["Sigma", "What product-neutral event selection and condition describe it?", "Identity group-change category plus risk filters"],
+              ["KQL / SPL", "How do local tables, indexes and fields implement it?", "Normalize actor, target, group, device and event time"],
+              ["Runbook", "What evidence makes this benign or urgent?", "Change ticket, approver, source device, follow-on actions"]
+            ] },
+            { t: "code", lang: "yaml", code:
+              "title: Privileged group membership changed\n" +
+              "logsource: { category: iam }\n" +
+              "detection:\n" +
+              "  selection: { action: group_member_added, target_group_class: privileged }\n" +
+              "  condition: selection\n" +
+              "falsepositives: [approved identity administration]\n" +
+              "level: high" },
+            { t: "p", html: "A KQL implementation might filter an identity audit table, project normalized fields and join device risk in a bounded time window. An SPL implementation searches the correct index/sourcetype, normalizes with field aliases and uses stats or transaction logic carefully. Preserve the hypothesis when syntax changes." },
+            { t: "widget", id: "ruleplanner" },
+            { t: "note", variant: "warn", html: "Do not deploy an auto-translated query directly. Verify field coverage, null behavior, time windows and expected volume against safe fixtures and representative benign telemetry." },
+            { t: "note", variant: "key", html: "<strong>Portability lives in the hypothesis and tests, not in identical query text.</strong>" }
+          ]
+        },
+        {
+          id: "detection-rule-ci",
+          title: "Detection rule CI: lint, fixtures, replay, review and release",
+          summary: "Treat rules as versioned products with deterministic tests and measurable production health.",
+          minutes: 11,
+          tags: ["advanced", "detection-as-code", "ci", "testing", "rule-lifecycle"],
+          blocks: [
+            { t: "ol", items: [
+              "<strong>Lint</strong> schema, ids, required metadata, severity and ATT&CK mappings.",
+              "<strong>Unit test</strong> synthetic event fixtures: should-fire, should-not-fire and known-benign edge cases.",
+              "<strong>Compile</strong> Sigma or templates into the target backend and reject unsupported constructs.",
+              "<strong>Replay</strong> against a privacy-safe sample or staging SIEM to estimate volume and cost.",
+              "<strong>Peer review</strong> logic, data dependencies, runbook and containment authority.",
+              "<strong>Release progressively</strong>: shadow, alert-only, tuned production; monitor misses, noise and data-source health."
+            ] },
+            { t: "table", headers: ["CI check", "Failure means"], rows: [
+              ["Schema and unique id", "The rule cannot be managed reliably"],
+              ["Should-fire fixture", "A known behavior is no longer detected"],
+              ["Benign fixture", "A normal workflow would page analysts"],
+              ["Field contract", "The source stopped sending required normalized fields"],
+              ["Volume budget", "The query is too broad or expensive"],
+              ["Runbook link / owner", "An alert has no accountable response path"]
+            ] },
+            { t: "p", html: "Safe fixtures describe fictional events and expected matches; they do not execute attacker procedures. Keep sensitive production logs out of public rule repositories, and test containment automation separately with approvals and dry runs." },
+            { t: "quiz", id: "defense-rule-engineering" },
+            { t: "note", variant: "key", html: "<strong>A detection without tests is a belief; a detection without an owner is abandoned code.</strong>" }
+          ]
+        }
+      ]
+    },
+    /* ============================ IDENTITY DEFENSE ============================ */
+    {
+      id: "identity-defense",
+      name: "AD & Kerberos Defense",
+      icon: "lock",
+      lessons: [
+        {
+          id: "ad-kerberos-model",
+          title: "Active Directory and Kerberos: the defender's model",
+          summary: "Understand domains, controllers, tickets and trust so the signals and hardening choices make sense.",
+          minutes: 11,
+          tags: ["practitioner", "active-directory", "kerberos", "identity"],
+          blocks: [
+            { t: "p", html: "<strong>Active Directory (AD)</strong> stores enterprise identities, computers, groups, policies and trusts. <strong>Kerberos</strong> is its primary network authentication protocol: the Key Distribution Center on a domain controller issues a ticket-granting ticket (TGT), then service tickets for specific services." },
+            { t: "table", headers: ["Component", "Role", "Defensive concern"], rows: [
+              ["Domain controller / KDC", "Directory plus ticket issuer", "Tier-zero asset; isolate administration and monitor every change"],
+              ["TGT", "Lets a principal request service tickets", "Short lifetime, protected endpoints, revoke by account action and key rotation when required"],
+              ["Service ticket", "Presents identity to one service", "Service-account key strength, scope and anomalous request patterns"],
+              ["Group / delegation", "Translates identity into privilege", "Nested privilege, stale membership and risky delegation paths"],
+              ["Trust", "Allows identity across domains or forests", "Direction, filtering and which identities may cross"]
+            ] },
+            { t: "p", html: "Kerberos avoids sending the password to each service, but tickets remain bearer-like evidence: a stolen valid ticket can be replayed until it expires or the relevant account keys are rotated. Endpoint protection, time synchronization and narrow privilege still matter." },
+            { t: "note", variant: "key", html: "<strong>The directory is both the map and the authority.</strong> Defend the identities and relationships that can change it, not only the servers that store it." }
+          ]
+        },
+        {
+          id: "ad-attack-paths",
+          title: "AD and Kerberos attack paths: defensive recognition",
+          summary: "Recognize ticket abuse, credential exposure, delegation and privilege relationships without reproducing exploit procedures.",
+          minutes: 12,
+          tags: ["advanced", "active-directory", "attack-path", "credential-theft", "defensive"],
+          blocks: [
+            { t: "note", variant: "warn", html: "This lesson is defensive only. It names attack classes so defenders can harden and detect them; it does not provide commands, payloads, credential material or exploitation steps." },
+            { t: "table", headers: ["Attack class", "What it abuses", "Defender signals"], rows: [
+              ["Password or hash reuse", "A reusable authenticator from one host reaches another", "New device, unusual logon type, rapid lateral authentication, privileged logon after endpoint alert"],
+              ["Service-ticket cracking pressure", "Weak service-account passwords and broadly discoverable service names", "Unusual bursts of service-ticket requests, old passwords, high-value service principals"],
+              ["TGT or service-ticket theft", "Tickets copied from a compromised endpoint", "Ticket use from an unexpected host, impossible sequence, endpoint credential-access telemetry"],
+              ["Forged-ticket persistence", "Compromise of highly sensitive domain or service keys", "Ticket anomalies plus directory compromise evidence; requires key-rotation incident runbook"],
+              ["Delegation abuse", "A service may impersonate users to other services", "Delegation setting changes, unusual service-to-service identity chains"],
+              ["Privilege-path chaining", "Group nesting, ACLs, sessions and local admin relationships", "Graph path to tier zero, newly added edge, high-risk session on lower-tier host"]
+            ] },
+            { t: "widget", id: "addefense" },
+            { t: "p", html: "Investigate the sequence, not one event: source endpoint risk, identity history, ticket requests, target systems, group changes and subsequent data access. Preserve domain-controller and endpoint evidence before rotating the keys that invalidate it." },
+            { t: "note", variant: "key", html: "<strong>Most directory compromise is a path, not a single magic ticket.</strong> Break one reusable credential, privileged relationship or unmanaged endpoint edge and the path stops." }
+          ]
+        },
+        {
+          id: "ad-hardening-detection",
+          title: "AD hardening and detection operations",
+          summary: "Tier administration, reduce reusable credentials, govern service accounts and test identity detections.",
+          minutes: 12,
+          tags: ["advanced", "active-directory", "hardening", "tiering", "detection"],
+          blocks: [
+            { t: "ul", items: [
+              "Treat domain controllers, directory synchronization, certificate services and privileged access systems as tier zero.",
+              "Use dedicated privileged admin accounts and hardened admin workstations; never browse email or the web in a tier-zero session.",
+              "Prefer managed service accounts with long, automatically rotated keys; inventory every service principal and owner.",
+              "Remove legacy protocols where possible, require modern signing/channel protections and keep domain-controller clocks and audit policy healthy.",
+              "Minimize delegation, local administrator reuse and standing privileged groups; expire emergency membership.",
+              "Continuously graph effective privilege and remediate the shortest paths to tier zero."
+            ] },
+            { t: "table", headers: ["Detection hypothesis", "Telemetry"], rows: [
+              ["Privileged group changed outside approved workflow", "Directory audit plus change ticket and actor device"],
+              ["Service-ticket request pattern departs from the account baseline", "KDC ticket events, service principal and source host"],
+              ["Privileged identity authenticates from a lower-trust workstation", "Domain logon events, device tier and EDR risk"],
+              ["Delegation or trust configuration changed", "Directory configuration audit and owner approval"],
+              ["Directory replication behavior appears from a non-controller identity", "Directory-service events and network source"]
+            ] },
+            { t: "quiz", id: "defense-ad" },
+            { t: "note", variant: "key", html: "<strong>Protect tier zero by controlling where its identities may appear, then alert whenever reality violates that map.</strong>" }
+          ]
         }
       ]
     },

@@ -404,37 +404,14 @@ window.TRACKS.threats = {
             { t: "note", variant: "key", html: "<strong>Attackers rarely defeat the strongest control; they take the sanctioned path that avoids it.</strong> Recovery exists because people genuinely lose devices, so it must succeed for someone who cannot pass the normal check \u2014 which makes it, by construction, the weakest approved route into an account and the one worth the most scrutiny. Hold a reset to the same bar as a login: verified evidence, helpdesk privileges separated from account ownership, an alert to the real user, and an audit trail that names who approved it." }
           ]
         },
-        {
-          id: "detection-engineering",
-          title: "Detection engineering: from case study to rule",
-          summary: "Turn painful incidents into durable detections, tests, false-positive notes and analyst runbooks.",
-          minutes: 11,
-          tags: ["detection", "soc", "p1"],
-          blocks: [
-            { t: "p", html: "A case study is useful only if it changes what you do. <strong>Detection engineering</strong> converts attacker behavior into a maintained detection: data source, logic, severity, triage steps, false-positive notes and tests." },
-            { t: "ol", items: [
-              "<strong>Pick behavior</strong> high on the Pyramid of Pain: process spawning, credential reset, unusual egress, privilege change.",
-              "<strong>Confirm telemetry</strong>: which log source proves it, and is it retained long enough?",
-              "<strong>Write logic</strong>: start broad, then tune with known-good examples.",
-              "<strong>Add a runbook</strong>: what should an analyst check in the first five minutes?",
-              "<strong>Test and review</strong>: simulate benign and malicious-looking events; track false positives."
-            ] },
-            { t: "h", text: "The detection card" },
-            { t: "p", html: "A good rule is a small product. It has a clear <strong>hypothesis</strong>, a known telemetry source, logic an analyst can explain in plain language, expected false positives, and a runbook that turns an alert into a decision." },
-            { t: "table", headers: ["Field", "What to write"], rows: [
-              ["Hypothesis", "If an attacker is using this technique, what behavior should appear?"],
-              ["Telemetry source", "Which event proves it: endpoint process events, identity audit logs, proxy, DNS, cloud activity, EDR alerts?"],
-              ["Plain-language rule logic", "Describe the condition without query syntax: which events, thresholds, joins, time windows and exclusions?"],
-              ["False positives", "Which admin tasks, automation, deployments or maintenance windows can look similar?"],
-              ["Runbook", "First five checks, evidence to preserve, escalation path and containment trigger."],
-              ["Test cases", "At least one should fire, one should not fire, and one known-benign edge case for tuning."]
-            ] },
-            { t: "p", html: "Use the builder below to assemble a complete detection card for a fictional identity or endpoint scenario. The output is deliberately plain language so it can be reviewed before anyone writes SIEM syntax." },
-            { t: "widget", id: "detectioncard" },
-            { t: "note", variant: "key", html: "Every incident should leave behind at least one new or improved control: a detection, a blocked path, a patch SLA, a runbook or an architecture change." },
-            { t: "quiz", id: "threats-detection" }
-          ]
-        },
+      ]
+    },
+    /* ============================ CAPSTONES ============================ */
+    {
+      id: "capstones",
+      name: "Capstones",
+      icon: "map",
+      lessons: [
         {
           id: "breach-capstone",
           title: "Capstone: investigate a breach end to end",

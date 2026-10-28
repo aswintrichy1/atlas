@@ -2,7 +2,7 @@
    TECHLEAD · HLD Leadership track  (curriculum + quizzes + widgets)
 
    Self-contained: registers window.TRACKS.hld, its hld-* quizzes, and the
-   five widgets those lessons mount.
+   six widgets those lessons mount.
    ===================================================================== */
 (function () {
   "use strict";
@@ -438,6 +438,105 @@
     paint();
   };
 
+  /* ---------------------------------------------------------------
+     6. MULTI-REGION PICKER
+     Choose a topology against a downtime cost and a recovery target,
+     and see whether it meets the target and whether it pays for
+     itself on expected loss.
+     --------------------------------------------------------------- */
+  Widgets["tm-region-picker"] = function (mount) {
+    shell(mount, "trade-off", "Multi-region picker",
+      "Pick a topology, what an hour of downtime costs, the recovery target you have promised, and whether failover is rehearsed. Illustrative numbers: 600k a year of base infrastructure, and a region-level event roughly once every three years lasting eight hours.");
+
+    var BASE = 600000, EVENTS = 0.3, OUTAGE = 8;
+    var TOPO = [
+      { v: "single", label: "Single region", rto: 8, rpo: "last backup, ~4 h", mult: 1.0, burden: "restore runbook only; a region loss is a long outage" },
+      { v: "warm", label: "Warm standby", rto: 1, rpo: "~5 min, async", mult: 1.35, burden: "scaled-down copy that must be scaled up during failover" },
+      { v: "hot", label: "Hot standby", rto: 0.25, rpo: "~30 s, async", mult: 1.9, burden: "full idle capacity; replication lag decides the data loss" },
+      { v: "active", label: "Active-active", rto: 0.03, rpo: "~0 local; conflicts on global writes", mult: 2.5, burden: "conflict resolution, routing and residency in every feature" }
+    ];
+    var COST = [{ v: 5000, label: "5k / hour" }, { v: 40000, label: "40k / hour" }, { v: 250000, label: "250k / hour" }];
+    var NEED = [{ v: 8, label: "Same day" }, { v: 1, label: "1 hour" }, { v: 0.25, label: "15 minutes" }];
+    var DRILL = [{ v: "never", label: "Never rehearsed" }, { v: "quarterly", label: "Rehearsed quarterly" }];
+    var topo = "active", cost = 40000, need = 1, drill = "never";
+
+    function money(n) { return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : Math.round(n / 1000) + "k"; }
+    function hours(x) { return x < 1 ? Math.max(1, Math.round(x * 60)) + " min" : x + " h"; }
+    function effRto(t) {
+      if (t.v === "single" || t.v === "active") return t.rto;
+      return drill === "never" ? Math.min(OUTAGE, t.rto * 4) : t.rto;
+    }
+    function evalT(t) {
+      var r = effRto(t);
+      var loss = EVENTS * r * cost;
+      var avoided = EVENTS * OUTAGE * cost - loss;
+      var extra = (t.mult - 1) * BASE;
+      return { t: t, r: r, loss: loss, avoided: avoided, extra: extra, meets: r <= need };
+    }
+    function labelRow(text) {
+      return h("span", { style: "font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);min-width:140px" }, text);
+    }
+
+    var stage = h("div", { class: "w-stage" });
+    var readout = h("div", { class: "w-readout" });
+
+    function paint() {
+      var all = TOPO.map(evalT);
+      var idx = TOPO.map(function (t) { return t.v; }).indexOf(topo);
+      var cur = all[idx];
+      var cheaper = all.filter(function (e, i) { return i < idx && e.meets; })[0];
+
+      var verdict, why;
+      if (!cur.meets) {
+        verdict = "misses the target";
+        why = (drill === "never" && cur.t.rto <= need)
+          ? "On paper it meets the target. An unrehearsed failover takes several times longer than the design says \u2014 rehearsal is the gap, not the topology."
+          : "Even working as designed, this topology cannot recover inside the promised window. Either buy more, or renegotiate the promise.";
+      } else if (cur.extra === 0) {
+        verdict = "meets it, no extra spend";
+        why = "The target allows a restore from backup. Spending on standby capacity here would buy nothing the commitment asks for.";
+      } else if (cur.extra > cur.avoided) {
+        verdict = "meets it, does not pay back";
+        why = "Costs " + money(cur.extra - cur.avoided) + " a year more than the expected loss it avoids. That can still be right \u2014 a contract penalty, a regulator or a reputational cliff \u2014 but say that is the reason, rather than expected value.";
+      } else {
+        verdict = "meets it and pays back";
+        why = "Avoids " + money(cur.avoided) + " a year of expected loss for " + money(cur.extra) + " of extra spend. At this downtime cost the investment justifies itself on expected value alone.";
+      }
+      if (cur.meets && cheaper) why += " " + cheaper.t.label + " also meets this target for " + money(cur.extra - cheaper.extra) + " a year less.";
+
+      stage.innerHTML = "";
+      stage.appendChild(rowsTable(
+        ["Topology", "Recovery (as run)", "Data loss", "Extra / yr", "Expected loss / yr", "Meets target"],
+        all.map(function (e) { return [e.t.label, hours(e.r), e.t.rpo, e.extra ? money(e.extra) : "\u2014", money(e.loss), e.meets ? "yes" : "no"]; }),
+        idx
+      ));
+      stage.appendChild(h("p", { style: "margin-top:10px;font-size:.76rem;color:var(--text-dim)" },
+        h("strong", {}, cur.t.label + ": "), why + " Operating burden: " + cur.t.burden + "."));
+
+      readout.innerHTML = "";
+      readout.appendChild(ro("verdict", verdict, true));
+      readout.appendChild(ro("recovery", hours(cur.r) + " vs " + hours(need) + " promised"));
+      readout.appendChild(ro("extra spend", cur.extra ? money(cur.extra) + " / yr" : "none"));
+      readout.appendChild(ro("loss avoided", money(cur.avoided) + " / yr"));
+    }
+
+    var controls = h("div", { style: "display:flex;flex-direction:column;gap:8px;margin-bottom:18px" });
+    [
+      ["Topology", TOPO, function () { return topo; }, function (v) { topo = v; }],
+      ["Downtime cost", COST, function () { return cost; }, function (v) { cost = v; }],
+      ["Recovery target", NEED, function () { return need; }, function (v) { need = v; }],
+      ["Failover", DRILL, function () { return drill; }, function (v) { drill = v; }]
+    ].forEach(function (c) {
+      controls.appendChild(h("div", { style: "display:flex;flex-wrap:wrap;gap:10px;align-items:center" },
+        labelRow(c[0]),
+        seg(c[1].map(function (x) { return { v: x.v, label: x.label }; }), c[2], function (v) { c[3](v); paint(); })));
+    });
+    mount.appendChild(controls);
+    mount.appendChild(stage);
+    mount.appendChild(readout);
+    paint();
+  };
+
   window.Widgets = Object.assign(window.Widgets || {}, Widgets);
 
   /* =====================================================================
@@ -519,7 +618,7 @@
 
     "hld-execution": {
       title: "Trade-offs checkpoint",
-      sub: "Cost as a design constraint, altitude in executive communication, and decisions that stay decided.",
+      sub: "Cost as a design constraint, altitude in executive communication, architecture reviews that decide, and decisions that stay decided.",
       questions: [
         {
           q: "Which cost figure is most useful for deciding what to change in an architecture?",
@@ -575,13 +674,24 @@
           ],
           answer: 3,
           explain: "Storage price is usually the smallest of the costs and the easiest to defend, which is why the argument gets framed that way. The real bill is scan cost on wide tables, a retention obligation you now have to honour under regulation, and a larger set of records exposed if you are breached. The other objections may be true but are guesses about usage rather than structural costs."
+        },
+        {
+          q: "Teams have started bringing designs to the architecture review only after the code is written. What is the most effective fix?",
+          options: [
+            "Make review mandatory before any merge to the main branch",
+            "Add more senior reviewers so the feedback is harder to ignore",
+            "Review early drafts against a short written pre-read, tier reviews by reversibility, and end every review with a recorded decision and owner",
+            "Publish a list of approved architecture patterns so review becomes unnecessary"
+          ],
+          answer: 2,
+          explain: "Teams arrive late when review is expensive and rarely decides anything, so the rational move is to show up with a finished design that is hard to reject. Reviewing drafts makes feedback cheap to act on, tiering keeps the board off reversible trivia, and a recorded outcome makes the meeting worth attending. A merge gate just moves the same late arrival one step earlier, and more seniority raises the cost of attending without changing the incentive."
         }
       ]
     },
 
     "hld-operations": {
       title: "Operations checkpoint",
-      sub: "Ownership and alerting, phased rollout, and leading an incident before you understand it.",
+      sub: "Ownership and alerting, phased rollout, re-platforming, multi-region trade-offs, and leading an incident before you understand it.",
       questions: [
         {
           q: "Which alert is most likely to be worth waking someone for?",
@@ -648,6 +758,28 @@
           ],
           answer: 1,
           explain: "User harm comes first, always \u2014 no coaching conversation is more urgent than stopping the bleeding. Then the private conversation, because a public one buys you nothing the private one does not and costs the person's willingness to raise the next problem early. The third step is the one leaders skip: a change that could reach production and break it is a gap in your gates, not only in someone's judgment."
+        },
+        {
+          q: "Leadership asks for active-active across two regions \u201cfor reliability\u201d. Most of last year's downtime came from bad deploys and config changes. What is the strongest response?",
+          options: [
+            "Agree \u2014 active-active is the highest-availability topology available",
+            "Show that active-active would not have prevented most of last year's downtime, derive the recovery target from the cost of an hour down, and propose the cheapest topology that meets it alongside deploy safety work",
+            "Decline \u2014 multi-region is too complex for the team to operate",
+            "Propose a warm standby as a compromise between cost and availability"
+          ],
+          answer: 1,
+          explain: "A second region protects against region loss, and a bad deploy rolled out to both regions takes both down. Starting from the actual causes of downtime and an explicit recovery target turns the request into a decision you can cost. Agreeing buys the most expensive option for the wrong failure mode, a flat refusal ignores a real requirement, and picking warm standby as a compromise is still choosing a topology before knowing the target."
+        },
+        {
+          q: "A team wants to rewrite a legacy billing platform from scratch and switch over in one release. Which risk is most often underestimated?",
+          options: [
+            "Reaching parity with years of undocumented behaviour that customers and other systems depend on",
+            "Choosing the right programming language for the new platform",
+            "Hiring enough engineers who know the new technology",
+            "The licence cost of the new platform's dependencies"
+          ],
+          answer: 0,
+          explain: "Legacy systems encode years of edge cases, workarounds and implicit contracts that nobody wrote down, and a rewrite has to rediscover each one \u2014 usually in production. That is why parity is the item that slips, and why incremental replacement behind a facade, with characterisation of current behaviour and a decision about which features to retire rather than port, beats a single cutover. The other three are real but visible and plannable."
         }
       ]
     }
@@ -777,6 +909,15 @@
                   ["Standout", "\u201cp95 under 800ms at peak, because it blocks a 09:00 decision; beyond 3s the user exports instead\u201d", "Carries the business consequence, so a trade-off conversation can happen without re-deriving why the number exists."]
                 ]
               },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Asks clarifying questions and restates the requirement before designing."],
+                  ["Senior", "Turns every adjective into a numbered, testable driver and says which drivers conflict."],
+                  ["Staff", "Ranks the drivers by business value, names the one the design will sacrifice first, and gets that ranking agreed before the design review."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> Every time a requirement arrives as an adjective \u2014 <em>fast, scalable, secure, enterprise-grade, real-time</em> \u2014 that is the trigger to stop and translate. Do it before you draw anything." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> A VP tells you the dashboard is slow. Ask the five questions that turn that complaint into design targets, then read your restatement back to them." },
               { t: "note", variant: "key", html: "<strong>You cannot design against an adjective, and you cannot be held to one either.</strong> Translating goals into numbered drivers is not pedantry \u2014 it is how you get a requirement you can satisfy, a test that proves you did, and a defence when someone later remembers wanting something else." }
@@ -814,6 +955,15 @@
                 good: { title: "Naming the trade", items: ["\u201cThis defers two controls; the residual risk is X and I am asking you to accept it until March.\u201d", "\u201cThe date is achievable at this scope. Here is what comes out.\u201d", "Deciding in the room, with the cost stated and written down."] }
               },
               { t: "note", variant: "trap", html: "<strong>Casting a stakeholder as the villain is the fastest way to lose the room</strong> \u2014 including the people who agree with you, who now know what you say about absent colleagues." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Lists who is affected by the design."],
+                  ["Senior", "States each stakeholder\u2019s real cost and what would move them, and restates the opposing position accurately."],
+                  ["Staff", "Shapes the decision forum itself \u2014 who decides, who is consulted, by when \u2014 so the disagreement is resolved once instead of in every meeting."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> When a question contains two named groups who want different things \u2014 <em>\u201cproduct wants\u2026 but security wants\u2026\u201d</em> \u2014 you are being asked to hold a trade-off without flattening it, not to choose a side quickly." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Product wants speed, security wants two more controls. Frame the decision in four sentences without making either side the villain, and end by naming who accepts the residual risk." },
               { t: "note", variant: "key", html: "<strong>A trade-off that has been averaged has not been made.</strong> The senior move is to state each cost accurately, recommend one option, and name the person who owns the risk you are choosing to carry \u2014 because the accountability, not the choice, is what makes the decision hold." }
@@ -861,6 +1011,15 @@
                 ]
               },
               { t: "note", variant: "trap", html: "<strong>A risk without a trigger gets re-argued every week</strong> by whoever is most anxious that day, and then quietly ignored. The threshold is the whole point: it decides in advance, while everyone is calm." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Names the main risks when asked."],
+                  ["Senior", "Separates assumptions from facts and gives each material risk an owner and a measurable trigger."],
+                  ["Staff", "Spends evidence in proportion to reversibility \u2014 spikes the one-way doors early, lets the reversible ones ride \u2014 and says so explicitly."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> If you catch yourself saying <em>\u201cwe will keep an eye on it\u201d</em>, <em>\u201cwe should be fine\u201d</em>, or <em>\u201cworst case we can always\u2026\u201d</em>, you have found an unowned risk. Give it a number and a name." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Write three risks for a vendor integration whose throughput you have not measured \u2014 each with an owner, a trigger, and the test that would close it." },
               { t: "note", variant: "key", html: "<strong>Uncertainty is not a weakness in a design; unassigned uncertainty is.</strong> Naming what you are relying on, who owns it, and the threshold at which the plan changes is what lets you hold a risky plan without being reckless \u2014 and it is the single clearest seniority signal in this round." },
@@ -979,9 +1138,74 @@
               },
               { t: "note", variant: "trap", html: "<strong>Burying the ask is the most common failure.</strong> A well-structured update that never says what you need produces a nod, no decision, and the same conversation in two weeks." },
               { t: "note", variant: "trap", html: "<strong>Altitude is not vagueness.</strong> If you cannot produce the mechanism on request in the next sentence, you were not being concise \u2014 you were guessing." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Can summarise a design without jargon."],
+                  ["Senior", "Leads with the consequence the listener owns, offers two options and a recommendation, and ends with an explicit ask."],
+                  ["Staff", "Pitches the same substance at three altitudes in the same week \u2014 VP, peer lead, engineer \u2014 and answers the obvious follow-up inside the first update."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> When you hear <em>\u201cjust give me the summary\u201d</em> or <em>\u201cwhy does this need two more weeks\u201d</em>, that is a request for consequence-first framing with an explicit ask at the end." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Explain to a non-technical leader why a phased migration needs two extra weeks. Five lines, ending with the decision you want from them." },
               { t: "note", variant: "key", html: "<strong>An update without an ask is not communication, it is narration.</strong> Lead with the consequence your listener owns, give them two options and your recommendation, and finish by naming the decision you need \u2014 otherwise you have transferred information and no accountability." }
+            ]
+          },
+          {
+            id: "architecture-review",
+            title: "Leading architecture reviews that decide things",
+            summary: "A review exists to surface risk while it is cheap and to end with a decision. Most fail by becoming a presentation with an audience.",
+            minutes: 9,
+            tags: ["execution", "review"],
+            blocks: [
+              { t: "p", html: "An architecture review has one job: <strong>produce a decision on a proposal that affects more than the team writing it, while the risks are still cheap to address</strong>. The common failure is not bad feedback \u2014 it is a meeting with no decision owner, no closing outcome, and comments that arrive as opinions about a design that is already half built." },
+              { t: "p", html: "The written half of the process \u2014 proposal format, reviewers, closing dates \u2014 is covered in <a class='inline' href='#/strategy/execution/rfc-review'>RFCs and design review that scale</a>. This lesson is about leading the review itself, and about what a reviewer is actually checking." },
+              { t: "table",
+                headers: ["Stage", "What the lead does", "Failure it prevents"],
+                rows: [
+                  ["Triage", "Choose the review tier by reversibility and blast radius, not by team or seniority", "Over-reviewing trivia while one-way doors slip through on a chat thread"],
+                  ["Pre-read", "Circulate a short written proposal two days ahead, with the specific questions the author wants answered", "A meeting spent reading, and feedback on whatever the loudest reviewer noticed"],
+                  ["In the room", "Open with the author\u2019s questions, timebox, and separate correctness and risk from preference", "An hour on naming while the failure modes go undiscussed"],
+                  ["Outcome", "Name one of: approved, approved with conditions, spike needed, or rejected \u2014 and who decided", "\u201cGood discussion\u201d with no outcome, and the same review next month"],
+                  ["Follow-through", "Record the conditions with owners and dates, and check them before launch", "Conditions agreed in the room and quietly forgotten"]
+                ]
+              },
+              { t: "h", text: "What a reviewer should actually check" },
+              { t: "ul", items: [
+                "<strong>Drivers as numbers.</strong> Load, latency, recovery target, cost ceiling \u2014 if they are adjectives, stop and fix that first (see <a class='inline' href='#/hld/framing/business-drivers'>business goals to architecture drivers</a>).",
+                "<strong>Failure modes.</strong> The degraded mode per dependency, and what the user sees while it is broken.",
+                "<strong>Data.</strong> Who owns it, how it migrates, and which parts are one-way doors.",
+                "<strong>Operability.</strong> Who is on call, what pages them, and how the change is rolled back.",
+                "<strong>Cost at expected load and at ten times it.</strong> The second number is where designs that look cheap stop being cheap.",
+                "<strong>Security boundaries.</strong> Where sensitive data crosses a trust boundary, and who reviewed that path."
+              ] },
+              { t: "code", lang: "text", code:
+                "Review outcome, as recorded\n" +
+                "\n" +
+                "PROPOSAL   Move invoice generation to an async worker\n" +
+                "TIER       2 \u2014 changes another team's failure mode; reversible\n" +
+                "DECISION   Approved with conditions (decided: payments lead)\n" +
+                "CONDITIONS 1. Idempotency key on invoice creation   owner: Ravi  by: 12 Mar\n" +
+                "           2. Alert on invoice queue age > 15 min    owner: Mei   by: launch\n" +
+                "           3. Rollback rehearsed in staging          owner: Ravi  by: launch\n" +
+                "NOT RAISED Language choice, folder layout (preference; author's call)\n" +
+                "REOPEN IF  invoice volume > 5x forecast, or p99 > 2 s for a week"
+              },
+              { t: "note", variant: "trap", html: "<strong>A review board that approves everything late is worse than none.</strong> Teams learn to bring finished designs, so feedback arrives when it can no longer change anything, and the board becomes a toll gate people schedule around. Review at thirty percent done, when changing direction costs an afternoon." },
+              { t: "p", html: "For the system-design substance a reviewer is checking \u2014 capacity, failure domains, tenant isolation \u2014 Blueprint\u2019s <a class='inline' href='../hld-lld-academy/index.html#/hld/cases/saas-reliability-review'>multi-tenant reliability review capstone</a> works through a full example. Here, the skill is running the room." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Brings a clear design to review and responds to feedback."],
+                  ["Senior", "Runs reviews that end with a recorded outcome, conditions with owners, and preference separated from risk."],
+                  ["Staff", "Designs the review system itself \u2014 tiers, timing, who decides \u2014 so teams bring drafts early because it saves them time."]
+                ]
+              },
+              { t: "cue", html: "<strong>Spotting it in a prompt.</strong> Prompts like <em>\u201chow do you run design reviews\u201d</em>, <em>\u201ca team shipped without review\u201d</em> or <em>\u201creviews have become a bottleneck\u201d</em> are asking about the review system \u2014 tiering, timing and outcomes \u2014 not about your opinion of a particular design." },
+              { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> A team bypassed architecture review and shipped a design that now pages another team nightly. Say what you change in the review process, not just what you say to the team." },
+              { t: "note", variant: "key", html: "<strong>A review is measured by the decisions it produces early, not by the issues it finds late.</strong> Tier it by reversibility, review drafts against a written pre-read, and end every session with an outcome, an owner and conditions someone will check \u2014 otherwise it is a presentation, and teams will treat it as one." }
             ]
           },
           {
@@ -1020,6 +1244,15 @@
                   ["Helper-function naming inside one module", "No \u2014 cheap to change, invisible outside the module"],
                   ["Three-year identity vendor contract", "Yes \u2014 money, lock-in, and an exit path someone will need"],
                   ["Retry count on an internal call", "No, unless it changes user-visible behaviour"]
+                ]
+              },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Writes down what was decided."],
+                  ["Senior", "Records the rejected options fairly, with a measurable revisit trigger and an owner."],
+                  ["Staff", "Decides which decisions warrant a record at all, keeps the set small enough to be read, and actually reopens them when a trigger fires."]
                 ]
               },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> The signal that you need a record is hearing <em>\u201cdidn't we already decide this?\u201d</em> \u2014 or realising that you cannot answer it yourself." },
@@ -1078,6 +1311,15 @@
                 good: { title: "Designed operations", items: ["Each dependency has a stated degraded mode", "Alerts on journeys; internals live on dashboards", "Rollback rehearsed, with a known duration"] }
               },
               { t: "note", variant: "trap", html: "<strong>An alert nobody can act on is worse than no alert.</strong> It consumes the attention you will need for the real one, and it teaches the team that paging is noise." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Knows the service needs monitoring and an on-call owner."],
+                  ["Senior", "Names the degraded mode per dependency and alerts on user journeys rather than internals."],
+                  ["Staff", "Treats operability as a launch criterion, sets the build-versus-run ownership split, and budgets the toil before it exists."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> Whenever a design introduces a dependency, that is the trigger to state its degraded mode out loud. \u201cWhat does the user see when this is gone\u201d is the question that separates a diagram from a design." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Your service calls three downstream APIs. For each, state the detection signal, the degraded behaviour, and who owns the pager." },
               { t: "note", variant: "key", html: "<strong>Undesigned, every dependency failure becomes an outage by default.</strong> Naming the degraded mode is the cheapest reliability work available, and it is a product decision \u2014 which means it belongs in the design review, not in the incident." }
@@ -1140,6 +1382,127 @@
             ]
           },
           {
+            id: "replatforming",
+            title: "Re-platforming: evolve, replace or rewrite",
+            summary: "Most re-platforming programmes fail on parity, not technology. Decide whether the pain is structural before choosing how to move.",
+            minutes: 10,
+            tags: ["operations", "migration", "strategy"],
+            blocks: [
+              { t: "p", html: "\u201cWe need to get off this platform\u201d is a conclusion, not a requirement. The first question is whether the pain is <strong>structural</strong> \u2014 the platform cannot meet a driver you have, such as tenant isolation, a recovery target or a cost ceiling \u2014 or <strong>local</strong>: code that is hard to change but sits on a perfectly adequate foundation. Local pain is fixed with refactoring; only structural pain justifies the calendar a re-platform costs." },
+              { t: "table",
+                headers: ["Approach", "Fits when", "What it really costs"],
+                rows: [
+                  ["Evolve in place", "The platform can meet the drivers; the code cannot", "Sustained refactoring budget and the discipline to measure it"],
+                  ["Strangle onto a new platform", "Structural limits, but the system can be sliced by journey or tenant", "A long period of two systems, a routing facade, and duplicated operations"],
+                  ["Replace with a bought product", "The capability is not a differentiator and a product covers most of it", "Customisation limits, data migration, and an exit path you must plan on day one"],
+                  ["Rewrite and cut over", "Small, well-specified system with a rehearsed rollback", "Parity risk concentrated into one date, with no partial value before it"]
+                ]
+              },
+              { t: "h", text: "The questions that decide it" },
+              { t: "ul", items: [
+                "<strong>Which driver can the current platform not meet, by how much, and by when?</strong> If you cannot name one, you are proposing a refactor with a bigger budget.",
+                "<strong>What is the freeze cost?</strong> Every month the team spends porting is a month of roadmap that does not ship. Put that number next to the benefit.",
+                "<strong>What will you deliberately not port?</strong> Usage data on legacy features is the cheapest scope reduction available; a feature nobody used last quarter is a candidate for retirement, not migration.",
+                "<strong>How will you know behaviour is preserved?</strong> Characterisation tests and parallel runs on the journeys that carry money or contracts \u2014 not a promise of feature parity.",
+                "<strong>Where is the first slice of value?</strong> A plan that delivers nothing until the final cutover concentrates all the risk in one weekend."
+              ] },
+              { t: "code", lang: "text", code:
+                "Re-platform case, one page\n" +
+                "\n" +
+                "STRUCTURAL GAP  Shared database cannot isolate tenants; two\n" +
+                "                enterprise deals require it by Q3.\n" +
+                "COST OF STAYING ~1 sev-2 a month from noisy neighbours; both deals\n" +
+                "                at risk (combined ~1.8M ARR).\n" +
+                "APPROACH        Strangle by tenant: new platform for new and\n" +
+                "                enterprise tenants first; long tail later.\n" +
+                "NOT PORTING     Legacy report builder (3 tenants used it last\n" +
+                "                quarter; offered an export instead).\n" +
+                "FREEZE COST     ~40% of team capacity for two quarters.\n" +
+                "FIRST VALUE     First enterprise tenant isolated in 10 weeks.\n" +
+                "STOP IF         Slice 1 takes > 16 weeks, or parity defects on\n" +
+                "                invoicing exceed 2 per tenant migrated."
+              },
+              { t: "note", variant: "trap", html: "<strong>\u201cFeature parity\u201d as the goal is the classic trap.</strong> A legacy system contains years of undocumented behaviour that someone depends on, and a rewrite rediscovers it one production incident at a time. Define parity per journey, characterise it before you start, and retire what nobody uses instead of porting it." },
+              { t: "p", html: "The rollout mechanics \u2014 canaries, parallel runs, go/no-go \u2014 are in <a class='inline' href='#/hld/operations/migration-strategy'>phased delivery and migration strategy</a>, and the last mile of moving reluctant consumers is in <a class='inline' href='#/strategy/execution/deprecations'>deprecations people actually finish</a>. For the data side, Blueprint covers <a class='inline' href='../hld-lld-academy/index.html#/hld/data/zero-downtime-data-migrations'>zero-downtime data migrations</a> and a worked <a class='inline' href='../hld-lld-academy/index.html#/breakdowns/wild/wild-wide-column-migration'>store-to-store migration</a>." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Can describe the target platform and a migration sequence."],
+                  ["Senior", "Names the structural gap, the freeze cost and the first slice of value, and plans parity per journey."],
+                  ["Staff", "Decides whether to re-platform at all, retires scope rather than porting it, and sets the stop condition before the programme starts."]
+                ]
+              },
+              { t: "cue", html: "<strong>Spotting it in a prompt.</strong> <em>\u201cOur platform is legacy\u201d</em>, <em>\u201cwe want to rewrite it\u201d</em> or <em>\u201cthe new platform is late and parity keeps slipping\u201d</em> are asking whether you separate structural from local pain, and whether you can find value before the final cutover." },
+              { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> Your team wants to rewrite a ten-year-old order system. Ask the three questions that decide whether to evolve, strangle or rewrite, and say which answer would change your recommendation." },
+              { t: "note", variant: "key", html: "<strong>Re-platform only for a structural gap you can name, and never for parity you cannot measure.</strong> Price the freeze, retire what nobody uses, slice by journey or tenant so value arrives early, and agree the stop condition before the first line of new code." }
+            ]
+          },
+          {
+            id: "multi-region",
+            title: "Multi-region: buying availability honestly",
+            summary: "A second region is bought with money, complexity and consistency. Derive the recovery target from the cost of downtime before choosing a topology.",
+            minutes: 10,
+            tags: ["operations", "reliability", "cost"],
+            blocks: [
+              { t: "p", html: "\u201cWe should be multi-region\u201d usually means \u201cwe should not go down\u201d, and those are different requests. A second region protects against <strong>losing a region</strong>. It does nothing for a bad deploy, a broken config push or a failing dependency \u2014 which together cause most real downtime \u2014 and an automated rollout can carry the same defect into both regions within minutes." },
+              { t: "stat", items: [
+                { v: "RTO", k: "how long you may be down" },
+                { v: "RPO", k: "how much data you may lose" },
+                { v: "1.3\u20132.5\u00d7", k: "typical infrastructure multiple" }
+              ] },
+              { t: "table",
+                headers: ["Topology", "Recovery time", "Data loss", "What it costs besides money"],
+                rows: [
+                  ["Single region, backups elsewhere", "Hours to a day", "Since the last backup", "A region loss is a long outage, and the restore is rarely rehearsed"],
+                  ["Warm standby", "Tens of minutes to an hour", "Minutes (async replication)", "A scaled-down copy that must scale up mid-incident"],
+                  ["Hot standby", "Minutes", "Seconds (replication lag)", "Paying for a full idle copy; lag decides what is lost"],
+                  ["Active-active", "Seconds", "Near zero locally; conflicts on global writes", "Conflict resolution, routing and data residency in every feature, forever"]
+                ]
+              },
+              { t: "widget", id: "tm-region-picker" },
+              { t: "h", text: "How to reason about it" },
+              { t: "ul", items: [
+                "<strong>Start from the cost of an hour down.</strong> Lost revenue, contract penalties, regulatory exposure. That number, not ambition, sets the recovery target.",
+                "<strong>Check what actually caused last year\u2019s downtime.</strong> If it was deploys and config, fund progressive delivery and fast rollback first; they are cheaper and help in every topology.",
+                "<strong>Make only the critical journey multi-region.</strong> Checkout and login may need it; the reporting suite almost certainly does not.",
+                "<strong>Rehearse the failover.</strong> An unexercised failover takes several times longer than the design says, and sometimes does not work at all.",
+                "<strong>Decide consistency per data type.</strong> Balances and inventory need a single writer or a conflict rule; preferences and carts can merge."
+              ] },
+              { t: "code", lang: "text", code:
+                "Does warm standby pay for itself? (illustrative)\n" +
+                "\n" +
+                "base infrastructure          600k / yr\n" +
+                "region-level event           ~0.3 / yr, ~8 h without failover\n" +
+                "\n" +
+                "at 40k per hour down\n" +
+                "  expected loss, single      0.3 x 8 h x 40k  =  96k / yr\n" +
+                "  expected loss, warm (1 h)  0.3 x 1 h x 40k  =  12k / yr\n" +
+                "  loss avoided                                 84k / yr\n" +
+                "  extra spend (0.35 x 600k)                   210k / yr\n" +
+                "  -> does not pay on expected value; justify it with the\n" +
+                "     contract or the regulator, or do not buy it\n" +
+                "\n" +
+                "at 250k per hour down\n" +
+                "  loss avoided  0.3 x 7 h x 250k  = 525k / yr  -> pays back"
+              },
+              { t: "note", variant: "trap", html: "<strong>Active-active chosen \u201cfor reliability\u201d without a conflict model is how teams buy a new class of outage.</strong> Two regions accepting writes to the same balance will disagree eventually, and the incident that follows is a data-correctness incident \u2014 slower to detect and harder to undo than the region loss it was meant to prevent." },
+              { t: "p", html: "The mechanics \u2014 replication modes, traffic steering, failure domains \u2014 are covered in depth in Blueprint\u2019s <a class='inline' href='../hld-lld-academy/index.html#/hld/reliability/multi-region-resilience'>multi-region resilience</a> lesson. Here the job is deciding how much to buy and saying why." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Knows the topologies and that more regions cost more."],
+                  ["Senior", "Derives the recovery target from the cost of downtime, scopes multi-region to the critical journey, and insists on rehearsed failover."],
+                  ["Staff", "Shows whether the spend pays back, redirects it to the actual causes of downtime when it does not, and owns the consistency model per data type."]
+                ]
+              },
+              { t: "cue", html: "<strong>Spotting it in a prompt.</strong> <em>\u201cShould we go multi-region?\u201d</em>, <em>\u201cwe need five nines\u201d</em> or <em>\u201ca cloud region went down last week\u201d</em> is asking whether you will convert an availability wish into a recovery target with a price." },
+              { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> A VP asks for active-active after a competitor\u2019s regional outage made the news. Respond in five lines: target, cause of your own downtime, recommendation, cost, and the decision you need." },
+              { t: "note", variant: "key", html: "<strong>Buy recovery against a target derived from the cost of downtime, not against fear.</strong> Fix the causes of your own outages first, make only the critical journey multi-region, rehearse the failover, and say plainly whether the spend pays back or is being bought for a contract." }
+            ]
+          },
+          {
             id: "incident-hld",
             title: "Incident leadership",
             summary: "Incident answers reveal the order of your instincts. Mitigate, communicate, then diagnose \u2014 and turn the finding into something that outlives your memory.",
@@ -1172,6 +1535,15 @@
                 good: { title: "Harm first", items: ["Roll back, confirm recovery, then read the diff", "Impact, confidence, next update time \u2014 every 30 minutes", "Two prevention items with owners and dates"] }
               },
               { t: "note", variant: "trap", html: "<strong>Debugging in the open channel is the classic senior mistake.</strong> Hypotheses posted to a stakeholder channel get read as facts, quoted upward, and then have to be retracted \u2014 which costs more trust than the incident did." },
+              { t: "h", text: "How this scores at each level" },
+              { t: "table",
+                headers: ["Level", "What the bar actually requires"],
+                rows: [
+                  ["Mid", "Follows the incident process and helps diagnose."],
+                  ["Senior", "Mitigates before diagnosing, holds a communication cadence, and states confidence honestly."],
+                  ["Staff", "Turns the finding into a control that removes a class of failure, and runs the review so the next person escalates earlier, not later."]
+                ]
+              },
               { t: "cue", html: "<strong>Spotting it in a prompt.</strong> Any prompt of the form <em>\u201ca deploy causes\u2026\u201d</em>, <em>\u201cusers report\u2026\u201d</em>, or <em>\u201cyou get paged at 3am\u2026\u201d</em> is testing sequence. Lead with the mitigation, not the hypothesis." },
               { t: "note", variant: "tip", html: "<strong>Say it out loud.</strong> A deploy causes high latency but no hard errors. Walk the first ten minutes in order, and state what you would post to stakeholders at minute five." },
               { t: "note", variant: "key", html: "<strong>The first move is always harm reduction, and the last move is always a control that outlives you.</strong> Everything between \u2014 the cadence, the honesty about confidence, the separation of accountability from blame \u2014 is what makes people willing to tell you about the next incident early." },
